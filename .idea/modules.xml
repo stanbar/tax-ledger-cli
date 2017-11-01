@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/bitbay-client.iml" filepath="$PROJECT_DIR$/.idea/modules/bitbay-client.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/bitbay-client_main.iml" filepath="$PROJECT_DIR$/.idea/modules/bitbay-client_main.iml" group="bitbay-client" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/bitbay-client_test.iml" filepath="$PROJECT_DIR$/.idea/modules/bitbay-client_test.iml" group="bitbay-client" />
+    </modules>
+  </component>
+</project>
