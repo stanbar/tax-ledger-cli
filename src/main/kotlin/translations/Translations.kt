@@ -1,10 +1,15 @@
 package translations
 
-object Translations{
-    val translations : MutableMap<String,String> = HashMap()
+object Translations {
+    val translations: MutableMap<String, String> = HashMap(5)
+
     init {
-        translations.put("-pay_for_currency", "Zapłata za zakup waluty")
-        translations.put("-fee", "Prowizja od transakcji")
-        translations.put("+currency_transaction", "Zakup waluty")
+        translations.put("+income", "Otrzymanie środków")
+        translations.put("-pay_for_currency", "Zakup")
+        translations.put("-fee", "Prowizja")
+        translations.put("+currency_transaction", "Sprzedaż")
+        translations.put("-withdraw", "Wypłata środków")
     }
+
+    fun translate(operationType: String) = translations[operationType]
 }

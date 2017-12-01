@@ -2,6 +2,7 @@ package models
 
 import api.Constants.dateFormat
 import com.google.gson.annotations.SerializedName
+import translations.Translations
 import java.math.BigDecimal
 import java.util.*
 
@@ -15,7 +16,7 @@ data class History(var id: String = "",
 
 ) {
     fun toCsv(): List<String> {
-        return Arrays.asList<String>(id, dateFormat.format(time), operationType, amount.toString(), currency, comment, balanceAfter.toString())
+        return Arrays.asList<String>(dateFormat.format(time), Translations.translate(operationType), amount.toString(), currency, comment, balanceAfter.toString())
     }
 
 }

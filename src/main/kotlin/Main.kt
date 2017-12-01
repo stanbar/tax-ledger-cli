@@ -1,7 +1,7 @@
 import api.PrivateApi
 import requests.HistoryRequest
 import requests.TransactionsRequest
-import utils.CsvConverter
+import utils.CsvManager
 
 var publicKey : String = ""
 var privateKey  : String = ""
@@ -11,7 +11,7 @@ fun main(args: Array<String>) {
     privateKey = args[1]
 
     history()
-    transactions()
+    //transactions()
 
 }
 
@@ -19,7 +19,7 @@ fun main(args: Array<String>) {
 
 fun history() {
 
-    val request = HistoryRequest("PLN", null)
+    val request = HistoryRequest("PLN", "46")
     val historyRequest = PrivateApi.getInstance(publicKey, privateKey)
             .service.value.history(request.toMap())
 
@@ -29,7 +29,7 @@ fun history() {
         it.forEach {
             println(it.toString())
         }
-        CsvConverter.saveToFile(it)
+        CsvManager.saveToFile(it)
     }
 }
 

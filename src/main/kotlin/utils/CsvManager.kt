@@ -3,24 +3,43 @@ package utils
 import api.Constants.dateFormat
 import api.CsvConversionException
 import models.History
+import translations.Translations
 import java.io.*
 import java.math.BigDecimal
 import java.text.SimpleDateFormat
 import java.util.*
 
-object CsvConverter {
+object CsvManager {
 
     fun saveToFile(histories: List<History>, fileName: String = fileName()) {
         try {
             val file = File(fileName)
             file.parentFile.mkdirs()
             val writer = FileWriter(file)
-            CsvConverter.writeLine(writer,
-                    Arrays.asList("id", "time", "operation_type", "amount", "currency", "comment", "balance_after"))
+            CsvManager.writeLine(writer,
+                    Arrays.asList("time", "operation_type", "amount", "currency", "comment", "balance_after"))
+
+            val translationCounter: MutableMap<String, BigDecimal> = HashMap(4)
+
+
+            translationCounter.put("+income", BigDecimal.ZERO)
+            translationCounter.put("-pay_for_currency", BigDecimal.ZERO)
+            translationCounter.put("-fee", BigDecimal.ZERO)
+            translationCounter.put("+currency_transaction", BigDecimal.ZERO)
+            translationCounter.put("-withdraw", BigDecimal.ZERO)
 
             for (history in histories) {
-                CsvConverter.writeLine(writer, history.toCsv())
+                val operation = history.operationType
+                val currentValue = translationCounter[operation]!!
+                translationCounter.put(operation, currentValue.add(history.amount))
+                CsvManager.writeLine(writer, history.toCsv())
             }
+            CsvManager.writeLine(writer, Arrays.asList<String>(""))
+            CsvManager.writeLine(writer, Arrays.asList<String>("","Summary"))
+            translationCounter.forEach { t, u ->
+                CsvManager.writeLine(writer, Arrays.asList<String>("",Translations.translate(t), u.toString()))
+            }
+
             writer.flush()
             writer.close()
         } catch (e: IOException) {
@@ -158,5 +177,36 @@ object CsvConverter {
 
     }
 
+    fun printSummaryOf(file: File) {
+        val map = HashMap<String, BigDecimal>(5)
+        map.put("Otrzymanie środków", BigDecimal.ZERO)
+        map.put("Zapłata za zakup waluty", BigDecimal.ZERO)
+        map.put("Zakup waluty", BigDecimal.ZERO)
+        map.put("Prowizja od transakcji", BigDecimal.ZERO)
+        map.put("Wypłata środków na konto", BigDecimal.ZERO)
 
+
+        val reader = FileReader(file)
+        reader.readLines()
+                .filterIndexed { index, s -> index != 0 }
+                .forEach {
+                    val splitted = it.split(",")
+                    val operationType = splitted[2]
+                    val value = BigDecimal(splitted[3])
+                    val currentValue = map.getOrDefault(operationType, BigDecimal.ZERO)
+                    map.put(operationType, currentValue + value)
+                }
+
+
+        map.forEach { t, u ->
+            println("$t: $u")
+        }
+
+    }
+
+
+}
+
+fun main(args: Array<String>) {
+    CsvManager.printSummaryOf(File("/Users/admin1/Downloads/BITBAY_2017.csv"))
 }

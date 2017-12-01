@@ -2,7 +2,7 @@ group 'com.stasbar'
 version '1.0-SNAPSHOT'
 
 buildscript {
-    ext.kotlin_version = '1.1.51'
+    ext.kotlin_version = '1.2.0'
 
     repositories {
         mavenCentral()
@@ -24,6 +24,7 @@ dependencies {
     compile 'com.squareup.retrofit2:converter-gson:2.3.0'
     compile 'com.google.code.gson:gson:2.8.2'
     compile 'com.squareup.okhttp3:logging-interceptor:3.6.0'
+    compile 'com.google.guava:guava:23.3-android'
 }
 
 compileKotlin {
