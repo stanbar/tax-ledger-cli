@@ -1,10 +1,8 @@
-## Welcome to GitHub Pages
+## Tax Ledger
 
-You can use the [editor on GitHub](https://github.com/stasbar/tax-ledger/edit/master/README.md) to maintain and preview the content for your website in Markdown files.
+Simple tax ledger generator for cryptocurrency exchanges
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
-
-### Markdown
+### How to use
 
 Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
 
