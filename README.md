@@ -1,35 +1,64 @@
-## Tax Ledger
+![Image](https://i.imgur.com/wBVi8X4.png)
+### Tax Ledger
+- Jest programem który pozwala na wygenerowanie księgi kosztów i zysków z giełd kryptowalut.  
+- Program jest w pełni* przetłumaczony na język Polski. 
+- Wybór języka jest podejmowany na podstawie języka systemu operacyjnego.
+- Każda komenda może być interpretowalna w obu językach
+- Każda komenda jest automatycznie uzupełniana przez klawisz Tab (np. tra -> TAB -> transakcje)
+- Program jest w pełni argumentowalny np. `java -jar tax-ledger.jar transactions -lastMonth -onlyBitbay exit`) przetworzy transakcje z poprzedniego miesiąca, z giełdy bitbay i zakończy działanie
 
-Simple tax ledger generator for cryptocurrency exchanges
+### Jak uruchomić
 
-### How to use
+1. Pobierz najnowszą wersję programu (tax-ledger.jar) [Pobierz](https://github.com/stasbar/tax-ledger/releases)
+2. Upewnij się, że masz zainstalowaną Javę [Pobierz](https://www.java.com/pl/download/)
+3. Otwórz konsolę/terminal [Windows - cmd.exe][macOS - Terminal.app]
+4. Wpisz `java -jar ` przeciągnij na okno terminala plik `tax-ledger[version].jar` i wykonaj komendę Enterem
 
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
+```sh
+$ java -jar /Users/stasbar/Downloads/tax-ledger0.1.jar 
+```   
 
-```markdown
-Syntax highlighted code block
+#### Dodawanie giełdy
+1. Pierwsze uruchomienie poprosi cię o skonfigurowanie pierwszej giełdy
+2. Klucze API wygenerujesz w ustawieniach konta. Program wymaga jedynie pozwolenia do odczytu histori transakcji.
+3. Aby dodać kolejne giełdy 
+- wybierz akcję `giełdy` a następnie skonfiguruj kolejną giełdę
+- dodaj po koleji nazwę giełdy a następnie klucze do pliku credentials.txt (Zostanie utworzony po dodaniu pierwszej giełdy)
 
-# Header 1
-## Header 2
-### Header 3
+### Transactions / Transakcje
 
-- Bulleted
-- List
+Podstawowa komenda `transakcje` łączy się z każdą skonfigurowaną giełdą a następnie:
+ - pobiera pełną listę transakcjii. Możliwe ograniczenia do -lastWeek -thisWeek -lastMonth -thisMonth -thisYear -lastYear
+ - Wyświetla podsumowanie
+ - Zapisuje do pliku .csv
+  
 
-1. Numbered
-2. List
 
-**Bold** and _Italic_ and `Code` text
 
-[Link](url) and ![Image](src)
+ 
+
+### License
 ```
 
-For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
+Copyright 2017 Stanislaw stasbar Baranski
 
-### Jekyll Themes
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
 
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/stasbar/tax-ledger/settings). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
+   http://www.apache.org/licenses/LICENSE-2.0
 
-### Support or Contact
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 
-Having trouble with Pages? Check out our [documentation](https://help.github.com/categories/github-pages-basics/) or [contact support](https://github.com/contact) and we’ll help you sort it out.
+
+         __             __              
+   _____/ /_____ ______/ /_  ____ ______
+  / ___/ __/ __ `/ ___/ __ \/ __ `/ ___/
+ (__  ) /_/ /_/ (__  ) /_/ / /_/ / /    
+/____/\__/\__,_/____/_.___/\__,_/_/     
+           taxledger@stasbar.com            
+```

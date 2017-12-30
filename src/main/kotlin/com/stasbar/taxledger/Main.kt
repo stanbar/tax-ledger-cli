@@ -9,6 +9,7 @@ import com.stasbar.taxledger.options.TransactionsOptions
 import com.stasbar.taxledger.translations.Text
 import org.fusesource.jansi.Ansi.ansi
 import org.jline.reader.LineReaderBuilder
+import org.jline.reader.UserInterruptException
 import org.jline.reader.impl.completer.StringsCompleter
 import org.jline.terminal.TerminalBuilder
 import java.util.*
@@ -69,11 +70,17 @@ fun parseExchangeName(): Boolean {
     val reader = LineReaderBuilder.builder()
             .terminal(terminal)
             .completer(StringsCompleter(exchanges.map { it.objectInstance!!.name }.toList()))
+            .appName("Tax-Ledger")
             .build()
 
     val prompt = getString(Text.ENTER_EXCHANGE_NAME) + " [$buffer]: "
-    val exchangeNameTry = reader.readLine(prompt)
-
+    var exchangeNameTry = ""
+    try {
+        exchangeNameTry = reader.readLine(prompt).trim().split(" ")[0]
+    } catch (e: UserInterruptException) {
+        Printer.printExitMessage()
+        System.exit(0)
+    }
     for (exchange in exchanges)
         if (exchange.objectInstance!!.isNameOf(exchangeNameTry)) {
             args.add(exchange.objectInstance!!.name)
@@ -109,7 +116,7 @@ fun parseCredentials() {
                 } catch (e: TooManyCredentialsException) {
                     // Failed, try from
                     promptUserForCredential(exchange, step)
-                }catch (e : IllegalStateException){
+                } catch (e: IllegalStateException) {
                     // Failed, try from
                     promptUserForCredential(exchange, step)
                 }
@@ -144,8 +151,13 @@ fun promptUserForCredential(exchange: Exchange<ExchangeApi>, step: String): Bool
             .fgBright(exchange.color).a(exchange.name + "> ")
             .fgBrightYellow().a(step).a(">")
             .reset()
-    val stepAnswer = reader.readLine(prompt.toString())
-
+    var stepAnswer = ""
+    try {
+        stepAnswer = reader.readLine(prompt.toString())
+    } catch (e: UserInterruptException) {
+        Printer.printExitMessage()
+        System.exit(0)
+    }
     try {
 
         exchange.addCredential(stepAnswer.trim())
@@ -177,7 +189,13 @@ fun parseAction() {
             .terminal(terminal)
             .completer(StringsCompleter(Action.values().map { getString(it.title).toLowerCase() }))
             .build()
-    val line = reader.readLine(getString(Text.ACTION) + "> ")
+    var line = ""
+    try {
+        line = reader.readLine(getString(Text.ACTION) + "> ")
+    } catch (e: UserInterruptException) {
+        Printer.printExitMessage()
+        System.exit(0)
+    }
     line.split(" ").filter { it.isNotBlank() }.forEach { args.add(it) }
 
 }
