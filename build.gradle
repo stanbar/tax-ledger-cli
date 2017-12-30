@@ -2,29 +2,43 @@ group 'com.stasbar'
 version '1.0-SNAPSHOT'
 
 buildscript {
-    ext.kotlin_version = '1.2.0'
+    ext.kotlin_version = '1.2.10'
 
     repositories {
         mavenCentral()
+        jcenter()
     }
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath 'com.github.jengelman.gradle.plugins:shadow:2.0.2'
     }
 }
 
 apply plugin: 'kotlin'
+apply plugin: 'com.github.johnrengelman.shadow'
 
 repositories {
     mavenCentral()
 }
 
+jar{
+    manifest{
+        attributes 'Main-Class': 'com.stasbar.taxledger.MainKt'
+    }
+}
+
+
 dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
     compile "org.jetbrains.kotlin:kotlin-stdlib-jre8:$kotlin_version"
     compile 'com.squareup.retrofit2:retrofit:2.3.0'
     compile 'com.squareup.retrofit2:converter-gson:2.3.0'
     compile 'com.google.code.gson:gson:2.8.2'
     compile 'com.squareup.okhttp3:logging-interceptor:3.6.0'
-    compile 'com.google.guava:guava:23.3-android'
+    compile "io.reactivex.rxjava2:rxjava:2.1.7"
+    compile "org.jline:jline:3.5.1"
+    compile "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
+    compile 'de.vandermeer:asciitable:0.3.2'
 }
 
 compileKotlin {
