@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Stanislaw stasbar Baranski
+ * Copyright (c) 2018 Stanislaw stasbar Baranski
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,16 +26,21 @@ package com.stasbar.taxledger
 
 import com.stasbar.taxledger.exceptions.ApiNotSetException
 import com.stasbar.taxledger.exceptions.CredentialsException
+import com.stasbar.taxledger.exceptions.IllegalDateRangeArgument
 import com.stasbar.taxledger.exceptions.TooManyCredentialsException
 import com.stasbar.taxledger.models.Transaction
-import com.stasbar.taxledger.options.DateRange
 import com.stasbar.taxledger.options.TransactionsOptions
 import com.stasbar.taxledger.translations.Text
+import com.stasbar.taxledger.writers.ConsoleWriter
+import com.stasbar.taxledger.writers.CsvWriter
 import org.fusesource.jansi.Ansi.ansi
 import org.jline.reader.LineReaderBuilder
 import org.jline.reader.UserInterruptException
 import org.jline.reader.impl.completer.StringsCompleter
 import org.jline.terminal.TerminalBuilder
+import java.text.ParseException
+import java.text.ParsePosition
+import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.reflect.KClass
 
@@ -62,7 +67,7 @@ fun selectLanguage(lang: String) {
 fun getString(key: String) = resourceBundle.getString(key)
 
 fun main(cliArgs: Array<String>) {
-    Printer.printIntro()
+    ConsoleWriter.printIntro()
     val credentials = loadCredentialsStrings()
 
     args.addAll(credentials)
@@ -102,7 +107,7 @@ fun parseExchangeName(): Boolean {
     try {
         exchangeNameTry = reader.readLine(prompt).trim().split(" ")[0]
     } catch (e: UserInterruptException) {
-        Printer.printExitMessage()
+        ConsoleWriter.printExitMessage()
         System.exit(0)
     }
     for (exchange in exchanges)
@@ -179,7 +184,7 @@ fun promptUserForCredential(exchange: Exchange<ExchangeApi>, step: String): Bool
     try {
         stepAnswer = reader.readLine(prompt.toString())
     } catch (e: UserInterruptException) {
-        Printer.printExitMessage()
+        ConsoleWriter.printExitMessage()
         System.exit(0)
     }
     try {
@@ -217,7 +222,7 @@ fun parseAction() {
     try {
         line = reader.readLine(getString(Text.ACTION) + "> ")
     } catch (e: UserInterruptException) {
-        Printer.printExitMessage()
+        ConsoleWriter.printExitMessage()
         System.exit(0)
     }
     line.split(" ").filter { it.isNotBlank() }.forEach { args.add(it) }
@@ -245,11 +250,14 @@ fun performActions(action: String): Boolean {
                     val newTransactions = it.getApi()
                             .transactions()
                             .filter { options.dateRange.isInRange(it) }
-                            .toList()
                     transactions.addAll(newTransactions)
                 } catch (e: ApiNotSetException) {
                     /* skip not set exchanges */
                 }
+            }
+            if (transactions.isEmpty()) {
+                Logger.err(getString(Text.NO_OPERATIONS))
+                return true
             }
 
             val comparator: Comparator<Transaction> = if (options.reverse)
@@ -258,10 +266,10 @@ fun performActions(action: String): Boolean {
 
             transactions.sortWith(comparator)
 
-            Printer.printTransactions(transactions)
-            Printer.printSummary(transactions)
+            ConsoleWriter.printTransactions(transactions)
+            ConsoleWriter.printSummary(transactions)
             Logger.info(getString(Text.LOAD_COMPLETE).format(transactions.size))
-            CsvManager.saveToFile(transactions, CsvManager.fileName(options.fileName.toString()))
+            CsvWriter.saveToFile(transactions, CsvWriter.fileName(options.fileName.toString()), options.printNonEssential, options.includeNonFiat)
         }
         getString(Action.CONTACT.title).toUpperCase(), Action.CONTACT.name -> {
             println(Misc.contact)
@@ -270,10 +278,10 @@ fun performActions(action: String): Boolean {
             parseCredentials()
         }
         getString(Action.DONATE.title).toUpperCase(), Action.DONATE.name -> {
-            Printer.printDonate()
+            ConsoleWriter.printDonate()
         }
         getString(Action.EXIT.title).toUpperCase(), Action.EXIT.name -> {
-            Printer.printExitMessage()
+            ConsoleWriter.printExitMessage()
             System.exit(0)
 
         }
@@ -289,26 +297,103 @@ fun parseTransactionOptions(): TransactionsOptions {
     while (args.peekFirst() != null && args.peekFirst().contains("-")) {
         val argument = args.pollFirst()
         option.fileName.append(argument)
+
+
+        if (isLikelyToBeDateFormat(argument) && tryToParseDateRange(option, argument))
+            continue
+
         when (argument.toLowerCase()) {
-            "-thisWeek".toLowerCase() -> option.dateRange = DateRange.THIS_WEEK
-            "-prevWeek".toLowerCase() -> option.dateRange = DateRange.PREV_WEEK
-            "-thisMonth".toLowerCase() -> option.dateRange = DateRange.THIS_MONTH
-            "-prevMonth".toLowerCase() -> option.dateRange = DateRange.PREV_MONTH
-            "-thisYear".toLowerCase() -> option.dateRange = DateRange.THIS_YEAR
-            "-prevYear".toLowerCase() -> option.dateRange = DateRange.PREV_YEAR
+            "-includeNonFiat".toLowerCase() -> option.includeNonFiat = true
+            "-printNonEssential".toLowerCase() -> option.printNonEssential = true
             "-reverse".toLowerCase() -> option.reverse = true
             "-bitbayOnly".toLowerCase(), "-bbOnly".toLowerCase()
                 , "-onlyBitbay".toLowerCase(), "-onlybb".toLowerCase() -> option.oneExchangeOnly = BitBay::class.objectInstance!!
             "-abucoinsOnly".toLowerCase(), "-abuOnly".toLowerCase()
                 , "-onlyAbucoins".toLowerCase(), "-onlyAbu".toLowerCase() -> option.oneExchangeOnly = Abucoins::class.objectInstance!!
+
             else -> Logger.err(getString(Text.Exceptions.INVALID_ARG).format(argument))
         }
     }
     return option
 }
 
+fun isLikelyToBeDateFormat(candidate: String) = candidate.matches(Regex("-([0-9]{2}).([0-9]{2}).([0-9]{4})"))
+        || candidate.matches(Regex("-([0-9]{2}).([0-9]{4})"))
+        || candidate.matches(Regex("-([0-9]{4})"))
+
+fun tryToParseDateRange(options: TransactionsOptions, argument: String): Boolean {
+    var success = tryToParseExplicitDate(options, argument)
+    if (!success)
+        success = tryToParseImplicitDate(options, argument)
+    return success
+}
+
+fun tryToParseImplicitDate(options: TransactionsOptions, argument: String): Boolean {
+    val calendar = Date().toCalendar()
+    when (argument.toLowerCase()) {
+        "-today".toLowerCase() -> {
+            options.dateRange.setToDay(calendar)
+        }
+        "-yesterday".toLowerCase() -> {
+            calendar.roll(Calendar.DAY_OF_MONTH, -1)
+            options.dateRange.setToDay(calendar)
+        }
+        "-thisMonth".toLowerCase() -> {
+            options.dateRange.setToMonth(calendar)
+        }
+        "-prevMonth".toLowerCase() -> {
+            calendar.roll(Calendar.MONTH, -1)
+            options.dateRange.setToMonth(calendar)
+        }
+        "-thisYear".toLowerCase() -> {
+            options.dateRange.setToYear(calendar)
+        }
+        "-prevYear".toLowerCase() -> {
+            calendar.roll(Calendar.YEAR, -1)
+            options.dateRange.setToYear(calendar)
+        }
+        else -> return false
+    }
+    return true
+}
 
 
+fun tryToParseExplicitDate(options: TransactionsOptions, argument: String): Boolean {
+    val parsePosition = ParsePosition(1)
+    try {
+        val dateFormat = SimpleDateFormat("dd.MM.yyyy")
+        dateFormat.isLenient = false
+        val calendar = dateFormat.parse(argument)
+                ?: throw IllegalDateRangeArgument(argument, parsePosition.errorIndex)
+
+        options.dateRange.setToDay(calendar.toCalendar())
+
+    } catch (e: Exception) {
+        try {
+            val dateFormat = SimpleDateFormat("MM.yyyy")
+            dateFormat.isLenient = false
+            val calendar = dateFormat.parse(argument, parsePosition)
+                    ?: throw IllegalDateRangeArgument(argument, parsePosition.errorIndex)
+            options.dateRange.setToMonth(calendar.toCalendar())
+        } catch (e: Exception) {
+            try {
+                val dateFormat = SimpleDateFormat("yyyy")
+                dateFormat.isLenient = false
+                val calendar = dateFormat.parse(argument, parsePosition)
+                        ?: throw IllegalDateRangeArgument(argument, parsePosition.errorIndex)
+                options.dateRange.setToYear(calendar.toCalendar())
+            } catch (e: ParseException) {
+                Logger.err(e.message)
+                return false
+            } catch (e: IllegalDateRangeArgument) {
+                //if(e.arg.length >=2 && e.arg[1].isDigit())
+                Logger.err(e.message)
+                return false
+            }
+        }
+    }
+    return true
+}
 
 
 

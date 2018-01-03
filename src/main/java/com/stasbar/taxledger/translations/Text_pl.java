@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Stanislaw stasbar Baranski
+ * Copyright (c) 2018 Stanislaw stasbar Baranski
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,8 +31,6 @@ import static com.stasbar.taxledger.translations.Text.Actions.*;
 import static com.stasbar.taxledger.translations.Text.Exceptions.*;
 import static com.stasbar.taxledger.translations.Text.Logger.ERROR;
 import static com.stasbar.taxledger.translations.Text.Logger.INFO;
-import static com.stasbar.taxledger.translations.Text.OperationType.BUY;
-import static com.stasbar.taxledger.translations.Text.OperationType.SELL;
 import static com.stasbar.taxledger.translations.Text.Summary.*;
 
 public class Text_pl extends ListResourceBundle {
@@ -45,8 +43,9 @@ public class Text_pl extends ListResourceBundle {
                 {ADDED_CREDENTIALS, "Pomyślnie dodano kody uwierzytelniające dla "},
                 {GROSS_INCOME, "Przychód (Brutto)"},
                 {EXPENSE, "Koszty"},
+                {EXPENSE_WITH_FEE, "Koszty (w tym prowizje)"},
                 {NET_INCOME, "Dochód (Netto)"},
-                {SUMMARY, "Summary"},
+                {SUMMARY, "Podsumowanie"},
                 {UNKNOWN_LANGUAGE, "Nieznany język"},
                 {CREDENTIALS_SAVED, "Klucze autoryzujące zostały zapisane do pliku %s"},
                 {DONATE, "Program został stworzony dla społeczności kryptowalut za darmo,\n" +
@@ -67,6 +66,10 @@ public class Text_pl extends ListResourceBundle {
                 {ERROR, "(BŁĄD) "},
                 {BUY, "Buy"},
                 {SELL, "Sell"},
+                {FEE, "Prowizja"},
+                {WITHDRAW, "Wypłata"},
+                {DEPOSIT, "Wpłata"},
+                {UNKNOWN, "Nieznane"},
                 {TOO_MANY_ARGS, "Za dużo kodów dla "},
                 {CREDENTIALS, "Podałeś niepoprawny %s dla %s, klucz powinien mieć %d znaków"},
                 {API_NOT_SET, "Nie wystarczająca ilość kodów uwierzytelniających aby połączyć się z API %s"},
@@ -79,6 +82,8 @@ public class Text_pl extends ListResourceBundle {
                 {INVALID_ARG, "Niepoprawny argument \"%s\""},
                 {TRANSACTIONS_SAVED, "Transakcje zostały zapisane do pliku %s"},
                 {LOAD_COMPLETE, "Pomyślnie wczytano %d transakcji"},
+                {NO_OPERATIONS, "Nie znaleziono żandych operacji"},
+                {TOTAL_OPERATIONS, "Łącznie %d operacji"},
         };
     }
 

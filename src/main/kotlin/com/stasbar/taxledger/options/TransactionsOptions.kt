@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Stanislaw stasbar Baranski
+ * Copyright (c) 2018 Stanislaw stasbar Baranski
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,73 +27,50 @@ package com.stasbar.taxledger.options
 import com.stasbar.taxledger.Exchange
 import com.stasbar.taxledger.ExchangeApi
 import com.stasbar.taxledger.models.Transaction
+import com.stasbar.taxledger.toCalendar
 import java.util.*
 
 
-enum class DateRange {
-    ALL {
-        override fun isInRange(it: Transaction): Boolean = true
-    },
-    THIS_WEEK {
-        override fun isInRange(it: Transaction): Boolean {
-            val calendar = it.time.toCalendar()
-            return calendar.get(Calendar.WEEK_OF_YEAR) == Calendar.getInstance().get(Calendar.WEEK_OF_YEAR)
-                    && calendar.get(Calendar.YEAR) == Calendar.getInstance().get(Calendar.YEAR)
-        }
-    }
-    ,
-    PREV_WEEK {
-        override fun isInRange(it: Transaction): Boolean {
-            val shiftedTime = Calendar.getInstance()
-            shiftedTime.roll(Calendar.WEEK_OF_YEAR, -1)
-            val calendar = it.time.toCalendar()
-            return calendar.get(Calendar.WEEK_OF_YEAR) == shiftedTime.get(Calendar.WEEK_OF_YEAR)
-                    && calendar.get(Calendar.YEAR) == Calendar.getInstance().get(Calendar.YEAR)
-        }
-    },
+class DateRange {
+    var day: Int? = null
+        private set
+    var month: Int? = null
+        private set
+    var year: Int? = null
+        private set
 
-    THIS_MONTH {
-        override fun isInRange(it: Transaction): Boolean {
-            val calendar = it.time.toCalendar()
-            return calendar.get(Calendar.MONTH) == Calendar.getInstance().get(Calendar.MONTH)
-                    && calendar.get(Calendar.YEAR) == Calendar.getInstance().get(Calendar.YEAR)
-        }
+    fun setToYear(cal: Calendar) {
+        this.year = cal.get(Calendar.YEAR)
     }
-    ,
-    PREV_MONTH {
-        override fun isInRange(it: Transaction): Boolean {
-            val calendar = it.time.toCalendar()
-            val shiftedTime = Calendar.getInstance()
-            shiftedTime.roll(Calendar.MONTH, -1)
-            return calendar.get(Calendar.MONTH) == shiftedTime.get(Calendar.MONTH)
-                    && calendar.get(Calendar.YEAR) == Calendar.getInstance().get(Calendar.YEAR)
-        }
-    },
-    THIS_YEAR {
-        override fun isInRange(it: Transaction): Boolean {
-            val calendar = it.time.toCalendar()
-            return calendar.get(Calendar.YEAR) == Calendar.getInstance().get(Calendar.YEAR)
-        }
-    },
-    PREV_YEAR {
-        override fun isInRange(it: Transaction): Boolean {
-            val calendar = it.time.toCalendar()
-            val shiftedTime = Calendar.getInstance()
-            shiftedTime.roll(Calendar.YEAR, -1)
-            return calendar.get(Calendar.YEAR) == shiftedTime.get(Calendar.YEAR)
-        }
-    };
 
-    fun Date.toCalendar() : Calendar{
-        val cal = Calendar.getInstance()
-        cal.time = this
-        return cal
+    fun setToMonth(cal: Calendar) {
+        setToYear(cal)
+        this.month = cal.get(Calendar.MONTH)
     }
-    abstract fun isInRange(it: Transaction): Boolean
+
+    fun setToDay(cal: Calendar) {
+        setToMonth(cal)
+        this.day = cal.get(Calendar.DAY_OF_MONTH)
+    }
+
+    fun isInRange(it: Transaction): Boolean {
+        if (day != null && day != it.time.toCalendar().get(Calendar.DAY_OF_MONTH))
+            return false
+        if (month != null && month != it.time.toCalendar().get(Calendar.MONTH))
+            return false
+        if (year != null && year != it.time.toCalendar().get(Calendar.YEAR))
+            return false
+        return true
+
+    }
 }
 
-class TransactionsOptions(var dateRange: DateRange = DateRange.ALL,
-                          var reverse: Boolean = false,
-                          var oneExchangeOnly: Exchange<ExchangeApi>? = null,
-                          var fileName : StringBuilder = StringBuilder()) {
+class TransactionsOptions(
+        val dateRange: DateRange = DateRange(),
+        var reverse: Boolean = false,
+        var oneExchangeOnly: Exchange<ExchangeApi>? = null,
+        var fileName: StringBuilder = StringBuilder(),
+        var printNonEssential: Boolean = false,
+        var includeNonFiat: Boolean = false) {
+
 }

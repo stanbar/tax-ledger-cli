@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Stanislaw stasbar Baranski
+ * Copyright (c) 2018 Stanislaw stasbar Baranski
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@
 package com.stasbar.taxledger.exchanges.abucoins
 
 import com.google.gson.GsonBuilder
+import com.google.gson.JsonObject
 import com.stasbar.taxledger.DEBUG
 import com.stasbar.taxledger.ExchangeApi
 import com.stasbar.taxledger.exchanges.abucoins.models.*
@@ -88,6 +89,11 @@ interface AbuService {
     @GET("/fills")
     fun fills(): Call<List<Fill>>
 
+    @GET("/withdrawals")
+    fun withdraws(): Call<JsonObject>
+
+    @GET("/deposits")
+    fun deposits(): Call<JsonObject>
 
 
 }
@@ -124,7 +130,4 @@ class AbuApi(private val accessKey: String, private val secretKey: String, priva
                 ?.toList() ?: ArrayList()
     }
 
-
-
 }
-

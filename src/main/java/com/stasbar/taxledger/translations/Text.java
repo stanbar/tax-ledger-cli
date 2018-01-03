@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Stanislaw stasbar Baranski
+ * Copyright (c) 2018 Stanislaw stasbar Baranski
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,13 +32,12 @@ import static com.stasbar.taxledger.translations.Text.Actions.*;
 import static com.stasbar.taxledger.translations.Text.Exceptions.*;
 import static com.stasbar.taxledger.translations.Text.Logger.ERROR;
 import static com.stasbar.taxledger.translations.Text.Logger.INFO;
-import static com.stasbar.taxledger.translations.Text.OperationType.BUY;
-import static com.stasbar.taxledger.translations.Text.OperationType.SELL;
 import static com.stasbar.taxledger.translations.Text.Summary.*;
 
 public class Text extends ListResourceBundle {
 
 
+    public static final String TOTAL_OPERATIONS = "total_operations";
     public static final String UNKNOWN_LANGUAGE = "unknown_language";
     public static final String CREDENTIALS_SAVED = "credentials_saved";
     public static final String DONATE = "donate";
@@ -56,11 +55,14 @@ public class Text extends ListResourceBundle {
     public static final String TRANSACTIONS_SAVED = "transactions_saved";
     @NotNull
     public static final String LOAD_COMPLETE = "load_complete";
+    @NotNull
+    public static final String NO_OPERATIONS = "no_transactions";
 
 
     public static class Summary {
         public static final String GROSS_INCOME = "gross_income";
         public static final String EXPENSE = "expense";
+        public static final String EXPENSE_WITH_FEE = "expense_with_fee";
         public static final String NET_INCOME = "net_income";
         public static final String SUMMARY = "summary";
     }
@@ -84,10 +86,12 @@ public class Text extends ListResourceBundle {
     }
 
 
-    public static class OperationType {
-        public static final String BUY = "buy";
-        public static final String SELL = "sell";
-    }
+    public static final String BUY = "buy";
+    public static final String SELL = "sell";
+    public static final String FEE = "fee";
+    public static final String WITHDRAW = "withdraw";
+    public static final String DEPOSIT = "deposit";
+    public static final String UNKNOWN = "unknown";
 
     public static class Exceptions {
         public static final String TOO_MANY_ARGS = "too_many_args";
@@ -109,6 +113,7 @@ public class Text extends ListResourceBundle {
             {ADDED_CREDENTIALS, "Successfully added credentials for "},
             {GROSS_INCOME, "Gross Income"},
             {EXPENSE, "Expense"},
+            {EXPENSE_WITH_FEE, "Expense (including fees)"},
             {NET_INCOME, "Net Income"},
             {SUMMARY, "Summary"},
             {UNKNOWN_LANGUAGE, "Unknown language"},
@@ -130,6 +135,10 @@ public class Text extends ListResourceBundle {
             {ERROR, "(ERROR) "},
             {BUY, "Buy"},
             {SELL, "Sell"},
+            {FEE, "Fee"},
+            {WITHDRAW, "Withdraw"},
+            {DEPOSIT, "Deposit"},
+            {UNKNOWN, "Unknown"},
             {TOO_MANY_ARGS, "Too many credential for "},
             {CREDENTIALS, "You provided invalid %s for %s, it should be %d length long"},
             {API_NOT_SET, "Not enough credentials to connect to %s API"},
@@ -142,6 +151,8 @@ public class Text extends ListResourceBundle {
             {INVALID_ARG, "Invalid argument \"%s\" for transactions action"},
             {TRANSACTIONS_SAVED, "Transactions have been saved to %s"},
             {LOAD_COMPLETE, "Successfully loaded %d transactions"},
+            {NO_OPERATIONS, "No operations found"},
+            {TOTAL_OPERATIONS, "Total %d operations"},
 
 
     };

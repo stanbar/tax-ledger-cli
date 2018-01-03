@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Stanislaw stasbar Baranski
+ * Copyright (c) 2018 Stanislaw stasbar Baranski
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ data class Transaction(val exchange: Exchange<ExchangeApi>,
 
     fun toList(): List<String> {
         return listOf(exchange.name
-                , getString(operationType.key)
+                , getString(operationType.key).substring(0, Math.min(getString(operationType.key).length, 4))
                 , Constants.dateFormat.format(time)
                 , rate.stripTrailingZeros().toPlainString()
                 , paidCurrency
@@ -62,16 +62,23 @@ data class Transaction(val exchange: Exchange<ExchangeApi>,
         val operationColor = when (operationType) {
             OperationType.BUY -> Ansi.Color.MAGENTA
             OperationType.SELL -> Ansi.Color.YELLOW
-            else -> Ansi.Color.DEFAULT
+            OperationType.FEE -> Ansi.Color.RED
+            OperationType.DEPOSIT -> Ansi.Color.WHITE
+            OperationType.WITHDRAW -> Ansi.Color.WHITE
+            else -> Ansi.Color.WHITE
         }
         return ansi()
                 .fg(exchange.color).a("%-11s".format("[${exchange.name}]")).reset()
-                .fg(operationColor).a("%-6s".format("[${getString(operationType.key)}]")).reset()
+                .fg(operationColor).a("%-6s".format("[$operationType]")).reset()
                 .a(" ${Constants.dateFormat.format(time)} ")
                 .a("rate=%.8f%s".format(rate, paidCurrency)).reset()
                 .fgBright(Ansi.Color.GREEN).a(" bought=$bought$boughtCurrency").reset()
                 .fgBright(Ansi.Color.RED).a(" paid=$paid$paidCurrency").reset()
                 .toString()
+    }
+
+    fun isFiatTransaction(): Boolean {
+        return "PLN" in arrayOf(paidCurrency.toUpperCase(), boughtCurrency.toUpperCase())
     }
 
 }

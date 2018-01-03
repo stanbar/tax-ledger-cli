@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Stanislaw stasbar Baranski
+ * Copyright (c) 2018 Stanislaw stasbar Baranski
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,7 +77,7 @@ class BitmarketApi(private val publicKey: String, private val privateKey: String
         val response = transactionRequest.execute()
         println(response.raw())
         println(response.body().toString())
-        return response.body()!!.results.map { it.toTransaction() } ?: ArrayList()
+        return response.body()!!.results.map { it.toTransaction() }
     }
 
 

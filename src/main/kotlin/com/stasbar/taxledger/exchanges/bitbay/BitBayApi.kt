@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Stanislaw stasbar Baranski
+ * Copyright (c) 2018 Stanislaw stasbar Baranski
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,8 +28,9 @@ import com.google.gson.GsonBuilder
 import com.stasbar.taxledger.Constants.DATE_FORMAT
 import com.stasbar.taxledger.DEBUG
 import com.stasbar.taxledger.ExchangeApi
+import com.stasbar.taxledger.exchanges.bitbay.models.BitBayHistory
 import com.stasbar.taxledger.exchanges.bitbay.models.BitBayTransaction
-import com.stasbar.taxledger.exchanges.bitbay.requests.TransactionsRequest
+import com.stasbar.taxledger.exchanges.bitbay.requests.HistoryRequest
 import com.stasbar.taxledger.models.Transaction
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -45,6 +46,18 @@ interface PrivateService {
     @FormUrlEncoded
     @POST("tradingApi.php")
     fun info(): Call<String>
+
+    /**
+     * history of all operations on user account
+     *
+     *Input:
+     *
+     * @param currency: name of the currency in which history will be displayed
+     * @param limit: the limit for results
+     */
+    @FormUrlEncoded
+    @POST("tradingApi.php")
+    fun history(@FieldMap(encoded = true) fields: Map<String, String>): Call<List<BitBayHistory>>
 
     /**
      * history of account transactions
@@ -81,10 +94,10 @@ class BitBayApi(private val publicKey: String, private val privateKey: String) :
     }
 
     override fun transactions(): List<Transaction> {
-        val request = TransactionsRequest(limit = "60")
-        val transactionRequest = service.value.transactions(request.toMap())
+        val request = HistoryRequest(limit = "1000000", currency = "PLN")
+        val transactionRequest = service.value.history(request.toMap())
         val response = transactionRequest.execute()
-        return response.body()?.map { it.toTransaction() }?.toList() ?: ArrayList()
+        return response.body()?.map { it.toTransaction() } ?: ArrayList()
     }
 
 

@@ -22,20 +22,8 @@
  *            taxledger@stasbar.com
  */
 
-package com.stasbar.taxledger
+package com.stasbar.taxledger.exceptions
 
-import com.stasbar.taxledger.translations.Text
 
-enum class OperationType(val key : String) {
-    BUY(Text.BUY),
-    SELL(Text.SELL),
-    FEE(Text.FEE),
-    DEPOSIT(Text.DEPOSIT),
-    WITHDRAW(Text.WITHDRAW),
-    UNKNOWN(Text.UNKNOWN);
-
-    override fun toString(): String {
-        return getString(key)
-    }
-
-}
+data class IllegalDateRangeArgument(val arg: String, val errorIndex: Int) : Exception("Could not parse date $arg," +
+        " error occurred at index $errorIndex")

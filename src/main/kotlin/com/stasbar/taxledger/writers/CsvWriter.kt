@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Stanislaw stasbar Baranski
+ * Copyright (c) 2018 Stanislaw stasbar Baranski
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,27 +22,38 @@
  *            taxledger@stasbar.com
  */
 
-package com.stasbar.taxledger
+package com.stasbar.taxledger.writers
 
+import com.stasbar.taxledger.Logger
+import com.stasbar.taxledger.getString
 import com.stasbar.taxledger.models.Transaction
 import com.stasbar.taxledger.translations.Text
 import java.io.File
 import java.io.FileWriter
 import java.io.IOException
 import java.io.Writer
-import java.math.BigDecimal
 import java.text.SimpleDateFormat
 import java.util.*
 
-object CsvManager {
+object CsvWriter : OutputWriter() {
 
-    fun saveToFile(transactions: Collection<Transaction>, fileName: String = fileName()) {
+    fun saveToFile(transactions: Collection<Transaction>, fileName: String = fileName(), printNonEssential: Boolean = false, includeNotFiat: Boolean = false) {
         try {
             val file = File(fileName)
             file.parentFile.mkdirs()
             FileWriter(file).use {
-                writeLine(it, Arrays.asList(getString(Text.EXCHANGE), getString(Text.TYPE), getString(Text.DATE), "", getString(Text.RATE), "", getString(Text.GET), "", getString(Text.PAID)))
-                transactions.forEach { transaction -> writeLine(it, transaction.toList()) }
+                writeLine(it, headRow)
+
+                if (printNonEssential)
+                    transactions
+                            .filter { includeNotFiat || it.isFiatTransaction() }
+                            .forEach { transaction -> writeLine(it, transaction.toList()) }
+                else //essential only
+                    transactions
+                            .filter { includeNotFiat || it.isFiatTransaction() }
+                            .filter { it.operationType in essentialOperation }
+                            .forEach { transaction -> writeLine(it, transaction.toList()) }
+
                 it.flush()
                 printSummary(it, transactions)
                 it.flush()
@@ -101,17 +112,23 @@ object CsvManager {
     }
 
     fun printSummary(writer: FileWriter, transactions: Collection<Transaction>) {
-        var grossIncome: BigDecimal = BigDecimal.ZERO
-        transactions.filter { it.boughtCurrency.toUpperCase() == "PLN" }.forEach { grossIncome += it.bought }
-        var expense: BigDecimal = BigDecimal.ZERO
-        transactions.filter { it.paidCurrency.toUpperCase() == "PLN" }.forEach { expense += it.paid }
-        val netIncome = grossIncome - expense
+        val grossIncome = getGrossIncome(transactions)
+        val expense = getExpense(transactions)
+        val fees = getFees(transactions)
+        val expenseWithFees = expense + fees
+        val netIncome = grossIncome - expenseWithFees
+        val withdraws = getWithdraws(transactions)
+        val deposits = getDeposits(transactions)
 
         writeLine(writer, listOf(getString(Text.Summary.SUMMARY)))
-        writeLine(writer, listOf(getString(Text.Summary.GROSS_INCOME), getString(Text.Summary.EXPENSE), getString(Text.Summary.NET_INCOME)))
+        writeLine(writer, listOf(getString(Text.Summary.GROSS_INCOME), getString(Text.Summary.EXPENSE_WITH_FEE), getString(Text.Summary.NET_INCOME)))
         writeLine(writer, listOf(grossIncome.stripTrailingZeros().toPlainString()
-                , expense.stripTrailingZeros().toPlainString()
+                , expenseWithFees.stripTrailingZeros().toPlainString()
                 , netIncome.stripTrailingZeros().toPlainString()))
+
+        writeLine(writer, listOf(getString(Text.DEPOSIT), getString(Text.WITHDRAW)))
+        writeLine(writer, listOf(deposits.stripTrailingZeros().toPlainString()
+                , withdraws.stripTrailingZeros().toPlainString()))
     }
 
 

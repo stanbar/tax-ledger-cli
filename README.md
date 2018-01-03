@@ -28,9 +28,17 @@ $ java -jar /Users/stasbar/Downloads/tax-ledger0.1.jar
 ### Transactions / Transakcje
 
 Podstawowa komenda `transakcje` łączy się z każdą skonfigurowaną giełdą a następnie:
- - pobiera pełną listę transakcjii. Możliwe ograniczenia do -lastWeek -thisWeek -lastMonth -thisMonth -thisYear -lastYear
+ - pobiera pełną listę transakcjii. 
  - Wyświetla podsumowanie
- - Zapisuje do pliku .csv
+ - Zapisuje wyniki do pliku [nazwa komendy].csv w folderze /transactions
+  
+ Dostępne argumenty dla komendy `transactions`:
+ - `-today`, `-yesterday`, `-thisYear`, `-prevYear`, `-thisMonth` lub `-prevMonth`
+ - lub bezpośrednie określenie daty poprzez np. `-2017`, `-12.2017` lub `-28.12.2017`
+ - `-reverse` odwrócenie listy wyników 
+ - `-onlyBitbay` wyświetla wyniki tylko dla BitBay analogicznie `-onlyAbu` dla Abucoins
+ - `-includeNonFiat` wyświetla również operacje crypto-crypto. Domyślnie wyłączone ponieważ do celów podatkowych jest to zbędna informacja.
+ - `-printNonEssential` wyświetla również wpłaty i wypłaty PLNów na konto giełdowe. Domyślnie wyłączone ponieważ do celów podatkowych jest to zbędna informacja.
   
 
 

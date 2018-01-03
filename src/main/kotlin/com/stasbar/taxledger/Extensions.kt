@@ -24,18 +24,10 @@
 
 package com.stasbar.taxledger
 
-import com.stasbar.taxledger.translations.Text
+import java.util.*
 
-enum class OperationType(val key : String) {
-    BUY(Text.BUY),
-    SELL(Text.SELL),
-    FEE(Text.FEE),
-    DEPOSIT(Text.DEPOSIT),
-    WITHDRAW(Text.WITHDRAW),
-    UNKNOWN(Text.UNKNOWN);
-
-    override fun toString(): String {
-        return getString(key)
-    }
-
+fun Date.toCalendar(): Calendar {
+    val cal = Calendar.getInstance()
+    cal.time = this
+    return cal
 }
