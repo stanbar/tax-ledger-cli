@@ -34,6 +34,7 @@ import com.stasbar.taxledger.translations.Text
 import com.stasbar.taxledger.writers.ConsoleWriter
 import com.stasbar.taxledger.writers.CsvWriter
 import org.fusesource.jansi.Ansi.ansi
+import org.fusesource.jansi.AnsiConsole
 import org.jline.reader.LineReaderBuilder
 import org.jline.reader.UserInterruptException
 import org.jline.reader.impl.completer.StringsCompleter
@@ -48,7 +49,10 @@ import kotlin.reflect.KClass
 val exchanges = setOf(BitBay::class, Abucoins::class)
 val DEBUG = false
 
-val terminal = TerminalBuilder.terminal()
+val terminal = TerminalBuilder
+        .builder()
+        .jansi(true)
+        .build()
 val preferenceManager = PreferencesManager()
 
 val args = ArrayDeque<String>()
@@ -56,17 +60,11 @@ val args = ArrayDeque<String>()
 private val BUNDLE_NAME = "com.stasbar.taxledger.translations.Text"
 var resourceBundle = ResourceBundle.getBundle(BUNDLE_NAME, Locale.getDefault())
 
-fun selectLanguage(lang: String) {
-    when {
-        Locale.forLanguageTag(lang) != null -> resourceBundle = ResourceBundle.getBundle(BUNDLE_NAME, Locale.forLanguageTag(lang))
-        else -> throw IllegalStateException(getString(Text.UNKNOWN_LANGUAGE))
-    }
-
-}
 
 fun getString(key: String) = resourceBundle.getString(key)
 
 fun main(cliArgs: Array<String>) {
+    AnsiConsole.systemInstall()
     ConsoleWriter.printIntro()
     val credentials = loadCredentialsStrings()
 
@@ -84,8 +82,6 @@ fun main(cliArgs: Array<String>) {
                 Logger.err(getString(Text.WRONG_ACTION))
         }
     }
-
-
 }
 
 
@@ -107,6 +103,9 @@ fun parseExchangeName(): Boolean {
     try {
         exchangeNameTry = reader.readLine(prompt).trim().split(" ")[0]
     } catch (e: UserInterruptException) {
+        ConsoleWriter.printExitMessage()
+        System.exit(0)
+    } catch (e: IllegalStateException) {
         ConsoleWriter.printExitMessage()
         System.exit(0)
     }
@@ -179,11 +178,14 @@ fun promptUserForCredential(exchange: Exchange<ExchangeApi>, step: String): Bool
     val prompt = ansi()
             .fgBright(exchange.color).a(exchange.name + "> ")
             .fgBrightYellow().a(step).a(">")
-            .reset()
+            .reset().toString()
     var stepAnswer = ""
     try {
-        stepAnswer = reader.readLine(prompt.toString())
+        stepAnswer = reader.readLine(prompt)
     } catch (e: UserInterruptException) {
+        ConsoleWriter.printExitMessage()
+        System.exit(0)
+    } catch (e: IllegalStateException) {
         ConsoleWriter.printExitMessage()
         System.exit(0)
     }
@@ -210,9 +212,9 @@ fun parseAction() {
         val actionLine = ansi().a("\n\t").a(String(Character.toChars(action.symbol))).bold().a(getString(action.title)).boldOff()
         if (getString(action.description).isNotBlank())
             actionLine.a(" - ${getString(action.description)}")
-        println(actionLine)
+        AnsiConsole.out.println(actionLine)
     }
-    println()
+    AnsiConsole.out.println()
 
     val reader = LineReaderBuilder.builder()
             .terminal(terminal)
@@ -224,72 +226,15 @@ fun parseAction() {
     } catch (e: UserInterruptException) {
         ConsoleWriter.printExitMessage()
         System.exit(0)
+    } catch (e: IllegalStateException) {
+        ConsoleWriter.printExitMessage()
+        System.exit(0)
     }
     line.split(" ").filter { it.isNotBlank() }.forEach { args.add(it) }
 
 }
 
 
-fun performActions(action: String): Boolean {
-
-    when (action.toUpperCase()) {
-        getString(Action.TRANSACTIONS.title).toUpperCase(), Action.TRANSACTIONS.name -> {
-            val options = parseTransactionOptions()
-
-            val transactions = ArrayList<Transaction>()
-            val apis = exchanges
-                    .map { it.objectInstance!! }
-                    .filter {
-                        //if one exchange is not specified then pass all exchanges
-                        if (options.oneExchangeOnly == null) true
-                        else it == options.oneExchangeOnly
-                    }
-
-            apis.parallelStream().forEach {
-                try {
-                    val newTransactions = it.getApi()
-                            .transactions()
-                            .filter { options.dateRange.isInRange(it) }
-                    transactions.addAll(newTransactions)
-                } catch (e: ApiNotSetException) {
-                    /* skip not set exchanges */
-                }
-            }
-            if (transactions.isEmpty()) {
-                Logger.err(getString(Text.NO_OPERATIONS))
-                return true
-            }
-
-            val comparator: Comparator<Transaction> = if (options.reverse)
-                kotlin.Comparator { o1, o2 -> o1.time.compareTo(o2.time) }
-            else kotlin.Comparator { o1, o2 -> o2.time.compareTo(o1.time) }
-
-            transactions.sortWith(comparator)
-
-            ConsoleWriter.printTransactions(transactions)
-            ConsoleWriter.printSummary(transactions)
-            Logger.info(getString(Text.LOAD_COMPLETE).format(transactions.size))
-            CsvWriter.saveToFile(transactions, CsvWriter.fileName(options.fileName.toString()), options.printNonEssential, options.includeNonFiat)
-        }
-        getString(Action.CONTACT.title).toUpperCase(), Action.CONTACT.name -> {
-            println(Misc.contact)
-        }
-        getString(Action.EXCHANGES.title).toUpperCase(), Action.EXCHANGES.name -> {
-            parseCredentials()
-        }
-        getString(Action.DONATE.title).toUpperCase(), Action.DONATE.name -> {
-            ConsoleWriter.printDonate()
-        }
-        getString(Action.EXIT.title).toUpperCase(), Action.EXIT.name -> {
-            ConsoleWriter.printExitMessage()
-            System.exit(0)
-
-        }
-        else -> return false
-    }
-
-    return true
-}
 
 
 fun parseTransactionOptions(): TransactionsOptions {
@@ -303,8 +248,8 @@ fun parseTransactionOptions(): TransactionsOptions {
             continue
 
         when (argument.toLowerCase()) {
-            "-includeNonFiat".toLowerCase() -> option.includeNonFiat = true
-            "-printNonEssential".toLowerCase() -> option.printNonEssential = true
+            "-showNonFiat".toLowerCase() -> option.showNonFiat = true
+            "-showNonEssential".toLowerCase() -> option.showNonEssential = true
             "-reverse".toLowerCase() -> option.reverse = true
             "-bitbayOnly".toLowerCase(), "-bbOnly".toLowerCase()
                 , "-onlyBitbay".toLowerCase(), "-onlybb".toLowerCase() -> option.oneExchangeOnly = BitBay::class.objectInstance!!
@@ -362,8 +307,8 @@ fun tryToParseExplicitDate(options: TransactionsOptions, argument: String): Bool
     val parsePosition = ParsePosition(1)
     try {
         val dateFormat = SimpleDateFormat("dd.MM.yyyy")
-        dateFormat.isLenient = false
-        val calendar = dateFormat.parse(argument)
+
+        val calendar = dateFormat.parse(argument, parsePosition)
                 ?: throw IllegalDateRangeArgument(argument, parsePosition.errorIndex)
 
         options.dateRange.setToDay(calendar.toCalendar())
@@ -371,7 +316,7 @@ fun tryToParseExplicitDate(options: TransactionsOptions, argument: String): Bool
     } catch (e: Exception) {
         try {
             val dateFormat = SimpleDateFormat("MM.yyyy")
-            dateFormat.isLenient = false
+
             val calendar = dateFormat.parse(argument, parsePosition)
                     ?: throw IllegalDateRangeArgument(argument, parsePosition.errorIndex)
             options.dateRange.setToMonth(calendar.toCalendar())
@@ -395,6 +340,67 @@ fun tryToParseExplicitDate(options: TransactionsOptions, argument: String): Bool
     return true
 }
 
+
+fun performActions(action: String): Boolean {
+
+    when (action.toUpperCase()) {
+        getString(Action.TRANSACTIONS.title).toUpperCase(), Action.TRANSACTIONS.name -> {
+            val options = parseTransactionOptions()
+
+            val transactions = ArrayList<Transaction>()
+            val apis = exchanges
+                    .map { it.objectInstance!! }
+                    .filter {
+                        //if one exchange is not specified then pass all exchanges
+                        if (options.oneExchangeOnly == null) true
+                        else it == options.oneExchangeOnly
+                    }
+
+            apis.parallelStream().forEach {
+                try {
+                    val newTransactions = it.getApi()
+                            .transactions()
+                            .filter { options.dateRange.isInRange(it) }
+                    transactions.addAll(newTransactions)
+                } catch (e: ApiNotSetException) {
+                    /* skip not set exchanges */
+                }
+            }
+            if (transactions.isEmpty()) {
+                Logger.err(getString(Text.NO_OPERATIONS))
+                return true
+            }
+
+            val comparator: Comparator<Transaction> = if (options.reverse)
+                kotlin.Comparator { o1, o2 -> o1.time.compareTo(o2.time) }
+            else kotlin.Comparator { o1, o2 -> o2.time.compareTo(o1.time) }
+
+            transactions.sortWith(comparator)
+
+            ConsoleWriter.printTransactions(transactions, options)
+            ConsoleWriter.printSummary(transactions)
+            Logger.info(getString(Text.LOAD_COMPLETE).format(transactions.size))
+            CsvWriter.saveToFile(transactions, options)
+        }
+        getString(Action.CONTACT.title).toUpperCase(), Action.CONTACT.name -> {
+            AnsiConsole.out.println(Misc.contact)
+        }
+        getString(Action.EXCHANGES.title).toUpperCase(), Action.EXCHANGES.name -> {
+            parseCredentials()
+        }
+        getString(Action.DONATE.title).toUpperCase(), Action.DONATE.name -> {
+            ConsoleWriter.printDonate()
+        }
+        getString(Action.EXIT.title).toUpperCase(), Action.EXIT.name -> {
+            ConsoleWriter.printExitMessage()
+            System.exit(0)
+
+        }
+        else -> return false
+    }
+
+    return true
+}
 
 
 

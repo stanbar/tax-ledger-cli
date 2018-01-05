@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Stanislaw stasbar Baranski
+ * Copyright (c) 2018 Stanislaw stasbar Baranski
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,16 +26,17 @@ package com.stasbar.taxledger
 
 import com.stasbar.taxledger.translations.Text
 import org.fusesource.jansi.Ansi.ansi
+import org.fusesource.jansi.AnsiConsole
 
 object Logger {
 
     fun info(info: String?) {
-        info?.let { println(ansi().a("\n").fgBrightCyan().a(0x2714.toChar()).a(getString(Text.Logger.INFO)).reset().a(info).a("\n")) }
+        info?.let { AnsiConsole.out.println(ansi().a("\n").fgBrightCyan().a(0x2714.toChar()).a(getString(Text.Logger.INFO)).reset().a(info).a("\n")) }
     }
 
 
     fun err(info: String?) {
-        info?.let { println(ansi().a("\n").fgBrightRed().a(0x2716.toChar()).a(getString(Text.Logger.ERROR)).reset().a(info).a("\n")) }
+        info?.let { AnsiConsole.out.println(ansi().a("\n").fgBrightRed().a(0x2716.toChar()).a(getString(Text.Logger.ERROR)).reset().a(info).a("\n")) }
     }
 
 }

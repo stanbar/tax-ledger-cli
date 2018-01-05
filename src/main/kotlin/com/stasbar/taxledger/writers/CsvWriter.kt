@@ -27,6 +27,7 @@ package com.stasbar.taxledger.writers
 import com.stasbar.taxledger.Logger
 import com.stasbar.taxledger.getString
 import com.stasbar.taxledger.models.Transaction
+import com.stasbar.taxledger.options.TransactionsOptions
 import com.stasbar.taxledger.translations.Text
 import java.io.File
 import java.io.FileWriter
@@ -37,23 +38,25 @@ import java.util.*
 
 object CsvWriter : OutputWriter() {
 
-    fun saveToFile(transactions: Collection<Transaction>, fileName: String = fileName(), printNonEssential: Boolean = false, includeNotFiat: Boolean = false) {
+    fun saveToFile(transactions: Collection<Transaction>, options: TransactionsOptions) {
         try {
-            val file = File(fileName)
+            val file = File(CsvWriter.fileName(options.fileName.toString()))
             file.parentFile.mkdirs()
             FileWriter(file).use {
+                transactions
+                        .filter { options.showNonFiat || it.isFiatTransaction() }
+                        .filter { options.showNonEssential || it.operationType in essentialOperation }
+
+                val filteredTransactions = transactions
+                        .filter { options.showNonFiat || it.isFiatTransaction() }
+                        .filter { options.showNonEssential || it.operationType in ConsoleWriter.essentialOperation }
+
+                if (filteredTransactions.isEmpty()) {
+                    Logger.err(getString(Text.NO_OPERATIONS))
+                    return
+                }
                 writeLine(it, headRow)
-
-                if (printNonEssential)
-                    transactions
-                            .filter { includeNotFiat || it.isFiatTransaction() }
-                            .forEach { transaction -> writeLine(it, transaction.toList()) }
-                else //essential only
-                    transactions
-                            .filter { includeNotFiat || it.isFiatTransaction() }
-                            .filter { it.operationType in essentialOperation }
-                            .forEach { transaction -> writeLine(it, transaction.toList()) }
-
+                filteredTransactions.forEach { transaction -> writeLine(it, transaction.toList()) }
                 it.flush()
                 printSummary(it, transactions)
                 it.flush()

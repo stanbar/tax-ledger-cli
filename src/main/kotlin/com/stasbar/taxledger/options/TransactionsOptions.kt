@@ -70,7 +70,7 @@ class TransactionsOptions(
         var reverse: Boolean = false,
         var oneExchangeOnly: Exchange<ExchangeApi>? = null,
         var fileName: StringBuilder = StringBuilder(),
-        var printNonEssential: Boolean = false,
-        var includeNonFiat: Boolean = false) {
+        var showNonEssential: Boolean = false,
+        var showNonFiat: Boolean = false) {
 
 }

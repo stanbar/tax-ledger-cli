@@ -32,6 +32,7 @@ import com.stasbar.taxledger.exchanges.bitmarket.requests.TransactionsRequest
 import com.stasbar.taxledger.models.Transaction
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
+import org.fusesource.jansi.AnsiConsole
 import retrofit2.Call
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -75,8 +76,8 @@ class BitmarketApi(private val publicKey: String, private val privateKey: String
         val request = TransactionsRequest()
         val transactionRequest = service.value.transactions(request.toMap())
         val response = transactionRequest.execute()
-        println(response.raw())
-        println(response.body().toString())
+        AnsiConsole.out.println(response.raw())
+        AnsiConsole.out.println(response.body().toString())
         return response.body()!!.results.map { it.toTransaction() }
     }
 

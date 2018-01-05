@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Stanislaw stasbar Baranski
+ * Copyright (c) 2018 Stanislaw stasbar Baranski
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -79,7 +79,7 @@ data class Order(
 //
 //    private fun toSellHistory(): History {
 //        if(type == "market")
-//            println(toString())
+//            AnsiConsole.out.println(toString())
 //        val rate = if(type == "market") price/filled_size else price
 //        val ammount = if(type == "market") price/filled_size else price
 //

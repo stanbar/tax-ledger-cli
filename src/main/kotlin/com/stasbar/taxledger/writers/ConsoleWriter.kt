@@ -28,41 +28,45 @@ import com.stasbar.taxledger.Logger
 import com.stasbar.taxledger.Misc
 import com.stasbar.taxledger.getString
 import com.stasbar.taxledger.models.Transaction
+import com.stasbar.taxledger.options.TransactionsOptions
 import com.stasbar.taxledger.translations.Text
 import de.vandermeer.asciitable.AsciiTable
 import de.vandermeer.asciitable.CWC_FixedWidth
 import de.vandermeer.asciithemes.TA_GridThemes
 import de.vandermeer.skb.interfaces.transformers.textformat.TextAlignment
 import org.fusesource.jansi.Ansi
+import org.fusesource.jansi.AnsiConsole
 import java.util.*
 
 object ConsoleWriter : OutputWriter() {
     fun printIntro() {
-        println(Misc.taxledger)
+        AnsiConsole.out.println(Misc.taxledger)
     }
 
-    fun printTransactions(transactions: Collection<Transaction>, printAll: Boolean = false, includeNotFiat: Boolean = false) {
+    fun printTransactions(transactions: Collection<Transaction>, options: TransactionsOptions) {
+        val filteredTransactions = transactions
+                .filter { options.showNonFiat || it.isFiatTransaction() }
+                .filter { options.showNonEssential || it.operationType in essentialOperation }
+        if (filteredTransactions.isEmpty()) {
+            Logger.err(getString(Text.NO_OPERATIONS))
+            return
+        }
 
         val at = AsciiTable()
+
         at.addRule()
 
         at.addRow(getString(Text.EXCHANGE), getString(Text.TYPE), getString(Text.DATE), null, getString(Text.RATE), null, getString(Text.GET), null, getString(Text.PAID))
                 .setTextAlignment(TextAlignment.CENTER)
         at.addRule()
-        if (printAll)
-            transactions.filter { includeNotFiat || it.isFiatTransaction() }
-                    .forEach { it.addRowTo(at) }
-        else //essential only
-            transactions
-                    .filter { includeNotFiat || it.isFiatTransaction() }
-                    .filter { it.operationType in essentialOperation }
-                    .forEach { it.addRowTo(at) }
+
+        filteredTransactions.forEach { it.addRowTo(at) }
         at.addRule()
         at.renderer.cwc = CWC_FixedWidth().add(10).add(4).add(19).add(14).add(4).add(18).add(4).add(18).add(4)
         at.context.setGridTheme(TA_GridThemes.HORIZONTAL)
-        println(at.render())
+        AnsiConsole.out.println(at.render())
 
-        println(getString(Text.TOTAL_OPERATIONS).format(transactions.size))
+        AnsiConsole.out.println(getString(Text.TOTAL_OPERATIONS).format(transactions.size))
     }
 
     private fun Transaction.addRowTo(at: AsciiTable) {
@@ -92,7 +96,7 @@ object ConsoleWriter : OutputWriter() {
                 , netIncome.stripTrailingZeros().toPlainString())
         atSummary.addRule()
         atSummary.setPaddingLeftRight(1)
-        println(atSummary.render())
+        AnsiConsole.out.println(atSummary.render())
 
         printDepositsAndWithdraws(transactions)
 
@@ -109,7 +113,7 @@ object ConsoleWriter : OutputWriter() {
                 , withdraws.stripTrailingZeros().toPlainString())
         at.addRule()
         at.setPaddingLeftRight(1)
-        println(at.render())
+        AnsiConsole.out.println(at.render())
 
     }
 
@@ -118,16 +122,15 @@ object ConsoleWriter : OutputWriter() {
         val donateMap = LinkedHashMap<String, Pair<Ansi.Color, String>>()
         donateMap.put("Bitcoin", Pair(Ansi.Color.YELLOW, "3QgRku1UkFbyVyBbdLFxfxKmgFwDvT5feP"))
         donateMap.put("Etherium", Pair(Ansi.Color.BLUE, "0x03Ba2f3907fcA09867C7A1F4f218D7B5eA052997"))
-        donateMap.put("Cardano", Pair(Ansi.Color.YELLOW, "DdzFFzCqrhtAWA4ftZxRvE8ixhybRcdo77hhVDTkphtSAvmbJwCwozGYg89ADTaGgNpRZDzV21t3d94Uq9M6vj9GUZp2cvBpgKsXWQWY"))
         donateMap.put("Bitcoin Cash", Pair(Ansi.Color.YELLOW, "1LTfvN44Lmf6eqHn9B1bAnJV4rbLQKpduK"))
         donateMap.put("Litecoin", Pair(Ansi.Color.WHITE, "M88GxayRm4YQ78KuLJ9tYuAYESrd9uPEAg"))
         donateMap.put("Dash", Pair(Ansi.Color.BLUE, "XmnmWK2iN73X9qqcE4NMX4VTVVC2YjrCMS"))
         donateMap.put("NEO", Pair(Ansi.Color.GREEN, "ANSHr2MMLM4YDFCpriRiE3WjnxMYcXteX3"))
-        donateMap.forEach { t, u -> println(Ansi.ansi().fg(u.first).bgDefault().a("$t -> ${u.second}").reset()) }
+        donateMap.forEach { t, u -> AnsiConsole.out.println(Ansi.ansi().fg(u.first).bgDefault().a("$t -> ${u.second}").reset()) }
     }
 
     fun printExitMessage() {
-        println(Misc.contact)
+        AnsiConsole.out.println(Misc.contact)
         Logger.info(getString(Text.DONATE))
 
         printDonate()

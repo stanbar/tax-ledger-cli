@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Stanislaw stasbar Baranski
+ * Copyright (c) 2018 Stanislaw stasbar Baranski
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,11 +56,11 @@ object BitBay : Exchange<BitBayApi>("BitBay", "bb", listOf("publicKey", "private
 
     }
 
-    private var api : BitBayApi? = null
+    private var api: BitBayApi? = null
 
     @Throws(ApiNotSetException::class)
-    override fun getApi() : BitBayApi{
-        return if(api == null){
+    override fun getApi(): BitBayApi {
+        return if (api == null) {
             if (isSet().not())
                 throw ApiNotSetException(name)
             else {
@@ -82,39 +82,40 @@ object BitBay : Exchange<BitBayApi>("BitBay", "bb", listOf("publicKey", "private
 
 }
 
-object Abucoins : Exchange<AbuApi>("Abucoins", "abu", listOf("key", "secret", "passphrase"), Ansi.Color.GREEN) {
+object Abucoins : Exchange<AbuApi>("Abucoins", "abu", listOf("passphrase", "key", "secret"), Ansi.Color.GREEN) {
     private const val KEY_LENGTH = 41
     private const val SECRET_LENGTH = 64
     private const val PASSPHRASE_LENGTH = 9
 
+    var passphrase: String = ""
     var key: String = ""
     var secret: String = ""
-    var passphrase: String = ""
 
 
     @Throws(CredentialsException::class, TooManyCredentialsException::class)
     override fun addCredential(credential: String) {
-        if (key.isBlank()) {
+        if (passphrase.isBlank()) {
+            if (credential.length != PASSPHRASE_LENGTH)
+                throw CredentialsException("passphrase", name, PASSPHRASE_LENGTH)
+            else passphrase = credential
+        } else if (key.isBlank()) {
             if (credential.length != KEY_LENGTH)
                 throw CredentialsException("key", name, KEY_LENGTH)
             else key = credential
         } else if (secret.isBlank()) {
             if (credential.length != SECRET_LENGTH)
-                throw CredentialsException("secret",name, SECRET_LENGTH)
+                throw CredentialsException("secret", name, SECRET_LENGTH)
             else secret = credential
-        } else if (passphrase.isBlank()) {
-            if (credential.length != PASSPHRASE_LENGTH)
-                throw CredentialsException("passphrase", name, PASSPHRASE_LENGTH)
-            else passphrase = credential
+
         } else throw TooManyCredentialsException(name)
 
     }
 
-    private var api : AbuApi? = null
+    private var api: AbuApi? = null
 
     @Throws(ApiNotSetException::class)
     override fun getApi(): AbuApi {
-        return if(api == null){
+        return if (api == null) {
             if (isSet().not())
                 throw ApiNotSetException(name)
             else {
@@ -129,9 +130,9 @@ object Abucoins : Exchange<AbuApi>("Abucoins", "abu", listOf("key", "secret", "p
 
     override fun printCredentials(writer: PrintWriter) {
         writer.println("abu")
+        writer.println(passphrase)
         writer.println(key)
         writer.println(secret)
-        writer.println(passphrase)
         writer.flush()
     }
 
@@ -160,11 +161,11 @@ object BitMarket : Exchange<BitmarketApi>("Bitmarket", "bm", listOf("publicKey",
 
     }
 
-    private var api : BitmarketApi? = null
+    private var api: BitmarketApi? = null
 
     @Throws(ApiNotSetException::class)
-    override fun getApi() : BitmarketApi{
-        return if(api == null){
+    override fun getApi(): BitmarketApi {
+        return if (api == null) {
             if (isSet().not())
                 throw ApiNotSetException(name)
             else {
