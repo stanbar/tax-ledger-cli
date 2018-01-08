@@ -47,24 +47,32 @@ import kotlin.reflect.KClass
 
 
 val exchanges = setOf(BitBay::class, Abucoins::class)
+
 val DEBUG = false
 
 val terminal = TerminalBuilder
         .builder()
         .jansi(true)
-        .build()
+        .build()!!
 val preferenceManager = PreferencesManager()
 
 val args = ArrayDeque<String>()
 
 private val BUNDLE_NAME = "com.stasbar.taxledger.translations.Text"
-var resourceBundle = ResourceBundle.getBundle(BUNDLE_NAME, Locale.getDefault())
+var resourceBundle = ResourceBundle.getBundle(BUNDLE_NAME, Locale.getDefault())!!
 
 
 fun getString(key: String) = resourceBundle.getString(key)
+fun selectLanguage(lang: String) {
+    when {
+        Locale.forLanguageTag(lang) != null -> resourceBundle = ResourceBundle.getBundle(BUNDLE_NAME, Locale.forLanguageTag(lang))
+        else -> throw IllegalStateException(getString(Text.UNKNOWN_LANGUAGE))
+    }
+}
 
 fun main(cliArgs: Array<String>) {
     AnsiConsole.systemInstall()
+
     ConsoleWriter.printIntro()
     val credentials = loadCredentialsStrings()
 
@@ -95,7 +103,7 @@ fun parseExchangeName(): Boolean {
     val reader = LineReaderBuilder.builder()
             .terminal(terminal)
             .completer(StringsCompleter(exchanges.map { it.objectInstance!!.name }.toList()))
-            .appName("Tax-Ledger")
+            .appName("Tax Ledger")
             .build()
 
     val prompt = getString(Text.ENTER_EXCHANGE_NAME) + " [$buffer]: "
@@ -233,8 +241,6 @@ fun parseAction() {
     line.split(" ").filter { it.isNotBlank() }.forEach { args.add(it) }
 
 }
-
-
 
 
 fun parseTransactionOptions(): TransactionsOptions {

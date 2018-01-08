@@ -26,6 +26,7 @@ package com.stasbar.taxledger.writers
 
 import com.stasbar.taxledger.Logger
 import com.stasbar.taxledger.Misc
+import com.stasbar.taxledger.Misc.donateMap
 import com.stasbar.taxledger.getString
 import com.stasbar.taxledger.models.Transaction
 import com.stasbar.taxledger.options.TransactionsOptions
@@ -36,7 +37,6 @@ import de.vandermeer.asciithemes.TA_GridThemes
 import de.vandermeer.skb.interfaces.transformers.textformat.TextAlignment
 import org.fusesource.jansi.Ansi
 import org.fusesource.jansi.AnsiConsole
-import java.util.*
 
 object ConsoleWriter : OutputWriter() {
     fun printIntro() {
@@ -119,13 +119,6 @@ object ConsoleWriter : OutputWriter() {
 
 
     fun printDonate() {
-        val donateMap = LinkedHashMap<String, Pair<Ansi.Color, String>>()
-        donateMap.put("Bitcoin", Pair(Ansi.Color.YELLOW, "3QgRku1UkFbyVyBbdLFxfxKmgFwDvT5feP"))
-        donateMap.put("Etherium", Pair(Ansi.Color.BLUE, "0x03Ba2f3907fcA09867C7A1F4f218D7B5eA052997"))
-        donateMap.put("Bitcoin Cash", Pair(Ansi.Color.YELLOW, "1LTfvN44Lmf6eqHn9B1bAnJV4rbLQKpduK"))
-        donateMap.put("Litecoin", Pair(Ansi.Color.WHITE, "M88GxayRm4YQ78KuLJ9tYuAYESrd9uPEAg"))
-        donateMap.put("Dash", Pair(Ansi.Color.BLUE, "XmnmWK2iN73X9qqcE4NMX4VTVVC2YjrCMS"))
-        donateMap.put("NEO", Pair(Ansi.Color.GREEN, "ANSHr2MMLM4YDFCpriRiE3WjnxMYcXteX3"))
         donateMap.forEach { t, u -> AnsiConsole.out.println(Ansi.ansi().fg(u.first).bgDefault().a("$t -> ${u.second}").reset()) }
     }
 

@@ -85,7 +85,7 @@ object BitBay : Exchange<BitBayApi>("BitBay", "bb", listOf("publicKey", "private
 object Abucoins : Exchange<AbuApi>("Abucoins", "abu", listOf("passphrase", "key", "secret"), Ansi.Color.GREEN) {
     private const val KEY_LENGTH = 41
     private const val SECRET_LENGTH = 64
-    private const val PASSPHRASE_LENGTH = 9
+    private const val PASSPHRASE_LENGTH = 8
 
     var passphrase: String = ""
     var key: String = ""
@@ -95,7 +95,7 @@ object Abucoins : Exchange<AbuApi>("Abucoins", "abu", listOf("passphrase", "key"
     @Throws(CredentialsException::class, TooManyCredentialsException::class)
     override fun addCredential(credential: String) {
         if (passphrase.isBlank()) {
-            if (credential.length != PASSPHRASE_LENGTH)
+            if (credential.length < PASSPHRASE_LENGTH)
                 throw CredentialsException("passphrase", name, PASSPHRASE_LENGTH)
             else passphrase = credential
         } else if (key.isBlank()) {

@@ -1,6 +1,8 @@
 ![Image](https://i.imgur.com/wBVi8X4.png)
 ### Tax Ledger
-Jest programem który pozwala na wygenerowanie księgi kosztów i przychodów z giełd kryptowalut.  
+Jest programem który pozwala na wygenerowanie zestawienia kosztów i przychodów z giełd kryptowalut.  
+
+[![TAX LEDGER DEMO](https://img.youtube.com/vi/6oPuD-Hg0KE/0.jpg)](https://www.youtube.com/watch?v=6oPuD-Hg0KE)
 
 ### Jak uruchomić
 

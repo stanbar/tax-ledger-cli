@@ -26,6 +26,7 @@ package com.stasbar.taxledger
 
 import org.fusesource.jansi.Ansi
 import org.fusesource.jansi.Ansi.ansi
+import java.util.*
 
 object Misc {
     val color1 = Ansi.Color.YELLOW
@@ -49,4 +50,20 @@ object Misc {
             .fg(color1).a("                                                                              \n").reset().toString()
 
     val gitlink = "https://taxledger.stasbar.com"
+
+    val donateMap: LinkedHashMap<String, Pair<Ansi.Color, String>> by lazy {
+        val map = LinkedHashMap<String, Pair<Ansi.Color, String>>()
+        map.put("Bitcoin", Pair(Ansi.Color.YELLOW, "3QgRku1UkFbyVyBbdLFxfxKmgFwDvT5feP"))
+        map.put("Etherium", Pair(Ansi.Color.BLUE, "0x03Ba2f3907fcA09867C7A1F4f218D7B5eA052997"))
+        map.put("Bitcoin Cash", Pair(Ansi.Color.YELLOW, "1LTfvN44Lmf6eqHn9B1bAnJV4rbLQKpduK"))
+        map.put("Litecoin", Pair(Ansi.Color.WHITE, "M88GxayRm4YQ78KuLJ9tYuAYESrd9uPEAg"))
+        map.put("Dash", Pair(Ansi.Color.BLUE, "XmnmWK2iN73X9qqcE4NMX4VTVVC2YjrCMS"))
+        map.put("NEO", Pair(Ansi.Color.GREEN, "ANSHr2MMLM4YDFCpriRiE3WjnxMYcXteX3"))
+        map.put("IOTA", Pair(Ansi.Color.WHITE, "GINAXBSANTACUZMDBYXSWVGKFCMJTUQPSJLYS9K9AAP9S9QCGPJAKCCZHSHV9RXWUMNMGMZNPFLHRLWHCFYTBDEJ99"))
+        map
+    }
+
+
+
+
 }
