@@ -2,7 +2,7 @@
 ### Tax Ledger
 Jest programem który pozwala na wygenerowanie zestawienia kosztów i przychodów z giełd kryptowalut.  
 
-[![TAX LEDGER DEMO](https://img.youtube.com/vi/6oPuD-Hg0KE/0.jpg)](https://www.youtube.com/watch?v=6oPuD-Hg0KE)
+[![TAX LEDGER DEMO](https://img.youtube.com/vi/9FUEPTlwf4w/0.jpg)](https://www.youtube.com/watch?v=9FUEPTlwf4w)
 
 ### Jak uruchomić
 
@@ -52,8 +52,8 @@ W celu zbudowania wykonywalnego pliku .jar przejdź do folderu projektu i wykona
 wykonywalny plik .jar zawierający wszystkie zależności, zostanie wygenerowany do folderu /build/libs/  
 
 ### Licencje
-```
 
+```
 Copyright 2017 Stanislaw stasbar Baranski
 
 Licensed under the Apache License, Version 2.0 (the "License");
