@@ -12,7 +12,7 @@ Jest programem który pozwala na wygenerowanie zestawienia kosztów i przychodó
 4. Włącz program poleceniem
 
 ```sh
-$ java -jar tax-ledger-v1.0.1.jar 
+$ java -jar tax-ledger-v1.0.3.jar 
 ```   
 
 #### Dodawanie giełdy
@@ -36,6 +36,7 @@ Podstawowa komenda `transakcje` łączy się z każdą skonfigurowaną giełdą 
  - `-onlyBitbay` wyświetla wyniki tylko dla BitBay analogicznie `-onlyAbu` dla Abucoins
  - `-showNonFiat` wyświetla również operacje crypto-crypto. Domyślnie wyłączone ponieważ do celów podatkowych jest to zbędna informacja.
  - `-showNonEssential` wyświetla również wpłaty i wypłaty PLNów na konto giełdowe. Domyślnie wyłączone ponieważ do celów podatkowych jest to zbędna informacja.
+ - `-all` wyświetla wszystkie transakcje 
   
 ### Informacje
 - Program jest w pełni* przetłumaczony na język Polski. 

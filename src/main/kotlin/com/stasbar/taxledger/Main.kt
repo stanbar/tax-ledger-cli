@@ -254,8 +254,18 @@ fun parseTransactionOptions(): TransactionsOptions {
             continue
 
         when (argument.toLowerCase()) {
-            "-showNonFiat".toLowerCase() -> option.showNonFiat = true
-            "-showNonEssential".toLowerCase() -> option.showNonEssential = true
+            "-showNonFiat".toLowerCase()
+                , "-showNoneFiat".toLowerCase()
+                , "-showNoFiat".toLowerCase() -> option.showNonFiat = true
+
+            "-showNonEssential".toLowerCase()
+                , "-showNoneEssential".toLowerCase()
+                , "-showNoEssential".toLowerCase() -> option.showNonEssential = true
+
+            "-all" -> {
+                option.showNonEssential = true
+                option.showNonFiat = true
+            }
             "-reverse".toLowerCase() -> option.reverse = true
             "-bitbayOnly".toLowerCase(), "-bbOnly".toLowerCase()
                 , "-onlyBitbay".toLowerCase(), "-onlybb".toLowerCase() -> option.oneExchangeOnly = BitBay::class.objectInstance!!
