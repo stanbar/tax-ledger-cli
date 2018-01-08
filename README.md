@@ -46,9 +46,12 @@ Podstawowa komenda `transakcje` łączy się z każdą skonfigurowaną giełdą 
 - Program jest w pełni argumentowalny np. `java -jar tax-ledger.jar transactions -lastMonth -onlyBitbay exit`) przetworzy transakcje z poprzedniego miesiąca, z giełdy bitbay i zakończy działanie
 
 
- 
+## Budowanie ze źródła
+W celu zbudowania wykonywalnego pliku .jar przejdź do folderu projektu i wykonaj polecenie
+`./gradlew shadowJar`
+wykonywalny plik .jar zawierający wszystkie zależności, zostanie wygenerowany do folderu /build/libs/  
 
-### License
+### Licencje
 ```
 
 Copyright 2017 Stanislaw stasbar Baranski
