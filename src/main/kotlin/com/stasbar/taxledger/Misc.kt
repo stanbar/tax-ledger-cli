@@ -59,6 +59,7 @@ object Misc {
         map.put("Litecoin", Pair(Ansi.Color.WHITE, "M88GxayRm4YQ78KuLJ9tYuAYESrd9uPEAg"))
         map.put("Dash", Pair(Ansi.Color.BLUE, "XmnmWK2iN73X9qqcE4NMX4VTVVC2YjrCMS"))
         map.put("NEO", Pair(Ansi.Color.GREEN, "ANSHr2MMLM4YDFCpriRiE3WjnxMYcXteX3"))
+        map.put("Lisk", Pair(Ansi.Color.BLUE, "7610839096466012755L"))
         map.put("IOTA", Pair(Ansi.Color.WHITE, "GINAXBSANTACUZMDBYXSWVGKFCMJTUQPSJLYS9K9AAP9S9QCGPJAKCCZHSHV9RXWUMNMGMZNPFLHRLWHCFYTBDEJ99"))
         map
     }
