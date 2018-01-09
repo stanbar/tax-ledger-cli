@@ -32,7 +32,6 @@ import com.stasbar.taxledger.exchanges.bitmarket.requests.TransactionsRequest
 import com.stasbar.taxledger.models.Transaction
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
-import org.fusesource.jansi.AnsiConsole
 import retrofit2.Call
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -72,13 +71,11 @@ class BitmarketApi(private val publicKey: String, private val privateKey: String
         retrofit.create(BitmarketService::class.java)
     }
 
-    override fun transactions(): List<Transaction> {
+    override fun transactions(): List<Transaction>? {
         val request = TransactionsRequest()
-        val transactionRequest = service.value.transactions(request.toMap())
-        val response = transactionRequest.execute()
-        AnsiConsole.out.println(response.raw())
-        AnsiConsole.out.println(response.body().toString())
-        return response.body()!!.results.map { it.toTransaction() }
+        //TODO Fix it, it's just mockup
+        return service.value.transactions(request.toMap()).execute().body()?.results?.map { it.toTransaction() }
+
     }
 
 

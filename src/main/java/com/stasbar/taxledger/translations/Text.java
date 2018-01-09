@@ -57,6 +57,8 @@ public class Text extends ListResourceBundle {
     public static final String LOAD_COMPLETE = "load_complete";
     @NotNull
     public static final String NO_OPERATIONS = "no_transactions";
+    @NotNull
+    public static final String AFFILIATE_INCOME = "affiliate_income";
 
 
     public static class Summary {
@@ -139,6 +141,7 @@ public class Text extends ListResourceBundle {
             {WITHDRAW, "Withdraw"},
             {DEPOSIT, "Deposit"},
             {UNKNOWN, "Unknown"},
+            {AFFILIATE_INCOME, "Affiliate Income"},
             {TOO_MANY_ARGS, "Too many credential for "},
             {CREDENTIALS, "You provided invalid %s for %s, it should be %d length long"},
             {API_NOT_SET, "Not enough credentials to connect to %s API"},

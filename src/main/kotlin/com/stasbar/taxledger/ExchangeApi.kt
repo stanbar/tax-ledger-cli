@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Stanislaw stasbar Baranski
+ * Copyright (c) 2018 Stanislaw stasbar Baranski
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import com.stasbar.taxledger.models.Transaction
 
 
 interface ExchangeApi{
-    fun transactions(): List<Transaction>
+    fun transactions(): List<Transaction>?
 }
 
 

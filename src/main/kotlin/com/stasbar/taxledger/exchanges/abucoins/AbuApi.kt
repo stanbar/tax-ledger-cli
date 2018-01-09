@@ -77,14 +77,14 @@ interface AbuService {
 
     /**
      * Get a list of recent fills.
-     * @param trade_id	identifier of the last trade
-     * @param product_id	product identifier
-     * @param price	trade price
+     * @param trade_id    identifier of the last trade
+     * @param product_id    product identifier
+     * @param price    trade price
      * @param size:	trade size
-     * @param order_id	Identifier of order
-     * @param created_at	time in UTC
-     * @param liquidity	indicates if the fill was the result of a liquidity provider or liquidity taker. M indicates Maker and T indicates Taker.
-     * @param side	user side(buy or sell)
+     * @param order_id    Identifier of order
+     * @param created_at    time in UTC
+     * @param liquidity    indicates if the fill was the result of a liquidity provider or liquidity taker. M indicates Maker and T indicates Taker.
+     * @param side    user side(buy or sell)
      */
     @GET("/fills")
     fun fills(): Call<List<Fill>>
@@ -123,11 +123,18 @@ class AbuApi(private val accessKey: String, private val secretKey: String, priva
         retrofit.create(AbuService::class.java)
     }
 
-    override fun transactions(): List<Transaction> {
+    @Throws(IllegalStateException::class)
+    override fun transactions(): List<Transaction>? {
         val response = service.value.fills().execute()
-        return response.body()
-                ?.map { it.toTransaction() }
-                ?.toList() ?: ArrayList()
+        return if (response.isSuccessful)
+            response.body()?.map { it.toTransaction() } ?: ArrayList()
+        else {
+            println("Unsuccessfully fetched transactions error code: ${response.code()} body: ${response.errorBody()} ")
+            null
+        }
+
+
     }
+
 
 }

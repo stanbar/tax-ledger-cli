@@ -49,7 +49,7 @@ object CsvWriter : OutputWriter() {
 
                 val filteredTransactions = transactions
                         .filter { options.showNonFiat || it.isFiatTransaction() }
-                        .filter { options.showNonEssential || it.operationType in ConsoleWriter.essentialOperation }
+                        .filter { options.showNonEssential || it.operationType in essentialOperation }
 
                 if (filteredTransactions.isEmpty()) {
                     Logger.err(getString(Text.NO_OPERATIONS))

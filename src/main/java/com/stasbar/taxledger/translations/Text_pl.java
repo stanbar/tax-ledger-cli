@@ -70,6 +70,7 @@ public class Text_pl extends ListResourceBundle {
                 {WITHDRAW, "Wypłata"},
                 {DEPOSIT, "Wpłata"},
                 {UNKNOWN, "Nieznane"},
+                {AFFILIATE_INCOME, "Afiliacje"},
                 {TOO_MANY_ARGS, "Za dużo kodów dla "},
                 {CREDENTIALS, "Podałeś niepoprawny %s dla %s, klucz powinien mieć %d znaków"},
                 {API_NOT_SET, "Nie wystarczająca ilość kodów uwierzytelniających aby połączyć się z API %s"},

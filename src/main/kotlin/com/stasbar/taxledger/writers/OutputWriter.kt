@@ -31,7 +31,8 @@ import com.stasbar.taxledger.translations.Text
 import java.math.BigDecimal
 
 abstract class OutputWriter {
-    val essentialOperation = arrayOf(OperationType.BUY, OperationType.SELL, OperationType.FEE)
+    val essentialOperation = arrayOf(OperationType.BUY, OperationType.SELL, OperationType.FEE
+            , OperationType.AFFILIATE_INCOME)
     val headRow = listOf(getString(Text.EXCHANGE),
             getString(Text.TYPE),
             getString(Text.DATE),

@@ -93,11 +93,17 @@ class BitBayApi(private val publicKey: String, private val privateKey: String) :
         retrofit.create(PrivateService::class.java)
     }
 
-    override fun transactions(): List<Transaction> {
+    override fun transactions(): List<Transaction>? {
         val request = HistoryRequest(limit = "1000000", currency = "PLN")
-        val transactionRequest = service.value.history(request.toMap())
-        val response = transactionRequest.execute()
-        return response.body()?.map { it.toTransaction() } ?: ArrayList()
+        val response = service.value.history(request.toMap()).execute()
+        return if (response.isSuccessful)
+            response.body()?.map { it.toTransaction() } ?: ArrayList()
+        else {
+            println("Unsuccessfully fetched transactions error code: ${response.code()} body: ${response.errorBody()} ")
+            null
+        }
+
+
     }
 
 

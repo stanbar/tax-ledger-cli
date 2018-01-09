@@ -23,7 +23,7 @@
  */
 
 group 'com.stasbar'
-version '1.0.3'
+version '1.0.4'
 
 buildscript {
     ext.kotlin_version = '1.2.10'
@@ -43,6 +43,7 @@ apply plugin: 'com.github.johnrengelman.shadow'
 
 repositories {
     mavenCentral()
+    jcenter()
 }
 
 jar{
@@ -59,10 +60,12 @@ dependencies {
     compile 'com.squareup.retrofit2:converter-gson:2.3.0'
     compile 'com.google.code.gson:gson:2.8.2'
     compile 'com.squareup.okhttp3:logging-interceptor:3.6.0'
-    compile "io.reactivex.rxjava2:rxjava:2.1.7"
     compile "org.jline:jline:3.5.1"
     compile "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
     compile 'de.vandermeer:asciitable:0.3.2'
+    compile "io.reactivex.rxjava2:rxjava:2.1.7"
+    compile 'com.squareup.retrofit2:adapter-rxjava2:2.3.0'
+
 }
 
 compileKotlin {

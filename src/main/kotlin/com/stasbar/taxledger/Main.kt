@@ -45,36 +45,40 @@ import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.reflect.KClass
 
-
-val exchanges = setOf(BitBay::class, Abucoins::class)
-
-val DEBUG = false
-
+/**
+ * Abstraction for both UNIX terminal and Windows Console
+ */
 val terminal = TerminalBuilder
         .builder()
         .jansi(true)
         .build()!!
+
+/**
+ * In debug mode logs are printed onto console
+ */
+val DEBUG = false
+
+/**
+ * Credentials file manager
+ */
 val preferenceManager = PreferencesManager()
 
+/**
+ * Set of all available exchanges.
+ * We can threat this set of KClasses as set of kotlin objects (Singletons) with .objectInstance reflection method
+ */
+val exchanges = setOf(BitBay::class, Abucoins::class)
+
+/**
+ * Argument deque on which whole CLI is working on
+ */
 val args = ArrayDeque<String>()
-
-private val BUNDLE_NAME = "com.stasbar.taxledger.translations.Text"
-var resourceBundle = ResourceBundle.getBundle(BUNDLE_NAME, Locale.getDefault())!!
-
-
-fun getString(key: String) = resourceBundle.getString(key)
-fun selectLanguage(lang: String) {
-    when {
-        Locale.forLanguageTag(lang) != null -> resourceBundle = ResourceBundle.getBundle(BUNDLE_NAME, Locale.forLanguageTag(lang))
-        else -> throw IllegalStateException(getString(Text.UNKNOWN_LANGUAGE))
-    }
-}
 
 fun main(cliArgs: Array<String>) {
     AnsiConsole.systemInstall()
 
     ConsoleWriter.printIntro()
-    val credentials = loadCredentialsStrings()
+    val credentials = preferenceManager.load()
 
     args.addAll(credentials)
     args.addAll(cliArgs)
@@ -91,9 +95,6 @@ fun main(cliArgs: Array<String>) {
         }
     }
 }
-
-
-fun loadCredentialsStrings() = preferenceManager.load()
 
 
 fun parseExchangeName(): Boolean {
@@ -361,42 +362,7 @@ fun performActions(action: String): Boolean {
 
     when (action.toUpperCase()) {
         getString(Action.TRANSACTIONS.title).toUpperCase(), Action.TRANSACTIONS.name -> {
-            val options = parseTransactionOptions()
-
-            val transactions = ArrayList<Transaction>()
-            val apis = exchanges
-                    .map { it.objectInstance!! }
-                    .filter {
-                        //if one exchange is not specified then pass all exchanges
-                        if (options.oneExchangeOnly == null) true
-                        else it == options.oneExchangeOnly
-                    }
-
-            apis.parallelStream().forEach {
-                try {
-                    val newTransactions = it.getApi()
-                            .transactions()
-                            .filter { options.dateRange.isInRange(it) }
-                    transactions.addAll(newTransactions)
-                } catch (e: ApiNotSetException) {
-                    /* skip not set exchanges */
-                }
-            }
-            if (transactions.isEmpty()) {
-                Logger.err(getString(Text.NO_OPERATIONS))
-                return true
-            }
-
-            val comparator: Comparator<Transaction> = if (options.reverse)
-                kotlin.Comparator { o1, o2 -> o1.time.compareTo(o2.time) }
-            else kotlin.Comparator { o1, o2 -> o2.time.compareTo(o1.time) }
-
-            transactions.sortWith(comparator)
-
-            ConsoleWriter.printTransactions(transactions, options)
-            ConsoleWriter.printSummary(transactions)
-            Logger.info(getString(Text.LOAD_COMPLETE).format(transactions.size))
-            CsvWriter.saveToFile(transactions, options)
+            performTransactionsAction()
         }
         getString(Action.CONTACT.title).toUpperCase(), Action.CONTACT.name -> {
             AnsiConsole.out.println(Misc.contact)
@@ -415,6 +381,56 @@ fun performActions(action: String): Boolean {
         else -> return false
     }
 
+    return true
+}
+
+fun performTransactionsAction(): Boolean {
+    val options = parseTransactionOptions()
+
+    val transactions = ArrayList<Transaction>()
+    val apis = exchanges
+            .map { it.objectInstance!! }
+            .filter {
+                //if one exchange is not specified then pass all exchanges
+                if (options.oneExchangeOnly == null) true
+                else it == options.oneExchangeOnly
+            }
+
+    apis.parallelStream().forEach {
+        try {
+
+            val newTransactions = try {
+                it.getApi().transactions()
+            } catch (e: IllegalStateException) {
+                println("Reconnecting to ${it.name}")
+                try {
+                    it.getApi().transactions()
+                } catch (e: IllegalStateException) {
+                    Logger.err("Failed $e")
+                    null
+                }
+            }
+            if (newTransactions != null)
+                transactions.addAll(newTransactions.filter { options.dateRange.isInRange(it) })
+        } catch (e: ApiNotSetException) {
+            /* skip not set exchanges */
+        }
+    }
+    if (transactions.isEmpty()) {
+        Logger.err(getString(Text.NO_OPERATIONS))
+        return true
+    }
+
+    val comparator: Comparator<Transaction> = if (options.reverse)
+        kotlin.Comparator { o1, o2 -> o1.time.compareTo(o2.time) }
+    else kotlin.Comparator { o1, o2 -> o2.time.compareTo(o1.time) }
+
+    transactions.sortWith(comparator)
+
+    ConsoleWriter.printTransactions(transactions, options)
+    ConsoleWriter.printSummary(transactions)
+    Logger.info(getString(Text.LOAD_COMPLETE).format(transactions.size))
+    CsvWriter.saveToFile(transactions, options)
     return true
 }
 

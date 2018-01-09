@@ -25,17 +25,23 @@
 package com.stasbar.taxledger
 
 import com.stasbar.taxledger.translations.Text
+import java.util.*
 
-enum class OperationType(val key : String) {
-    BUY(Text.BUY),
-    SELL(Text.SELL),
-    FEE(Text.FEE),
-    DEPOSIT(Text.DEPOSIT),
-    WITHDRAW(Text.WITHDRAW),
-    AFFILIATE_INCOME(Text.AFFILIATE_INCOME);
 
-    override fun toString(): String {
-        return getString(key)
+private val BUNDLE_NAME = "com.stasbar.taxledger.translations.Text"
+var resourceBundle = ResourceBundle.getBundle(BUNDLE_NAME, Locale.getDefault())!!
+
+/**
+ * Get language specific string
+ */
+fun getString(key: String) = resourceBundle.getString(key)
+
+/**
+ * Change app language
+ */
+fun selectLanguage(lang: String) {
+    when {
+        Locale.forLanguageTag(lang) != null -> resourceBundle = ResourceBundle.getBundle(BUNDLE_NAME, Locale.forLanguageTag(lang))
+        else -> throw IllegalStateException(getString(Text.UNKNOWN_LANGUAGE))
     }
-
 }

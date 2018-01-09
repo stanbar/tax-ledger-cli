@@ -4,6 +4,7 @@ Jest programem który pozwala na wygenerowanie zestawienia kosztów i przychodó
 
 [![TAX LEDGER DEMO](https://img.youtube.com/vi/9FUEPTlwf4w/0.jpg)](https://www.youtube.com/watch?v=9FUEPTlwf4w)
 
+
 ### Jak uruchomić
 
 1. Pobierz najnowszą wersję programu (tax-ledger.jar) [Pobierz](https://github.com/stasbar/tax-ledger/releases)
@@ -45,6 +46,10 @@ Podstawowa komenda `transakcje` łączy się z każdą skonfigurowaną giełdą 
 - Każda komenda jest automatycznie uzupełniana przez klawisz Tab (np. tra -> TAB -> transakcje)
 - Program jest w pełni argumentowalny np. `java -jar tax-ledger.jar transactions -lastMonth -onlyBitbay exit`) przetworzy transakcje z poprzedniego miesiąca, z giełdy bitbay i zakończy działanie
 
+### Do zrobienia
+- Przywracanie starych transakcji z BitBay 1.0 z pliku .csv 
+- Stworzenie GUI
+- Automatyczne generowanie porfolio(zysk/strata) na podstawie histori transakcji z giełd
 
 ## Budowanie ze źródła
 W celu zbudowania wykonywalnego pliku .jar przejdź do folderu projektu i wykonaj polecenie

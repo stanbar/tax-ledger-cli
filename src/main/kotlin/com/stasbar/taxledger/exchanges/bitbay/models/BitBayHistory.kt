@@ -44,7 +44,8 @@ data class BitBayHistory(val amount: BigDecimal,
         "-pay_for_currency" -> OperationType.BUY
         "+income" -> OperationType.DEPOSIT
         "-withdraw" -> OperationType.WITHDRAW
-        else -> OperationType.UNKNOWN
+        "affiliate_income" -> OperationType.AFFILIATE_INCOME
+        else -> throw IllegalStateException("BitBay operation type $operation_type is not supported")
 
     }
 
@@ -56,7 +57,7 @@ data class BitBayHistory(val amount: BigDecimal,
             OperationType.FEE -> toBuyTransaction()
             OperationType.WITHDRAW -> toBuyTransaction()
             OperationType.DEPOSIT -> toSellTransaction()
-            else -> throw IllegalStateException("Unknown history type")
+            OperationType.AFFILIATE_INCOME -> toSellTransaction()
         }
     }
 
