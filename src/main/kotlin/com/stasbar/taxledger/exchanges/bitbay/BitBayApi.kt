@@ -94,7 +94,7 @@ class BitBayApi(private val publicKey: String, private val privateKey: String) :
     }
 
     override fun transactions(): List<Transaction>? {
-        val request = HistoryRequest(limit = "1000000", currency = "PLN")
+        val request = HistoryRequest(limit = "10000000", currency = "PLN")
         val response = service.value.history(request.toMap()).execute()
         return if (response.isSuccessful)
             response.body()?.map { it.toTransaction() } ?: ArrayList()

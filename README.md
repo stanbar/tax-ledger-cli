@@ -7,9 +7,12 @@ Jest programem który pozwala na wygenerowanie zestawienia kosztów i przychodó
 
 ### Jak uruchomić
 
+##### Windows
+1. Pobierz i uruchom najnowszą wersję programu (tax-ledger.exe)[Pobierz](https://github.com/stasbar/tax-ledger/releases)
+##### macOS i Linux
 1. Pobierz najnowszą wersję programu (tax-ledger.jar) [Pobierz](https://github.com/stasbar/tax-ledger/releases)
 2. Upewnij się, że masz zainstalowaną Javę [Pobierz](https://www.java.com/pl/download/)
-3. Otwórz konsolę/terminal [Windows - cmd.exe][macOS - Terminal.app] w miejsu pobranego pliku 
+3. Otwórz terminal [macOS - Terminal.app] w miejsu pobranego pliku 
 4. Włącz program poleceniem
 
 ```sh
