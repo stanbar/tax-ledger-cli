@@ -30,6 +30,7 @@ import com.stasbar.taxledger.exceptions.TooManyCredentialsException
 import com.stasbar.taxledger.exchanges.abucoins.AbuApi
 import com.stasbar.taxledger.exchanges.bitbay.BitBayApi
 import com.stasbar.taxledger.exchanges.bitmarket.BitmarketApi
+import com.stasbar.taxledger.exchanges.coinroom.CoinroomApi
 import org.fusesource.jansi.Ansi
 import java.io.PrintWriter
 
@@ -180,6 +181,55 @@ object BitMarket : Exchange<BitmarketApi>("Bitmarket", "bm", listOf("publicKey",
 
     override fun printCredentials(writer: PrintWriter) {
         writer.println("bitmarket")
+        writer.println(publicKey)
+        writer.println(privateKey)
+        writer.flush()
+    }
+
+}
+
+object Coinroom : Exchange<CoinroomApi>("Coinroom", "cr", listOf("publicKey", "privateKey"), Ansi.Color.YELLOW) {
+
+
+    private const val PUBLIC_KEY_LENGTH = 36
+    private const val PRIVATE_KEY_LENGTH = 36
+
+    var publicKey: String = ""
+    var privateKey: String = ""
+
+    @Throws(CredentialsException::class, TooManyCredentialsException::class)
+    override fun addCredential(credential: String) {
+        if (publicKey.isBlank()) {
+            if (credential.length != PUBLIC_KEY_LENGTH)
+                throw CredentialsException("publicKey", name, PUBLIC_KEY_LENGTH)
+            else publicKey = credential
+        } else if (privateKey.isBlank()) {
+            if (credential.length != PRIVATE_KEY_LENGTH)
+                throw CredentialsException("privateKey", name, PRIVATE_KEY_LENGTH)
+            else privateKey = credential
+        } else throw TooManyCredentialsException(name)
+
+    }
+
+    private var api: CoinroomApi? = null
+
+    @Throws(ApiNotSetException::class)
+    override fun getApi(): CoinroomApi {
+        return if (api == null) {
+            if (isSet().not())
+                throw ApiNotSetException(name)
+            else {
+                api = CoinroomApi(publicKey, privateKey)
+                api!!
+            }
+
+        } else api!!
+    }
+
+    override fun isSet() = publicKey.isNotBlank() && privateKey.isNotBlank()
+
+    override fun printCredentials(writer: PrintWriter) {
+        writer.println("coinroom")
         writer.println(publicKey)
         writer.println(privateKey)
         writer.flush()

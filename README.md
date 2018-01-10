@@ -8,22 +8,28 @@ Jest programem który pozwala na wygenerowanie zestawienia kosztów i przychodó
 ### Jak uruchomić
 
 ##### Windows
-1. Pobierz i uruchom najnowszą wersję programu (tax-ledger.exe)[Pobierz](https://github.com/stasbar/tax-ledger/releases)
-##### macOS i Linux
-1. Pobierz najnowszą wersję programu (tax-ledger.jar) [Pobierz](https://github.com/stasbar/tax-ledger/releases)
-2. Upewnij się, że masz zainstalowaną Javę [Pobierz](https://www.java.com/pl/download/)
+1. Upewnij się, że masz zainstalowaną Javę [Pobierz](https://www.java.com/pl/download/)
+2. Pobierz i uruchom najnowszą wersję programu (tax-ledger.exe)[Pobierz](https://github.com/stasbar/tax-ledger/releases)
+##### macOS
+###### metoda 1 Polecana
+1. Upewnij się, że masz zainstalowaną Javę [Pobierz](https://www.java.com/pl/download/)
+2. Pobierz i zamontuj obraz (tax-ledger-macOS.dmg) [Pobierz](https://github.com/stasbar/tax-ledger/releases)
+3. Przeciągnij aplikację (Tax Ledger.app) na skrót folderu Applocations 
+###### metoda 2 i Linux
+1. Upewnij się, że masz zainstalowaną Javę [Pobierz](https://www.java.com/pl/download/)
+2. Pobierz plik (tax-ledger.jar) [Pobierz](https://github.com/stasbar/tax-ledger/releases)
 3. Otwórz terminal [macOS - Terminal.app] w miejsu pobranego pliku 
 4. Włącz program poleceniem
 
 ```sh
-$ java -jar tax-ledger-v1.0.3.jar 
+$ java -jar tax-ledger.jar 
 ```   
 
 #### Dodawanie giełdy
 1. Pierwsze uruchomienie poprosi cię o skonfigurowanie pierwszej giełdy
 2. Klucze API wygenerujesz w ustawieniach konta. Program wymaga jedynie pozwolenia do odczytu histori transakcji.
 3. Aby dodać kolejne giełdy 
-- wybierz akcję `giełdy` a następnie skonfiguruj kolejną giełdę
+- wybierz akcję `gieldy` a następnie skonfiguruj kolejną giełdę
 - dodaj po koleji nazwę giełdy a następnie klucze do pliku credentials.txt (Zostanie utworzony po dodaniu pierwszej giełdy)
 
 ### Transactions / Transakcje
@@ -50,7 +56,7 @@ Podstawowa komenda `transakcje` łączy się z każdą skonfigurowaną giełdą 
 - Program jest w pełni argumentowalny np. `java -jar tax-ledger.jar transactions -lastMonth -onlyBitbay exit`) przetworzy transakcje z poprzedniego miesiąca, z giełdy bitbay i zakończy działanie
 
 ### Do zrobienia
-- Przywracanie starych transakcji z BitBay 1.0 z pliku .csv 
+- Przywracanie starych transakcji z BitBay 2.0 z pliku .csv 
 - Stworzenie GUI
 - Automatyczne generowanie porfolio(zysk/strata) na podstawie histori transakcji z giełd
 

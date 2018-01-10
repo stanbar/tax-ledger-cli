@@ -76,8 +76,8 @@ val args = ArrayDeque<String>()
 
 fun main(cliArgs: Array<String>) {
     AnsiConsole.systemInstall()
-
     ConsoleWriter.printIntro()
+
     val credentials = preferenceManager.load()
 
     args.addAll(credentials)
@@ -251,7 +251,7 @@ fun parseTransactionOptions(): TransactionsOptions {
         option.fileName.append(argument)
 
 
-        if (isLikelyToBeDateFormat(argument) && tryToParseDateRange(option, argument))
+        if (tryToParseDateRange(option, argument))
             continue
 
         when (argument.toLowerCase()) {
@@ -284,7 +284,7 @@ fun isLikelyToBeDateFormat(candidate: String) = candidate.matches(Regex("-([0-9]
         || candidate.matches(Regex("-([0-9]{4})"))
 
 fun tryToParseDateRange(options: TransactionsOptions, argument: String): Boolean {
-    var success = tryToParseExplicitDate(options, argument)
+    var success = isLikelyToBeDateFormat(argument) && tryToParseExplicitDate(options, argument)
     if (!success)
         success = tryToParseImplicitDate(options, argument)
     return success

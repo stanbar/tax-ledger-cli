@@ -29,6 +29,7 @@ import org.fusesource.jansi.Ansi.ansi
 import java.util.*
 
 object Misc {
+
     val color1 = Ansi.Color.YELLOW
     val color2 = Ansi.Color.BLUE
     val contact = ansi().a("\n")
@@ -40,6 +41,9 @@ object Misc {
             .fgBright(color2).a("           taxledger").fg(color1).a("@stasbar.com                \n").reset().toString()
 
 
+    val gitlink = "https://taxledger.stasbar.com"
+    val version = Misc::class.java.`package`.implementationVersion
+
     val taxledger = ansi().fg(color1).a("                                                                              \n")
             .fg(color1).a("████████╗ █████╗ ██╗  ██╗  ").fgBright(color2).a("  ██╗     ███████╗██████╗  ██████╗ ███████╗██████╗ \n")
             .fg(color1).a("╚══██╔══╝██╔══██╗╚██╗██╔╝  ").fgBright(color2).a("  ██║     ██╔════╝██╔══██╗██╔════╝ ██╔════╝██╔══██╗\n")
@@ -47,9 +51,8 @@ object Misc {
             .fg(color1).a("   ██║   ██╔══██║ ██╔██╗   ").fgBright(color2).a("  ██║     ██╔══╝  ██║  ██║██║   ██║██╔══╝  ██╔══██╗\n")
             .fg(color1).a("   ██║   ██║  ██║██╔╝ ██╗  ").fgBright(color2).a("  ███████╗███████╗██████╔╝╚██████╔╝███████╗██║  ██║\n")
             .fg(color1).a("   ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═╝  ").fgBright(color2).a("  ╚══════╝╚══════╝╚═════╝  ╚═════╝ ╚══════╝╚═╝  ╚═╝\n")
-            .fg(color1).a("                                                                              \n").reset().toString()
+            .fgBright(color2).a("          v$version").fg(color1).a("                        $gitlink \n").reset().toString()
 
-    val gitlink = "https://taxledger.stasbar.com"
 
     val donateMap: LinkedHashMap<String, Pair<Ansi.Color, String>> by lazy {
         val map = LinkedHashMap<String, Pair<Ansi.Color, String>>()
@@ -63,8 +66,6 @@ object Misc {
         map.put("IOTA", Pair(Ansi.Color.WHITE, "GINAXBSANTACUZMDBYXSWVGKFCMJTUQPSJLYS9K9AAP9S9QCGPJAKCCZHSHV9RXWUMNMGMZNPFLHRLWHCFYTBDEJ99"))
         map
     }
-
-
 
 
 }

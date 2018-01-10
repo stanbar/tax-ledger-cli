@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Stanislaw stasbar Baranski
+ * Copyright (c) 2018 Stanislaw stasbar Baranski
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ open class AbuHeaderInterceptor(private val accessKey: String, private val passp
 
     override fun intercept(chain: Interceptor.Chain): Response {
         val request = chain.request()
+
         val timestampInSeconds = System.currentTimeMillis() / 1000
         val message = buildMessage(chain.request(), timestampInSeconds)
         val newRequest = request.newBuilder()

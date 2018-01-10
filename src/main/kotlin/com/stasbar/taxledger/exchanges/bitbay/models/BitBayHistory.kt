@@ -44,8 +44,12 @@ data class BitBayHistory(val amount: BigDecimal,
         "-pay_for_currency" -> OperationType.BUY
         "+income" -> OperationType.DEPOSIT
         "-withdraw" -> OperationType.WITHDRAW
+        "+withdraw" -> OperationType.DEPOSIT //TODO potentially bug
         "affiliate_income" -> OperationType.AFFILIATE_INCOME
-        else -> throw IllegalStateException("BitBay operation type $operation_type is not supported")
+        else -> throw IllegalStateException("BitBay operation type $operation_type is not supported \n" +
+                "amount: $amount \n" +
+                "currency: $currency \n" +
+                "comment: $comment")
 
     }
 
