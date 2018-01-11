@@ -58,6 +58,7 @@ Podstawowa komenda `transakcje` łączy się z każdą skonfigurowaną giełdą 
 ### Do zrobienia
 - Przywracanie starych transakcji z BitBay 2.0 z pliku .csv 
 - Stworzenie GUI
+- Podsumowanie wszystkich walut na giełdach 
 - Automatyczne generowanie porfolio(zysk/strata) na podstawie histori transakcji z giełd
 
 ## Budowanie ze źródła

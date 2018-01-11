@@ -25,6 +25,7 @@
 package com.stasbar.taxledger.writers
 
 import com.stasbar.taxledger.Logger
+import com.stasbar.taxledger.PreferencesManager
 import com.stasbar.taxledger.getString
 import com.stasbar.taxledger.models.Transaction
 import com.stasbar.taxledger.options.TransactionsOptions
@@ -40,8 +41,7 @@ object CsvWriter : OutputWriter() {
 
     fun saveToFile(transactions: Collection<Transaction>, options: TransactionsOptions) {
         try {
-            val file = File(CsvWriter.fileName(options.fileName.toString()))
-            file.parentFile.mkdirs()
+            val file = File(PreferencesManager.transactionsDir, fileName(options.fileName.toString()))
             FileWriter(file).use {
                 transactions
                         .filter { options.showNonFiat || it.isFiatTransaction() }
@@ -71,8 +71,7 @@ object CsvWriter : OutputWriter() {
 
     }
 
-    private fun fileName() = "transactions/transactions_${SimpleDateFormat("dd_MM_yyyy_hhmmss").format(Date(System.currentTimeMillis()))}.csv"
-    fun fileName(arguments: String) = "transactions/transactions${arguments}_${SimpleDateFormat("dd_MM_yyyy_hhmmss").format(Date(System.currentTimeMillis()))}.csv"
+    fun fileName(arguments: String) = "transactions${arguments}_${SimpleDateFormat("dd_MM_yyyy_hhmmss").format(Date(System.currentTimeMillis()))}.csv"
 
 
     private val DEFAULT_SEPARATOR = ','

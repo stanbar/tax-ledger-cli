@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Stanislaw stasbar Baranski
+ * Copyright (c) 2018 Stanislaw stasbar Baranski
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,17 +29,32 @@ import java.io.FileReader
 import java.io.PrintWriter
 import kotlin.reflect.KClass
 
-class PreferencesManager(val file: File = File("credentials.txt")) {
+object PreferencesManager {
+    val workingDir: File by lazy {
+        if (System.getProperty("user.dir").contains(".app/")) {
+            val taxLedgerFolder = File(System.getProperty("user.home"), "TaxLedger")
+            if (!taxLedgerFolder.exists()) taxLedgerFolder.mkdir()
+            taxLedgerFolder
+        } else
+            File(System.getProperty("user.dir"))
+    }
 
+    val transactionsDir: File by lazy {
+        val dir = File(workingDir, "transactions")
+        if (!dir.exists()) dir.mkdir()
+        dir
+
+    }
+    val credentials: File = File(workingDir, "credentials.txt")
 
     fun save(supportedExchanges: Set<KClass<out Exchange<ExchangeApi>>>) {
-        val writer = PrintWriter(file)
-        supportedExchanges.map { it.objectInstance!! }.filter{ it.isSet() }.forEach { it.printCredentials(writer) }
+        val writer = PrintWriter(credentials)
+        supportedExchanges.map { it.objectInstance!! }.filter { it.isSet() }.forEach { it.printCredentials(writer) }
     }
 
     fun load(): List<String> {
-        if (!file.exists()) file.createNewFile()
-        return FileReader(file).readLines()
+        if (!credentials.exists()) credentials.createNewFile()
+        return FileReader(credentials).readLines()
     }
 
 }

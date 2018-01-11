@@ -58,10 +58,6 @@ val terminal = TerminalBuilder
  */
 val DEBUG = false
 
-/**
- * Credentials file manager
- */
-val preferenceManager = PreferencesManager()
 
 /**
  * Set of all available exchanges.
@@ -78,7 +74,7 @@ fun main(cliArgs: Array<String>) {
     AnsiConsole.systemInstall()
     ConsoleWriter.printIntro()
 
-    val credentials = preferenceManager.load()
+    val credentials = PreferencesManager.load()
 
     args.addAll(credentials)
     args.addAll(cliArgs)
@@ -211,8 +207,8 @@ fun promptUserForCredential(exchange: Exchange<ExchangeApi>, step: String): Bool
 }
 
 fun saveCredentials(supportedExchanges: Set<KClass<out Exchange<ExchangeApi>>>) {
-    preferenceManager.save(supportedExchanges)
-    Logger.info(getString(Text.CREDENTIALS_SAVED).format(preferenceManager.file.absoluteFile))
+    PreferencesManager.save(supportedExchanges)
+    Logger.info(getString(Text.CREDENTIALS_SAVED).format(PreferencesManager.credentials.absoluteFile))
 }
 
 
