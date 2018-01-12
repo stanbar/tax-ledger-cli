@@ -22,14 +22,31 @@
  *            taxledger@stasbar.com
  */
 
-package com.stasbar.taxledger
+package com.stasbar.taxledger.models
 
-import com.stasbar.taxledger.models.Transaction
+class Credential(val name: String, val length: Int) {
+    var value: String = ""
+        set(value) {
+            if (value.trim().length != length)
+                throw IllegalStateException("")
+            else field = value
+        }
 
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
 
-interface ExchangeApi{
-    fun transactions(): List<Transaction>
+        other as Credential
+
+        if (name != other.name) return false
+        if (length != other.length) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = name.hashCode()
+        result = 31 * result + length
+        return result
+    }
 }
-
-
-

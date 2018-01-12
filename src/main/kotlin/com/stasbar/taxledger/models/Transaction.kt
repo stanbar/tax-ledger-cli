@@ -35,7 +35,7 @@ interface Transactionable {
     fun operationType(): OperationType
 }
 
-data class Transaction(val exchange: Exchange<ExchangeApi>,
+data class Transaction(val exchange: Exchange<out ExchangeApi>,
                        var id: String = "",
                        var time: Date = Date(),
                        var operationType: OperationType,

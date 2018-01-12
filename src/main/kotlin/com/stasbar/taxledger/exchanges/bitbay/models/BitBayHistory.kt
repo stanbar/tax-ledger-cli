@@ -44,7 +44,10 @@ data class BitBayHistory(val amount: BigDecimal,
         "-pay_for_currency" -> OperationType.BUY
         "+income" -> OperationType.DEPOSIT
         "-withdraw" -> OperationType.WITHDRAW
-        "+withdraw" -> OperationType.DEPOSIT //TODO potentially bug
+        "+withdraw" -> OperationType.DEPOSIT
+        "-card_payment" -> OperationType.CARD_ORDER_FEE
+        "-card_withdraw" -> OperationType.CARD_WITHDRAW
+        "-cancel_card_withdraw" -> OperationType.CANCEL_CARD_WITHDRAW
         "affiliate_income" -> OperationType.AFFILIATE_INCOME
         else -> throw IllegalStateException("BitBay operation type $operation_type is not supported \n" +
                 "amount: $amount \n" +
@@ -62,8 +65,16 @@ data class BitBayHistory(val amount: BigDecimal,
             OperationType.WITHDRAW -> toBuyTransaction()
             OperationType.DEPOSIT -> toSellTransaction()
             OperationType.AFFILIATE_INCOME -> toSellTransaction()
+            OperationType.CARD_WITHDRAW -> toBuyTransaction()
+            OperationType.CANCEL_CARD_WITHDRAW -> toSellTransaction()
+            OperationType.CARD_ORDER_FEE -> toBuyTransaction()
+            else -> throw IllegalStateException("BitBay operation type $operation_type is not supported \n" +
+                    "amount: $amount \n" +
+                    "currency: $currency \n" +
+                    "comment: $comment")
         }
     }
+
 
     private fun toBuyTransaction(): Transaction {
         return Transaction(exchange = BitBay

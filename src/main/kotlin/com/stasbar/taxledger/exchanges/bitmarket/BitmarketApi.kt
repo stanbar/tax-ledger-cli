@@ -71,10 +71,10 @@ class BitmarketApi(private val publicKey: String, private val privateKey: String
         retrofit.create(BitmarketService::class.java)
     }
 
-    override fun transactions(): List<Transaction>? {
+    override fun transactions(): List<Transaction> {
         val request = TransactionsRequest()
         //TODO Fix it, it's just mockup
-        return service.value.transactions(request.toMap()).execute().body()?.results?.map { it.toTransaction() }
+        return service.value.transactions(request.toMap()).execute().body()?.results?.map { it.toTransaction() } ?: emptyList()
 
     }
 

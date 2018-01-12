@@ -50,12 +50,14 @@ package com.stasbar.taxledger.exchanges.coinroom
 
 
 
+import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.stasbar.taxledger.Constants.DATE_FORMAT
 import com.stasbar.taxledger.DEBUG
 import com.stasbar.taxledger.ExchangeApi
 import com.stasbar.taxledger.exchanges.coinroom.models.CoinroomOrdersResponse
 import com.stasbar.taxledger.exchanges.coinroom.requests.CoinroomOrdersRequest
+import com.stasbar.taxledger.models.Credential
 import com.stasbar.taxledger.models.Transaction
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -86,7 +88,9 @@ interface PrivateService {
 
 }
 
-class CoinroomApi(private val publicKey: String, private val privateKey: String) : ExchangeApi {
+class CoinroomApi(credentials: HashSet<Credential>, private val gson: Gson) : ExchangeApi {
+    private val publicKey: String = credentials.first { it.name == "publicKey" }.value
+    private val privateKey: String = credentials.first { it.name == "privateKey" }.value
 
     private val URI = "https://coinroom.com/api/"
 
@@ -108,14 +112,14 @@ class CoinroomApi(private val publicKey: String, private val privateKey: String)
         retrofit.create(PrivateService::class.java)
     }
 
-    override fun transactions(): List<Transaction>? {
+    override fun transactions(): List<Transaction> {
         val request = CoinroomOrdersRequest()
         val response = service.value.orders(request.toMap(privateKey)).execute()
         return if (response.isSuccessful && response.body() != null && response.body()!!.result)
             response.body()?.data?.map { it.toTransaction() } ?: ArrayList()
         else {
             println("Unsuccessfully fetched transactions error code: ${response.code()} body: ${response.errorBody()} ")
-            null
+            emptyList()
         }
 
 

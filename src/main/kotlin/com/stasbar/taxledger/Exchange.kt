@@ -24,227 +24,75 @@
 
 package com.stasbar.taxledger
 
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 import com.stasbar.taxledger.exceptions.ApiNotSetException
-import com.stasbar.taxledger.exceptions.CredentialsException
 import com.stasbar.taxledger.exceptions.TooManyCredentialsException
 import com.stasbar.taxledger.exchanges.abucoins.AbuApi
 import com.stasbar.taxledger.exchanges.bitbay.BitBayApi
 import com.stasbar.taxledger.exchanges.bitmarket.BitmarketApi
 import com.stasbar.taxledger.exchanges.coinroom.CoinroomApi
+import com.stasbar.taxledger.models.Credential
 import org.fusesource.jansi.Ansi
 import java.io.PrintWriter
 
-object BitBay : Exchange<BitBayApi>("BitBay", "bb", listOf("publicKey", "privateKey"), Ansi.Color.BLUE) {
+object BitBay : Exchange<BitBayApi>(BitBayApi::class.java, "BitBay", "bb",
+        linkedSetOf(Credential("publicKey", 36), Credential("privateKey", 36)), Ansi.Color.BLUE)
+
+object Abucoins : Exchange<AbuApi>(AbuApi::class.java, "Abucoins", "abu",
+        linkedSetOf(Credential("passphrase", 9),
+                Credential("key", 41),
+                Credential("secret", 64))
+        , Ansi.Color.GREEN)
+
+object BitMarket : Exchange<BitmarketApi>(BitmarketApi::class.java, "Bitmarket", "bm",
+        linkedSetOf(Credential("publicKey", 32), Credential("privateKey", 32)), Ansi.Color.GREEN)
 
 
-    private const val PUBLIC_KEY_LENGTH = 36
-    private const val PRIVATE_KEY_LENGTH = 36
+object Coinroom : Exchange<CoinroomApi>(CoinroomApi::class.java, "Coinroom", "cr",
+        linkedSetOf(Credential("publicKey", 36), Credential("privateKey", 36)), Ansi.Color.YELLOW)
 
-    var publicKey: String = ""
-    var privateKey: String = ""
 
-    @Throws(CredentialsException::class, TooManyCredentialsException::class)
-    override fun addCredential(credential: String) {
-        if (publicKey.isBlank()) {
-            if (credential.length != PUBLIC_KEY_LENGTH)
-                throw CredentialsException("publicKey", name, PUBLIC_KEY_LENGTH)
-            else publicKey = credential
-        } else if (privateKey.isBlank()) {
-            if (credential.length != PRIVATE_KEY_LENGTH)
-                throw CredentialsException("privateKey", name, PRIVATE_KEY_LENGTH)
-            else privateKey = credential
-        } else throw TooManyCredentialsException(name)
+abstract class Exchange<ApiType : ExchangeApi>(private val klass: Class<ApiType>,
+                                               val name: String,
+                                               private val shortcut: String,
+                                               val credentials: LinkedHashSet<Credential>,
+                                               val color: Ansi.Color) {
 
+    val gson = GsonBuilder().setDateFormat(Constants.DATE_FORMAT).create()
+    var apia: ApiType? = null
+
+
+    fun addCredential(newCredential: Credential) {
+        credentials.add(newCredential)
     }
 
-    private var api: BitBayApi? = null
+
+    @Throws(TooManyCredentialsException::class)
+    fun enforceNotFull() {
+        if (credentials.none { it.value.isEmpty() })
+            throw TooManyCredentialsException(name)
+    }
 
     @Throws(ApiNotSetException::class)
-    override fun getApi(): BitBayApi {
-        return if (api == null) {
-            if (isSet().not())
+    fun getApi(): ApiType =
+            if (isNotSet())
                 throw ApiNotSetException(name)
             else {
-                api = BitBayApi(publicKey, privateKey)
-                api!!
+                klass.getConstructor(LinkedHashSet::class.java, Gson::class.java).newInstance(credentials, gson)
             }
 
-        } else api!!
-    }
 
-    override fun isSet() = publicKey.isNotBlank() && privateKey.isNotBlank()
-
-    override fun printCredentials(writer: PrintWriter) {
-        writer.println("bitbay")
-        writer.println(publicKey)
-        writer.println(privateKey)
-        writer.flush()
-    }
-
-}
-
-object Abucoins : Exchange<AbuApi>("Abucoins", "abu", listOf("passphrase", "key", "secret"), Ansi.Color.GREEN) {
-    private const val KEY_LENGTH = 41
-    private const val SECRET_LENGTH = 64
-    private const val PASSPHRASE_LENGTH = 8
-
-    var passphrase: String = ""
-    var key: String = ""
-    var secret: String = ""
-
-
-    @Throws(CredentialsException::class, TooManyCredentialsException::class)
-    override fun addCredential(credential: String) {
-        if (passphrase.isBlank()) {
-            if (credential.length < PASSPHRASE_LENGTH)
-                throw CredentialsException("passphrase", name, PASSPHRASE_LENGTH)
-            else passphrase = credential
-        } else if (key.isBlank()) {
-            if (credential.length != KEY_LENGTH)
-                throw CredentialsException("key", name, KEY_LENGTH)
-            else key = credential
-        } else if (secret.isBlank()) {
-            if (credential.length != SECRET_LENGTH)
-                throw CredentialsException("secret", name, SECRET_LENGTH)
-            else secret = credential
-
-        } else throw TooManyCredentialsException(name)
-
-    }
-
-    private var api: AbuApi? = null
-
-    @Throws(ApiNotSetException::class)
-    override fun getApi(): AbuApi {
-        return if (api == null) {
-            if (isSet().not())
-                throw ApiNotSetException(name)
-            else {
-                api = AbuApi(key, secret, passphrase)
-                api!!
-            }
-
-        } else api!!
-    }
-
-    override fun isSet() = key.isNotBlank() && secret.isNotBlank() && passphrase.isNotBlank()
-
-    override fun printCredentials(writer: PrintWriter) {
-        writer.println("abu")
-        writer.println(passphrase)
-        writer.println(key)
-        writer.println(secret)
-        writer.flush()
-    }
-
-}
-
-object BitMarket : Exchange<BitmarketApi>("Bitmarket", "bm", listOf("publicKey", "privateKey"), Ansi.Color.BLUE) {
-
-
-    private const val PUBLIC_KEY_LENGTH = 32
-    private const val PRIVATE_KEY_LENGTH = 32
-
-    var publicKey: String = ""
-    var privateKey: String = ""
-
-    @Throws(CredentialsException::class, TooManyCredentialsException::class)
-    override fun addCredential(credential: String) {
-        if (publicKey.isBlank()) {
-            if (credential.length != PUBLIC_KEY_LENGTH)
-                throw CredentialsException("publicKey", name, PUBLIC_KEY_LENGTH)
-            else publicKey = credential
-        } else if (privateKey.isBlank()) {
-            if (credential.length != PRIVATE_KEY_LENGTH)
-                throw CredentialsException("privateKey", name, PRIVATE_KEY_LENGTH)
-            else privateKey = credential
-        } else throw TooManyCredentialsException(name)
-
-    }
-
-    private var api: BitmarketApi? = null
-
-    @Throws(ApiNotSetException::class)
-    override fun getApi(): BitmarketApi {
-        return if (api == null) {
-            if (isSet().not())
-                throw ApiNotSetException(name)
-            else {
-                api = BitmarketApi(publicKey, privateKey)
-                api!!
-            }
-
-        } else api!!
-    }
-
-    override fun isSet() = publicKey.isNotBlank() && privateKey.isNotBlank()
-
-    override fun printCredentials(writer: PrintWriter) {
-        writer.println("bitmarket")
-        writer.println(publicKey)
-        writer.println(privateKey)
-        writer.flush()
-    }
-
-}
-
-object Coinroom : Exchange<CoinroomApi>("Coinroom", "cr", listOf("publicKey", "privateKey"), Ansi.Color.YELLOW) {
-
-
-    private const val PUBLIC_KEY_LENGTH = 36
-    private const val PRIVATE_KEY_LENGTH = 36
-
-    var publicKey: String = ""
-    var privateKey: String = ""
-
-    @Throws(CredentialsException::class, TooManyCredentialsException::class)
-    override fun addCredential(credential: String) {
-        if (publicKey.isBlank()) {
-            if (credential.length != PUBLIC_KEY_LENGTH)
-                throw CredentialsException("publicKey", name, PUBLIC_KEY_LENGTH)
-            else publicKey = credential
-        } else if (privateKey.isBlank()) {
-            if (credential.length != PRIVATE_KEY_LENGTH)
-                throw CredentialsException("privateKey", name, PRIVATE_KEY_LENGTH)
-            else privateKey = credential
-        } else throw TooManyCredentialsException(name)
-
-    }
-
-    private var api: CoinroomApi? = null
-
-    @Throws(ApiNotSetException::class)
-    override fun getApi(): CoinroomApi {
-        return if (api == null) {
-            if (isSet().not())
-                throw ApiNotSetException(name)
-            else {
-                api = CoinroomApi(publicKey, privateKey)
-                api!!
-            }
-
-        } else api!!
-    }
-
-    override fun isSet() = publicKey.isNotBlank() && privateKey.isNotBlank()
-
-    override fun printCredentials(writer: PrintWriter) {
-        writer.println("coinroom")
-        writer.println(publicKey)
-        writer.println(privateKey)
-        writer.flush()
-    }
-
-}
-
-abstract class Exchange<out ApiType : ExchangeApi>(val name: String, val shortcut: String, val credentialsSteps: List<String>, val color: Ansi.Color) {
-    @Throws(ApiNotSetException::class)
-    abstract fun getApi(): ApiType
-
-    @Throws(CredentialsException::class, TooManyCredentialsException::class)
-    abstract fun addCredential(credential: String)
+    fun isSet() = credentials.all { it.value.isNotBlank() }
+    fun isNotSet() = !isSet()
 
     fun isNameOf(candidate: String) = candidate.toLowerCase() in arrayOf(name.toLowerCase(), shortcut.toLowerCase())
-    abstract fun isSet(): Boolean
-    abstract fun printCredentials(writer: PrintWriter)
+
+    fun printCredentials(writer: PrintWriter) {
+        writer.println(name.toLowerCase())
+        credentials.forEach { writer.println(it.value) }
+        writer.flush()
+    }
+
+
 }

@@ -24,11 +24,13 @@
 
 package com.stasbar.taxledger.exchanges.abucoins
 
-import com.google.gson.GsonBuilder
-import com.google.gson.JsonObject
+import com.google.gson.*
+import com.google.gson.reflect.TypeToken
 import com.stasbar.taxledger.DEBUG
 import com.stasbar.taxledger.ExchangeApi
+import com.stasbar.taxledger.Logger
 import com.stasbar.taxledger.exchanges.abucoins.models.*
+import com.stasbar.taxledger.models.Credential
 import com.stasbar.taxledger.models.Transaction
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -77,6 +79,13 @@ interface AbuService {
 
     /**
      * Get a list of recent fills.
+     * Pagination
+     * @param before Request page before (newer) this pagination id.
+     * @param after    Request page after (older) this pagination id.
+     * @param limit    default 100	Number of results per request. Maximum 1000. (default 100)
+     *
+     *
+     * Response
      * @param trade_id    identifier of the last trade
      * @param product_id    product identifier
      * @param price    trade price
@@ -87,7 +96,7 @@ interface AbuService {
      * @param side    user side(buy or sell)
      */
     @GET("/fills")
-    fun fills(): Call<List<Fill>>
+    fun fills(@Query("before") before: Int? = null, @Query("after") after: Int? = null, @Query("limit") limit: Int? = null): Call<JsonElement>
 
     @GET("/withdrawals")
     fun withdraws(): Call<JsonObject>
@@ -98,7 +107,11 @@ interface AbuService {
 
 }
 
-class AbuApi(private val accessKey: String, private val secretKey: String, private val passphrase: String) : ExchangeApi {
+class AbuApi(credentials: LinkedHashSet<Credential>, private val gson: Gson) : ExchangeApi {
+    private val passphrase: String = credentials.first { it.name == "passphrase" }.value
+    private val accessKey: String = credentials.first { it.name == "key" }.value
+    private val secretKey: String = credentials.first { it.name == "secret" }.value
+
     companion object {
         const val URI = "https://api.abucoins.com"
         val DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss'Z'"
@@ -124,14 +137,35 @@ class AbuApi(private val accessKey: String, private val secretKey: String, priva
     }
 
     @Throws(IllegalStateException::class)
-    override fun transactions(): List<Transaction>? {
-        val response = service.value.fills().execute()
-        return if (response.isSuccessful)
-            response.body()?.map { it.toTransaction() } ?: ArrayList()
-        else {
-            println("Unsuccessfully fetched transactions error code: ${response.code()} body: ${response.errorBody()} ")
-            null
-        }
+    override fun transactions(): List<Transaction> {
+        val limit = 1000
+        var after: Int? = null
+
+        val transactions = ArrayList<Transaction>()
+        var newTransactions: List<Transaction> = emptyList()
+
+        do {
+            val response = service.value.fills(null, after, limit).execute()
+            if (response.isSuccessful) {
+                val responseBody = response.body()
+                after = response.headers().get("ac-after")?.toInt()
+                try {
+                    val list: List<Fill> = gson.fromJson(responseBody, object : TypeToken<List<Fill>>() {}.type)
+                    newTransactions = list.map { it.toTransaction() }
+                    transactions.addAll(newTransactions)
+
+                } catch (e: JsonSyntaxException) {
+                    Logger.err(responseBody.toString())
+                }
+
+
+            } else {
+                Logger.err("Unsuccessfully fetched transactions error code: ${response.code()} body: ${response.errorBody()} ")
+                return emptyList()
+            }
+        } while (newTransactions.size == limit)
+
+        return transactions
 
 
     }

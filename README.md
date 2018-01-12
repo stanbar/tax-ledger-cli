@@ -55,6 +55,11 @@ Podstawowa komenda `transakcje` łączy się z każdą skonfigurowaną giełdą 
 - Każda komenda jest automatycznie uzupełniana przez klawisz Tab (np. tra -> TAB -> transakcje)
 - Program jest w pełni argumentowalny np. `java -jar tax-ledger.jar transactions -lastMonth -onlyBitbay exit`) przetworzy transakcje z poprzedniego miesiąca, z giełdy bitbay i zakończy działanie
 
+### Znane problemy
+- BitBay nie pozwala na pobranie więcej niż 200 ostatnich pozycji historii. Aktualny stan: Oczekiwanie na poprawę przez BitBay
+- BitBay nie pozwala na pobranie starszych transakcji (z przed BitBay 3.0). Aktualny stan: implementacja obejścia przez podanie zewnętrznego źródła danych z pliku .csv
+- Abucoins nie pozwala na pobranie historii wpłat i wypłat. Aktualny stan: Oczekiwanie na poprawę przez Abucoins 
+
 ### Do zrobienia
 - Przywracanie starych transakcji z BitBay 2.0 z pliku .csv 
 - Stworzenie GUI

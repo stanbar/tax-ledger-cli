@@ -24,8 +24,6 @@
 
 package com.stasbar.taxledger.translations;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.util.ListResourceBundle;
 
 import static com.stasbar.taxledger.translations.Text.Actions.*;
@@ -36,7 +34,6 @@ import static com.stasbar.taxledger.translations.Text.Summary.*;
 
 public class Text extends ListResourceBundle {
 
-
     public static final String TOTAL_OPERATIONS = "total_operations";
     public static final String UNKNOWN_LANGUAGE = "unknown_language";
     public static final String CREDENTIALS_SAVED = "credentials_saved";
@@ -45,7 +42,6 @@ public class Text extends ListResourceBundle {
     public static final String WRONG_ACTION = "wrong_action";
     public static final String ENTER_EXCHANGE_NAME = "enter_exchange_name";
     public static final String ADDED_CREDENTIALS = "added_credentials";
-
     public static final String EXCHANGE = "exchange";
     public static final String TYPE = "type";
     public static final String DATE = "date";
@@ -53,13 +49,14 @@ public class Text extends ListResourceBundle {
     public static final String GET = "get";
     public static final String PAID = "paid";
     public static final String TRANSACTIONS_SAVED = "transactions_saved";
-    @NotNull
     public static final String LOAD_COMPLETE = "load_complete";
-    @NotNull
     public static final String NO_OPERATIONS = "no_transactions";
-    @NotNull
     public static final String AFFILIATE_INCOME = "affiliate_income";
-
+    public static final String CRYPTO_TRANSFER = "crypto_transfer";
+    public static final String CARD_WITHDRAW = "card_operation";
+    public static final String CANCEL_CARD_WITHDRAW = "cancel_card_withdraw";
+    public static final String CARD_ORDER_FEE = "card_order_fee";
+    public static final String TRANSFER = "transfer";
 
     public static class Summary {
         public static final String GROSS_INCOME = "gross_income";
@@ -87,7 +84,6 @@ public class Text extends ListResourceBundle {
         public static final String ERROR = "error";
     }
 
-
     public static final String BUY = "buy";
     public static final String SELL = "sell";
     public static final String FEE = "fee";
@@ -99,7 +95,6 @@ public class Text extends ListResourceBundle {
         public static final String TOO_MANY_ARGS = "too_many_args";
         public static final String CREDENTIALS = "credentials_exc";
         public static final String API_NOT_SET = "api_not_set";
-        @NotNull
         public static final String INVALID_ARG = "invalid_arg";
     }
 
@@ -156,6 +151,11 @@ public class Text extends ListResourceBundle {
             {LOAD_COMPLETE, "Successfully loaded %d transactions"},
             {NO_OPERATIONS, "No operations found"},
             {TOTAL_OPERATIONS, "Total %d operations"},
+            {CRYPTO_TRANSFER, "Crypto transfer"},
+            {CARD_WITHDRAW, "Card withdraw"},
+            {CANCEL_CARD_WITHDRAW, "Cancel card withdraw"},
+            {CARD_ORDER_FEE, "Card order fee"},
+            {TRANSFER, "Transfer"},
 
 
     };

@@ -28,6 +28,7 @@ import com.stasbar.taxledger.Exchange
 import com.stasbar.taxledger.ExchangeApi
 import com.stasbar.taxledger.models.Transaction
 import com.stasbar.taxledger.toCalendar
+import java.io.File
 import java.util.*
 
 
@@ -68,7 +69,8 @@ class DateRange {
 class TransactionsOptions(
         val dateRange: DateRange = DateRange(),
         var reverse: Boolean = false,
-        var oneExchangeOnly: Exchange<ExchangeApi>? = null,
+        var oldBitBayHistory: File? = null,
+        var oneExchangeOnly: Exchange<out ExchangeApi>? = null,
         var fileName: StringBuilder = StringBuilder(),
         var showNonEssential: Boolean = false,
         var showNonFiat: Boolean = false) {

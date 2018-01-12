@@ -24,13 +24,19 @@
 
 package com.stasbar.taxledger.exchanges.bitbay
 
+import com.google.gson.Gson
 import com.google.gson.GsonBuilder
+import com.google.gson.JsonElement
+import com.google.gson.JsonSyntaxException
+import com.google.gson.reflect.TypeToken
 import com.stasbar.taxledger.Constants.DATE_FORMAT
 import com.stasbar.taxledger.DEBUG
 import com.stasbar.taxledger.ExchangeApi
+import com.stasbar.taxledger.Logger
 import com.stasbar.taxledger.exchanges.bitbay.models.BitBayHistory
 import com.stasbar.taxledger.exchanges.bitbay.models.BitBayTransaction
 import com.stasbar.taxledger.exchanges.bitbay.requests.HistoryRequest
+import com.stasbar.taxledger.models.Credential
 import com.stasbar.taxledger.models.Transaction
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -57,7 +63,7 @@ interface PrivateService {
      */
     @FormUrlEncoded
     @POST("tradingApi.php")
-    fun history(@FieldMap(encoded = true) fields: Map<String, String>): Call<List<BitBayHistory>>
+    fun history(@FieldMap(encoded = true) fields: Map<String, String>): Call<JsonElement>
 
     /**
      * history of account transactions
@@ -71,8 +77,9 @@ interface PrivateService {
     fun transactions(@FieldMap(encoded = true) fields: Map<String, String>): Call<List<BitBayTransaction>>
 }
 
-class BitBayApi(private val publicKey: String, private val privateKey: String) : ExchangeApi {
-
+class BitBayApi(credentials: LinkedHashSet<Credential>, private val gson: Gson) : ExchangeApi {
+    private val publicKey: String = credentials.first { it.name == "publicKey" }.value
+    private val privateKey: String = credentials.first { it.name == "privateKey" }.value
     private val URI = "https://bitbay.net/API/Trading/"
 
     private val service: Lazy<PrivateService> = lazy {
@@ -93,14 +100,23 @@ class BitBayApi(private val publicKey: String, private val privateKey: String) :
         retrofit.create(PrivateService::class.java)
     }
 
-    override fun transactions(): List<Transaction>? {
+    override fun transactions(): List<Transaction> {
         val request = HistoryRequest(limit = "10000000", currency = "PLN")
+
         val response = service.value.history(request.toMap()).execute()
-        return if (response.isSuccessful)
-            response.body()?.map { it.toTransaction() } ?: ArrayList()
-        else {
-            println("Unsuccessfully fetched transactions error code: ${response.code()} body: ${response.errorBody()} ")
-            null
+
+        return if (response.isSuccessful) {
+            val responseBody = response.body()
+            try {
+                val list: List<BitBayHistory>? = gson.fromJson(responseBody, object : TypeToken<List<BitBayHistory>>() {}.type)
+                list?.map { it.toTransaction() } ?: emptyList()
+            } catch (e: JsonSyntaxException) {
+                Logger.err(responseBody.toString())
+                emptyList<Transaction>()
+            }
+        } else {
+            Logger.err("Unsuccessfully fetched transactions error code: ${response.code()} body: ${response.errorBody()} ")
+            emptyList()
         }
 
 

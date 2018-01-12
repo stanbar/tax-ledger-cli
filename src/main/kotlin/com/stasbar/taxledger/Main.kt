@@ -28,6 +28,7 @@ import com.stasbar.taxledger.exceptions.ApiNotSetException
 import com.stasbar.taxledger.exceptions.CredentialsException
 import com.stasbar.taxledger.exceptions.IllegalDateRangeArgument
 import com.stasbar.taxledger.exceptions.TooManyCredentialsException
+import com.stasbar.taxledger.models.Credential
 import com.stasbar.taxledger.models.Transaction
 import com.stasbar.taxledger.options.TransactionsOptions
 import com.stasbar.taxledger.translations.Text
@@ -39,6 +40,7 @@ import org.jline.reader.LineReaderBuilder
 import org.jline.reader.UserInterruptException
 import org.jline.reader.impl.completer.StringsCompleter
 import org.jline.terminal.TerminalBuilder
+import java.nio.file.Paths
 import java.text.ParseException
 import java.text.ParsePosition
 import java.text.SimpleDateFormat
@@ -135,23 +137,23 @@ fun parseCredentials() {
         val exchange = exchangeByName(args.peekFirst()).objectInstance!!
         args.pop() //Now we are sure that this is correct exchange name so we can safely pop() and process
 
-        for (step in exchange.credentialsSteps) {
+        for (credentialStep in exchange.credentials) {
             var correctValue: Boolean
             do {
                 correctValue = try {
                     // Try add credential from argument queue
-                    exchange.addCredential(args.peekFirst())
+                    credentialStep.value = args.peekFirst()
                     args.pop()
                     true
                 } catch (e: CredentialsException) {
                     // Failed, try from
-                    promptUserForCredential(exchange, step)
+                    promptUserForCredential(exchange, credentialStep)
                 } catch (e: TooManyCredentialsException) {
                     // Failed, try from
-                    promptUserForCredential(exchange, step)
+                    promptUserForCredential(exchange, credentialStep)
                 } catch (e: IllegalStateException) {
                     // Failed, try from
-                    promptUserForCredential(exchange, step)
+                    promptUserForCredential(exchange, credentialStep)
                 }
 
             } while (!correctValue)
@@ -176,13 +178,13 @@ fun parseCredentials() {
 fun exchangeByName(pollFirst: String) = exchanges.first { it.objectInstance!!.isNameOf(pollFirst) }
 
 
-fun promptUserForCredential(exchange: Exchange<ExchangeApi>, step: String): Boolean {
+fun promptUserForCredential(exchange: Exchange<out ExchangeApi>, credentialStep: Credential): Boolean {
     val reader = LineReaderBuilder.builder()
             .terminal(terminal)
             .build()
     val prompt = ansi()
             .fgBright(exchange.color).a(exchange.name + "> ")
-            .fgBrightYellow().a(step).a(">")
+            .fgBrightYellow().a(credentialStep.name).a(">")
             .reset().toString()
     var stepAnswer = ""
     try {
@@ -195,8 +197,8 @@ fun promptUserForCredential(exchange: Exchange<ExchangeApi>, step: String): Bool
         System.exit(0)
     }
     try {
-
-        exchange.addCredential(stepAnswer.trim())
+        credentialStep.value = stepAnswer.trim()
+        exchange.addCredential(credentialStep)
         return true
     } catch (e: CredentialsException) {
         Logger.err(e.message)
@@ -206,7 +208,7 @@ fun promptUserForCredential(exchange: Exchange<ExchangeApi>, step: String): Bool
     return false
 }
 
-fun saveCredentials(supportedExchanges: Set<KClass<out Exchange<ExchangeApi>>>) {
+fun saveCredentials(supportedExchanges: Set<KClass<out Exchange<out ExchangeApi>>>) {
     PreferencesManager.save(supportedExchanges)
     Logger.info(getString(Text.CREDENTIALS_SAVED).format(PreferencesManager.credentials.absoluteFile))
 }
@@ -249,7 +251,8 @@ fun parseTransactionOptions(): TransactionsOptions {
 
         if (tryToParseDateRange(option, argument))
             continue
-
+        if (tryToParseOldBitBayHistory(option, argument, args.peekFirst()))
+            continue
         when (argument.toLowerCase()) {
             "-showNonFiat".toLowerCase()
                 , "-showNoneFiat".toLowerCase()
@@ -274,6 +277,20 @@ fun parseTransactionOptions(): TransactionsOptions {
     }
     return option
 }
+
+fun tryToParseOldBitBayHistory(option: TransactionsOptions, argument: String, nextArgument: String?): Boolean {
+    return if (validateOldBbArgument(argument, nextArgument)) {
+        option.oldBitBayHistory = Paths.get(nextArgument).toFile()
+        args.pop()
+        true
+    } else false
+
+}
+
+fun validateOldBbArgument(argument: String, nextArgument: String?) = argument.toLowerCase() == "-oldbb"
+        && nextArgument != null
+        && nextArgument.isNotBlank()
+        && Paths.get(nextArgument).toFile().exists()
 
 fun isLikelyToBeDateFormat(candidate: String) = candidate.matches(Regex("-([0-9]{2}).([0-9]{2}).([0-9]{4})"))
         || candidate.matches(Regex("-([0-9]{2}).([0-9]{4})"))
@@ -395,7 +412,7 @@ fun performTransactionsAction(): Boolean {
     apis.parallelStream().forEach {
         try {
 
-            val newTransactions = try {
+            val newTransactions: List<Transaction> = try {
                 it.getApi().transactions()
             } catch (e: IllegalStateException) {
                 println("Reconnecting to ${it.name}")
@@ -403,10 +420,10 @@ fun performTransactionsAction(): Boolean {
                     it.getApi().transactions()
                 } catch (e: IllegalStateException) {
                     Logger.err("Failed $e")
-                    null
+                    emptyList()
                 }
             }
-            if (newTransactions != null)
+            if (newTransactions.isNotEmpty())
                 transactions.addAll(newTransactions.filter { options.dateRange.isInRange(it) })
         } catch (e: ApiNotSetException) {
             /* skip not set exchanges */

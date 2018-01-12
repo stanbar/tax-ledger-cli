@@ -26,16 +26,33 @@ package com.stasbar.taxledger
 
 import com.stasbar.taxledger.translations.Text
 
-enum class OperationType(val key : String) {
+enum class OperationType(val key: String) {
     BUY(Text.BUY),
     SELL(Text.SELL),
     FEE(Text.FEE),
     DEPOSIT(Text.DEPOSIT),
     WITHDRAW(Text.WITHDRAW),
-    AFFILIATE_INCOME(Text.AFFILIATE_INCOME);
+    TRANSFER(Text.TRANSFER),
+    AFFILIATE_INCOME(Text.AFFILIATE_INCOME),
+    CARD_WITHDRAW(Text.CARD_WITHDRAW),
+    CANCEL_CARD_WITHDRAW(Text.CANCEL_CARD_WITHDRAW),
+    CARD_ORDER_FEE(Text.CARD_ORDER_FEE);
 
     override fun toString(): String {
         return getString(key)
     }
+
+    companion object {
+        fun parse(string: String) = when (string) {
+            "Zakup Waluty" -> OperationType.TRANSFER
+            "Prowizja od transakcji" -> OperationType.FEE
+            "Zapłata za zakup waluty" -> OperationType.BUY
+            "Otrzymanie środków" -> OperationType.SELL
+            "Zewnętrzny przelew przychodzący" -> OperationType.DEPOSIT
+            "Wypłata środków na konto" -> OperationType.WITHDRAW
+            else -> throw IllegalArgumentException("Could not map $string to OperationType")
+        }
+    }
+
 
 }

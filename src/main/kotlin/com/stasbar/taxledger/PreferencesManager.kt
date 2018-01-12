@@ -47,7 +47,7 @@ object PreferencesManager {
     }
     val credentials: File = File(workingDir, "credentials.txt")
 
-    fun save(supportedExchanges: Set<KClass<out Exchange<ExchangeApi>>>) {
+    fun save(supportedExchanges: Set<KClass<out Exchange<out ExchangeApi>>>) {
         val writer = PrintWriter(credentials)
         supportedExchanges.map { it.objectInstance!! }.filter { it.isSet() }.forEach { it.printCredentials(writer) }
     }
