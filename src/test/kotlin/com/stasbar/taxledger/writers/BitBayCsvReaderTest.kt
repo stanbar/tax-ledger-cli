@@ -38,7 +38,7 @@ import kotlin.test.assertTrue
 
 internal class BitBayCsvReaderTest {
 
-    val oldBbHistoryCsvFile = File("build/libs/report.csv")
+    val oldBbHistoryCsvFile = File("old_bb_report.csv")
     // transactions -oldbb build/libs/report.csv -after 7.2017 -before 11.2017
     @Before
     fun setUp() {
