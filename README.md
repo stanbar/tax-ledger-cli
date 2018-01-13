@@ -35,19 +35,21 @@ $ java -jar tax-ledger.jar
 ### Transactions / Transakcje
 
 Podstawowa komenda `transakcje` łączy się z każdą skonfigurowaną giełdą a następnie:
- - pobiera pełną listę transakcjii. 
+ - pobiera pełną listę transakcjii.  
  - Wyświetla podsumowanie
  - Zapisuje wyniki do pliku [nazwa komendy].csv w folderze /transactions
   
  Dostępne argumenty dla komendy `transactions`:
  - `-today`, `-yesterday`, `-thisYear`, `-prevYear`, `-thisMonth` lub `-prevMonth`
  - lub bezpośrednie określenie daty poprzez np. `-2017`, `-12.2017` lub `-28.12.2017`
+ - jednostronne zakresy dat przez `-after 8.2017`, `-po 8.2017`, `-before 11.2017`  `-przed 11.2017`  
  - `-reverse` odwrócenie listy wyników 
  - `-onlyBitbay` wyświetla wyniki tylko dla BitBay analogicznie `-onlyAbu` dla Abucoins
  - `-showNonFiat` wyświetla również operacje crypto-crypto. Domyślnie wyłączone ponieważ do celów podatkowych jest to zbędna informacja.
  - `-showNonEssential` wyświetla również wpłaty i wypłaty PLNów na konto giełdowe. Domyślnie wyłączone ponieważ do celów podatkowych jest to zbędna informacja.
  - `-all` wyświetla wszystkie transakcje 
-  
+ - `-oldBb <siezka_do_pliku_csv>` pozwala na importowanie operacji ze starego BitBay 2.0. Listę transakcji możemy pobrać logując się na https://old.bitbay.net i w zakładce Historia na dole strony znajduje się link do pobrania w .csv
+
 ### Informacje
 - Program jest w pełni* przetłumaczony na język Polski. 
 - Wybór języka jest podejmowany na podstawie języka systemu operacyjnego.
@@ -56,12 +58,11 @@ Podstawowa komenda `transakcje` łączy się z każdą skonfigurowaną giełdą 
 - Program jest w pełni argumentowalny np. `java -jar tax-ledger.jar transactions -lastMonth -onlyBitbay exit`) przetworzy transakcje z poprzedniego miesiąca, z giełdy bitbay i zakończy działanie
 
 ### Znane problemy
+- BitBay nie pozwala na pobranie starszych transakcji (z przed BitBay 3.0). Aby zaimportować starsze tranksację prosze skorzystać z parametru `-oldBb <siezka_do_pliku_csv>` opisanego powyżej.
 - BitBay nie pozwala na pobranie więcej niż 200 ostatnich pozycji historii. Aktualny stan: Oczekiwanie na poprawę przez BitBay
-- BitBay nie pozwala na pobranie starszych transakcji (z przed BitBay 3.0). Aktualny stan: implementacja obejścia przez podanie zewnętrznego źródła danych z pliku .csv
 - Abucoins nie pozwala na pobranie historii wpłat i wypłat. Aktualny stan: Oczekiwanie na poprawę przez Abucoins 
 
 ### Do zrobienia
-- Przywracanie starych transakcji z BitBay 2.0 z pliku .csv 
 - Stworzenie GUI
 - Podsumowanie wszystkich walut na giełdach 
 - Automatyczne generowanie porfolio(zysk/strata) na podstawie histori transakcji z giełd

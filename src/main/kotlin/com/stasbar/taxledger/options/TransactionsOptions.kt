@@ -62,17 +62,39 @@ class DateRange {
         if (year != null && year != it.time.toCalendar().get(Calendar.YEAR))
             return false
         return true
+    }
 
+    fun isBefore(it: Transaction): Boolean {
+        if (year != null && year!! < it.time.toCalendar().get(Calendar.YEAR))
+            return false
+        if (month != null && month!! < it.time.toCalendar().get(Calendar.MONTH))
+            return false
+        if (day != null && day!! < it.time.toCalendar().get(Calendar.DAY_OF_MONTH))
+            return false
+        return true
+    }
+
+    fun isAfter(it: Transaction): Boolean {
+        if (year != null && year!! > it.time.toCalendar().get(Calendar.YEAR))
+            return false
+        if (month != null && month!! > it.time.toCalendar().get(Calendar.MONTH))
+            return false
+        if (day != null && day!! > it.time.toCalendar().get(Calendar.DAY_OF_MONTH))
+            return false
+        return true
     }
 }
 
 class TransactionsOptions(
         val dateRange: DateRange = DateRange(),
+        val dateAfter: DateRange = DateRange(),
+        val dateBefore: DateRange = DateRange(),
         var reverse: Boolean = false,
         var oldBitBayHistory: File? = null,
         var oneExchangeOnly: Exchange<out ExchangeApi>? = null,
         var fileName: StringBuilder = StringBuilder(),
         var showNonEssential: Boolean = false,
         var showNonFiat: Boolean = false) {
+    fun isInRange(it: Transaction): Boolean = dateRange.isInRange(it) && dateBefore.isBefore(it) && dateAfter.isAfter(it)
 
 }

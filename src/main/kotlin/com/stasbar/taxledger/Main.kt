@@ -30,8 +30,10 @@ import com.stasbar.taxledger.exceptions.IllegalDateRangeArgument
 import com.stasbar.taxledger.exceptions.TooManyCredentialsException
 import com.stasbar.taxledger.models.Credential
 import com.stasbar.taxledger.models.Transaction
+import com.stasbar.taxledger.options.DateRange
 import com.stasbar.taxledger.options.TransactionsOptions
 import com.stasbar.taxledger.translations.Text
+import com.stasbar.taxledger.writers.BitBayCsvReader
 import com.stasbar.taxledger.writers.ConsoleWriter
 import com.stasbar.taxledger.writers.CsvWriter
 import org.fusesource.jansi.Ansi.ansi
@@ -172,6 +174,7 @@ fun parseCredentials() {
 
     saveCredentials(exchanges)
 
+
 }
 
 
@@ -248,11 +251,18 @@ fun parseTransactionOptions(): TransactionsOptions {
         val argument = args.pollFirst()
         option.fileName.append(argument)
 
-
-        if (tryToParseDateRange(option, argument))
+        if (tryToParseOneSideBoundDateRange(option.dateBefore, argument, args.peekFirst(), "-before", "-przed"))
             continue
+
+        if (tryToParseOneSideBoundDateRange(option.dateAfter, argument, args.peekFirst(), "-after", "-po"))
+            continue
+
+        if (tryToParseDateRange(option.dateRange, argument, false))
+            continue
+
         if (tryToParseOldBitBayHistory(option, argument, args.peekFirst()))
             continue
+
         when (argument.toLowerCase()) {
             "-showNonFiat".toLowerCase()
                 , "-showNoneFiat".toLowerCase()
@@ -278,6 +288,93 @@ fun parseTransactionOptions(): TransactionsOptions {
     return option
 }
 
+fun tryToParseOneSideBoundDateRange(sideDateRange: DateRange, argument: String?, nextArgument: String?, vararg synonyms: String): Boolean {
+    return if (argument in synonyms && nextArgument != null && nextArgument.isNotBlank()) {
+        val success = tryToParseDateRange(sideDateRange, nextArgument, true)
+        if (success) args.pop()
+        success
+    } else false
+}
+
+fun tryToParseDateRange(dateRange: DateRange, argument: String, parameterArgument: Boolean): Boolean {
+    var success = isLikelyToBeDateFormat(argument) && tryToParseExplicitDate(dateRange, argument, parameterArgument)
+    if (!success)
+        success = tryToParseImplicitDate(dateRange, argument)
+    return success
+}
+
+
+fun isLikelyToBeDateFormat(candidate: String) = candidate.matches(Regex("-?([0-9]{1,2}).([0-9]{1,2}).([0-9]{4})"))
+        || candidate.matches(Regex("-?([0-9]{1,2}).([0-9]{4})"))
+        || candidate.matches(Regex("-?([0-9]{4})"))
+
+
+fun tryToParseImplicitDate(dateRange: DateRange, argument: String): Boolean {
+    val calendar = Date().toCalendar()
+    when (argument.toLowerCase()) {
+        "-today".toLowerCase() -> {
+            dateRange.setToDay(calendar)
+        }
+        "-yesterday".toLowerCase() -> {
+            calendar.roll(Calendar.DAY_OF_MONTH, -1)
+            dateRange.setToDay(calendar)
+        }
+        "-thisMonth".toLowerCase() -> {
+            dateRange.setToMonth(calendar)
+        }
+        "-prevMonth".toLowerCase() -> {
+            calendar.roll(Calendar.MONTH, -1)
+            dateRange.setToMonth(calendar)
+        }
+        "-thisYear".toLowerCase() -> {
+            dateRange.setToYear(calendar)
+        }
+        "-prevYear".toLowerCase() -> {
+            calendar.roll(Calendar.YEAR, -1)
+            dateRange.setToYear(calendar)
+        }
+        else -> return false
+    }
+    return true
+}
+
+
+fun tryToParseExplicitDate(dateRange: DateRange, argument: String, parameterArgument: Boolean): Boolean {
+    val parsePosition = ParsePosition(if (parameterArgument) 0 else 1)
+    try {
+        val dateFormat = SimpleDateFormat("dd.MM.yyyy")
+
+        val calendar = dateFormat.parse(argument, parsePosition)
+                ?: throw IllegalDateRangeArgument(argument, parsePosition.errorIndex)
+        dateRange.setToDay(calendar.toCalendar())
+
+    } catch (e: Exception) {
+        try {
+            val dateFormat = SimpleDateFormat("MM.yyyy")
+            val calendar = dateFormat.parse(argument, parsePosition)
+                    ?: throw IllegalDateRangeArgument(argument, parsePosition.errorIndex)
+            dateRange.setToMonth(calendar.toCalendar())
+        } catch (e: Exception) {
+            try {
+                val dateFormat = SimpleDateFormat("yyyy")
+                dateFormat.isLenient = false
+                val calendar = dateFormat.parse(argument, parsePosition)
+                        ?: throw IllegalDateRangeArgument(argument, parsePosition.errorIndex)
+                dateRange.setToYear(calendar.toCalendar())
+            } catch (e: ParseException) {
+                Logger.err(e.message)
+                return false
+            } catch (e: IllegalDateRangeArgument) {
+                //if(e.arg.length >=2 && e.arg[1].isDigit())
+                Logger.err(e.message)
+                return false
+            }
+        }
+    }
+    return true
+}
+
+
 fun tryToParseOldBitBayHistory(option: TransactionsOptions, argument: String, nextArgument: String?): Boolean {
     return if (validateOldBbArgument(argument, nextArgument)) {
         option.oldBitBayHistory = Paths.get(nextArgument).toFile()
@@ -291,84 +388,6 @@ fun validateOldBbArgument(argument: String, nextArgument: String?) = argument.to
         && nextArgument != null
         && nextArgument.isNotBlank()
         && Paths.get(nextArgument).toFile().exists()
-
-fun isLikelyToBeDateFormat(candidate: String) = candidate.matches(Regex("-([0-9]{2}).([0-9]{2}).([0-9]{4})"))
-        || candidate.matches(Regex("-([0-9]{2}).([0-9]{4})"))
-        || candidate.matches(Regex("-([0-9]{4})"))
-
-fun tryToParseDateRange(options: TransactionsOptions, argument: String): Boolean {
-    var success = isLikelyToBeDateFormat(argument) && tryToParseExplicitDate(options, argument)
-    if (!success)
-        success = tryToParseImplicitDate(options, argument)
-    return success
-}
-
-fun tryToParseImplicitDate(options: TransactionsOptions, argument: String): Boolean {
-    val calendar = Date().toCalendar()
-    when (argument.toLowerCase()) {
-        "-today".toLowerCase() -> {
-            options.dateRange.setToDay(calendar)
-        }
-        "-yesterday".toLowerCase() -> {
-            calendar.roll(Calendar.DAY_OF_MONTH, -1)
-            options.dateRange.setToDay(calendar)
-        }
-        "-thisMonth".toLowerCase() -> {
-            options.dateRange.setToMonth(calendar)
-        }
-        "-prevMonth".toLowerCase() -> {
-            calendar.roll(Calendar.MONTH, -1)
-            options.dateRange.setToMonth(calendar)
-        }
-        "-thisYear".toLowerCase() -> {
-            options.dateRange.setToYear(calendar)
-        }
-        "-prevYear".toLowerCase() -> {
-            calendar.roll(Calendar.YEAR, -1)
-            options.dateRange.setToYear(calendar)
-        }
-        else -> return false
-    }
-    return true
-}
-
-
-fun tryToParseExplicitDate(options: TransactionsOptions, argument: String): Boolean {
-    val parsePosition = ParsePosition(1)
-    try {
-        val dateFormat = SimpleDateFormat("dd.MM.yyyy")
-
-        val calendar = dateFormat.parse(argument, parsePosition)
-                ?: throw IllegalDateRangeArgument(argument, parsePosition.errorIndex)
-
-        options.dateRange.setToDay(calendar.toCalendar())
-
-    } catch (e: Exception) {
-        try {
-            val dateFormat = SimpleDateFormat("MM.yyyy")
-
-            val calendar = dateFormat.parse(argument, parsePosition)
-                    ?: throw IllegalDateRangeArgument(argument, parsePosition.errorIndex)
-            options.dateRange.setToMonth(calendar.toCalendar())
-        } catch (e: Exception) {
-            try {
-                val dateFormat = SimpleDateFormat("yyyy")
-                dateFormat.isLenient = false
-                val calendar = dateFormat.parse(argument, parsePosition)
-                        ?: throw IllegalDateRangeArgument(argument, parsePosition.errorIndex)
-                options.dateRange.setToYear(calendar.toCalendar())
-            } catch (e: ParseException) {
-                Logger.err(e.message)
-                return false
-            } catch (e: IllegalDateRangeArgument) {
-                //if(e.arg.length >=2 && e.arg[1].isDigit())
-                Logger.err(e.message)
-                return false
-            }
-        }
-    }
-    return true
-}
 
 
 fun performActions(action: String): Boolean {
@@ -400,7 +419,7 @@ fun performActions(action: String): Boolean {
 fun performTransactionsAction(): Boolean {
     val options = parseTransactionOptions()
 
-    val transactions = ArrayList<Transaction>()
+    var transactions = ArrayList<Transaction>()
     val apis = exchanges
             .map { it.objectInstance!! }
             .filter {
@@ -423,12 +442,19 @@ fun performTransactionsAction(): Boolean {
                     emptyList()
                 }
             }
-            if (newTransactions.isNotEmpty())
-                transactions.addAll(newTransactions.filter { options.dateRange.isInRange(it) })
+
+            transactions.addAll(newTransactions)
+
         } catch (e: ApiNotSetException) {
             /* skip not set exchanges */
         }
     }
+
+    options.oldBitBayHistory?.let { transactions.addAll(BitBayCsvReader.readCsv(it)) }
+
+    transactions = ArrayList(transactions.filter { options.isInRange(it) })
+
+
     if (transactions.isEmpty()) {
         Logger.err(getString(Text.NO_OPERATIONS))
         return true

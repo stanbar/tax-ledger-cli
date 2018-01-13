@@ -25,6 +25,7 @@
 package com.stasbar.taxledger.writers
 
 import com.stasbar.taxledger.BitBay
+import com.stasbar.taxledger.Constants.dateFormat
 import com.stasbar.taxledger.Logger
 import com.stasbar.taxledger.OperationType
 import com.stasbar.taxledger.models.Transaction
@@ -32,71 +33,75 @@ import java.io.File
 import java.io.FileReader
 import java.io.IOException
 import java.math.BigDecimal
-import java.sql.Date
+
+fun String.toTransaction(): Transaction {
+    val values = split(";")
+
+    val operationName = values[2]
+
+    val operationType = parseOperationType(operationName)
+
+    return when (operationType) {
+        OperationType.BUY -> toBuyTransaction()
+        OperationType.SELL -> toSellTransaction()
+        OperationType.FEE -> toBuyTransaction()
+        OperationType.WITHDRAW -> toBuyTransaction()
+        OperationType.DEPOSIT -> toSellTransaction()
+        else -> throw IllegalStateException("BitBay operation type $operationType is not supported \n whole line: $this")
+    }
+}
+
+fun parseOperationType(string: String) = when (string) {
+    "Zakup waluty" -> OperationType.SELL
+    "Prowizja od transakcji" -> OperationType.FEE
+    "Zapłata za zakup waluty" -> OperationType.BUY
+    "Otrzymanie środków" -> OperationType.DEPOSIT
+    "Wypłata środków na konto" -> OperationType.WITHDRAW
+    else -> throw IllegalArgumentException("Could not map $string to OperationType")
+}
+
+private fun String.toBuyTransaction(): Transaction {
+    val values = split(";")
+    val operationDate = dateFormat.parse(values[0])
+
+    val operationType = parseOperationType(values[2])
+
+    val amount = values[3]
+            .replace(",", "") // Remove kilo separator
+            .split(" ")[0] // split amount from currency
+            .toBigDecimal()
+    val currency = values[3].split(" ")[1]
+
+    return Transaction(exchange = BitBay
+            , time = operationDate
+            , operationType = operationType
+            , bought = BigDecimal.ZERO
+            , boughtCurrency = ""
+            , paid = amount.abs()
+            , paidCurrency = currency.toUpperCase()
+            , rate = BigDecimal.ZERO)
+}
+
+private fun String.toSellTransaction(): Transaction {
+    val values = split(";")
+    val operationDate = dateFormat.parse(values[0])
+    val operationType = parseOperationType(values[2])
+    val amount = values[3]
+            .replace(",", "") // Remove kilo separator
+            .split(" ")[0] // split amount from currency
+            .toBigDecimal()
+    val currency = values[3].split(" ")[1]
+    return Transaction(exchange = BitBay
+            , time = operationDate
+            , operationType = operationType
+            , bought = amount.abs()
+            , boughtCurrency = currency.toUpperCase()
+            , paid = BigDecimal.ZERO
+            , paidCurrency = ""
+            , rate = BigDecimal.ZERO)
+}
 
 object BitBayCsvReader {
-
-    fun String.toTransaction(): Transaction {
-        val values = split(";")
-        val operationDate = values[0]
-        val bookDate = Date.valueOf(values[1])
-        val operationTypeString = values[2]
-        val operationType = OperationType.parse(operationTypeString)
-        val amount = values[3]
-        val balanceAfter = values[4]
-
-        return when (operationType) {
-            OperationType.BUY -> toBuyTransaction()
-            OperationType.SELL -> toSellTransaction()
-            OperationType.FEE -> toBuyTransaction()
-            OperationType.WITHDRAW -> toBuyTransaction()
-            OperationType.DEPOSIT -> toSellTransaction()
-            OperationType.AFFILIATE_INCOME -> toSellTransaction()
-            OperationType.CARD_WITHDRAW -> toBuyTransaction()
-            OperationType.CANCEL_CARD_WITHDRAW -> toSellTransaction()
-            OperationType.CARD_ORDER_FEE -> toBuyTransaction()
-            else -> throw IllegalStateException("BitBay operation type $ is not supported \n" +
-                    "amount: $amount \n")
-        }
-    }
-
-
-    private fun String.toBuyTransaction(): Transaction {
-        val values = split(";")
-        val operationDate = Date.valueOf(values[0])
-        val bookDate = Date.valueOf(values[1])
-        val operationType = OperationType.parse(values[2])
-        val amount = values[3].dropLast(3).toBigDecimal()
-        val currency = values[3].takeLast(3)
-        val balanceAfter = values[4].toBigDecimal()
-
-        return Transaction(exchange = BitBay
-                , time = bookDate
-                , operationType = operationType
-                , bought = BigDecimal.ZERO
-                , boughtCurrency = ""
-                , paid = amount.abs()
-                , paidCurrency = currency.toUpperCase()
-                , rate = BigDecimal.ZERO)
-    }
-
-    private fun String.toSellTransaction(): Transaction {
-        val values = split(";")
-        val operationDate = Date.valueOf(values[0])
-        val bookDate = Date.valueOf(values[1])
-        val operationType = OperationType.parse(values[2])
-        val amount = values[3].dropLast(3).toBigDecimal()
-        val currency = values[3].takeLast(3)
-        val balanceAfter = values[4].toBigDecimal()
-        return Transaction(exchange = BitBay
-                , time = bookDate
-                , operationType = operationType
-                , bought = amount.abs()
-                , boughtCurrency = currency.toUpperCase()
-                , paid = BigDecimal.ZERO
-                , paidCurrency = ""
-                , rate = BigDecimal.ZERO)
-    }
 
     fun readCsv(file: File): Collection<Transaction> {
         var transactions: List<Transaction> = emptyList()
@@ -106,7 +111,13 @@ object BitBayCsvReader {
                 if (lines.isEmpty())
                     Logger.err("The file: $file is empty")
                 else
-                    transactions = lines.drop(1).map { it.toTransaction() }
+                    transactions = lines
+                            .filterIndexed { index, line ->
+                                index != 0 //Skip the header
+                                        && line.isNotBlank()
+                                        && isFiatLine(line)
+                            }
+                            .map { it.toTransaction() }
             }
 
         } catch (e: IOException) {
@@ -115,4 +126,6 @@ object BitBayCsvReader {
         }
         return transactions
     }
+
+    fun isFiatLine(line: String) = line.split(";")[3].split(" ")[1] == "PLN"
 }

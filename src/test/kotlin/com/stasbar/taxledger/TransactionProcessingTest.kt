@@ -24,22 +24,14 @@
 
 package com.stasbar.taxledger
 
-import com.stasbar.taxledger.translations.Text
+import com.stasbar.taxledger.models.Transaction
+import org.junit.Before
 
-enum class OperationType(val key: String) {
-    BUY(Text.BUY),
-    SELL(Text.SELL),
-    FEE(Text.FEE),
-    DEPOSIT(Text.DEPOSIT),
-    WITHDRAW(Text.WITHDRAW),
-    TRANSFER(Text.TRANSFER),
-    AFFILIATE_INCOME(Text.AFFILIATE_INCOME),
-    CARD_WITHDRAW(Text.CARD_WITHDRAW),
-    CANCEL_CARD_WITHDRAW(Text.CANCEL_CARD_WITHDRAW),
-    CARD_ORDER_FEE(Text.CARD_ORDER_FEE);
+internal class TransactionProcessingTest {
 
-    override fun toString(): String {
-        return getString(key)
+    var transactions: Collection<Transaction> = ArrayList()
+
+    @Before
+    internal fun setUp() {
     }
-
 }

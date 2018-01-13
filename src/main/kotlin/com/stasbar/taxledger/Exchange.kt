@@ -60,8 +60,16 @@ abstract class Exchange<ApiType : ExchangeApi>(private val klass: Class<ApiType>
                                                val color: Ansi.Color) {
 
     val gson = GsonBuilder().setDateFormat(Constants.DATE_FORMAT).create()
-    var apia: ApiType? = null
+    var apiHolder: ApiType? = null
 
+    @Throws(ApiNotSetException::class)
+    fun getApi(): ApiType {
+        if (isNotSet())
+            throw ApiNotSetException(name)
+        else if (apiHolder == null)
+            apiHolder = klass.getConstructor(LinkedHashSet::class.java, Gson::class.java).newInstance(credentials, gson)
+        return apiHolder!!
+    }
 
     fun addCredential(newCredential: Credential) {
         credentials.add(newCredential)
@@ -73,14 +81,6 @@ abstract class Exchange<ApiType : ExchangeApi>(private val klass: Class<ApiType>
         if (credentials.none { it.value.isEmpty() })
             throw TooManyCredentialsException(name)
     }
-
-    @Throws(ApiNotSetException::class)
-    fun getApi(): ApiType =
-            if (isNotSet())
-                throw ApiNotSetException(name)
-            else {
-                klass.getConstructor(LinkedHashSet::class.java, Gson::class.java).newInstance(credentials, gson)
-            }
 
 
     fun isSet() = credentials.all { it.value.isNotBlank() }

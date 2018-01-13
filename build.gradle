@@ -50,7 +50,7 @@ repositories {
 jar {
     manifest {
         attributes 'Main-Class': 'com.stasbar.taxledger.MainKt',
-                'Implementation-Title': 'Gradle Quickst art',
+                'Implementation-Title': 'Gradle Quickstart',
                 'Implementation-Version': version
     }
 }
@@ -68,6 +68,9 @@ dependencies {
     compile 'de.vandermeer:asciitable:0.3.2'
     compile "io.reactivex.rxjava2:rxjava:2.1.7"
     compile 'com.squareup.retrofit2:adapter-rxjava2:2.3.0'
+    testCompile 'junit:junit:4.12'
+    testCompile "org.mockito:mockito-core:1.9.5"
+    testCompile "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
 
 }
 
