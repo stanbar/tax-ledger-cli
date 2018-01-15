@@ -24,6 +24,8 @@
 
 package com.stasbar.taxledger
 
+import com.stasbar.taxledger.completers.ActionsCompleter
+import com.stasbar.taxledger.completers.TransactionsCompleter
 import com.stasbar.taxledger.exceptions.ApiNotSetException
 import com.stasbar.taxledger.exceptions.CredentialsException
 import com.stasbar.taxledger.exceptions.IllegalDateRangeArgument
@@ -40,6 +42,7 @@ import org.fusesource.jansi.Ansi.ansi
 import org.fusesource.jansi.AnsiConsole
 import org.jline.reader.LineReaderBuilder
 import org.jline.reader.UserInterruptException
+import org.jline.reader.impl.completer.ArgumentCompleter
 import org.jline.reader.impl.completer.StringsCompleter
 import org.jline.terminal.TerminalBuilder
 import java.nio.file.Paths
@@ -54,6 +57,7 @@ import kotlin.reflect.KClass
  */
 val terminal = TerminalBuilder
         .builder()
+        .dumb(true)
         .jansi(true)
         .build()!!
 
@@ -76,6 +80,7 @@ val args = ArrayDeque<String>()
 
 fun main(cliArgs: Array<String>) {
     AnsiConsole.systemInstall()
+
     ConsoleWriter.printIntro()
 
     val credentials = PreferencesManager.load()
@@ -228,7 +233,7 @@ fun parseAction() {
 
     val reader = LineReaderBuilder.builder()
             .terminal(terminal)
-            .completer(StringsCompleter(Action.values().map { getString(it.title).toLowerCase() }))
+            .completer(ArgumentCompleter(ActionsCompleter(), TransactionsCompleter()))
             .build()
     var line = ""
     try {
@@ -384,10 +389,23 @@ fun tryToParseOldBitBayHistory(option: TransactionsOptions, argument: String, ne
 
 }
 
-fun validateOldBbArgument(argument: String, nextArgument: String?) = argument.toLowerCase() == "-oldbb"
-        && nextArgument != null
-        && nextArgument.isNotBlank()
-        && Paths.get(nextArgument).toFile().exists()
+fun validateOldBbArgument(argument: String, nextArgument: String?): Boolean {
+    Logger.d("argument: $argument nextArgument: $nextArgument")
+    if (argument.toLowerCase() != "-oldbb") {
+        return false
+    }
+    if (nextArgument == null || nextArgument.isBlank()) {
+        Logger.err(getString(Text.COULD_NOT_FIND_PATH_ARGUMENT))
+        return false
+    }
+
+    if (!Paths.get(nextArgument).toFile().exists()) {
+        Logger.err(getString(Text.INVALID_OLDBB_CSV_PATH).format(nextArgument))
+        return false
+    }
+    return true
+
+}
 
 
 fun performActions(action: String): Boolean {

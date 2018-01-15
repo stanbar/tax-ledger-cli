@@ -24,12 +24,13 @@
 
 package com.stasbar.taxledger.translations;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.ListResourceBundle;
 
 import static com.stasbar.taxledger.translations.Text.Actions.*;
 import static com.stasbar.taxledger.translations.Text.Exceptions.*;
-import static com.stasbar.taxledger.translations.Text.Logger.ERROR;
-import static com.stasbar.taxledger.translations.Text.Logger.INFO;
+import static com.stasbar.taxledger.translations.Text.Logger.*;
 import static com.stasbar.taxledger.translations.Text.Summary.*;
 
 public class Text extends ListResourceBundle {
@@ -57,6 +58,13 @@ public class Text extends ListResourceBundle {
     public static final String CANCEL_CARD_WITHDRAW = "cancel_card_withdraw";
     public static final String CARD_ORDER_FEE = "card_order_fee";
     public static final String TRANSFER = "transfer";
+    @NotNull
+    public static final String INVALID_OLDBB_CSV_PATH = "invalid_oldbb_csv_path";
+    @NotNull
+    public static final String COULD_NOT_FIND_PATH_ARGUMENT = "could_not_find_path_parameter";
+
+    public static final String ACTIONS = "actions";
+    public static final String TRANSACTIONS_PARAMETER = "transactions_parameter";
 
     public static class Summary {
         public static final String GROSS_INCOME = "gross_income";
@@ -82,6 +90,8 @@ public class Text extends ListResourceBundle {
     public static class Logger {
         public static final String INFO = "info";
         public static final String ERROR = "error";
+        @NotNull
+        public static final String DEBUG = "debug";
     }
 
     public static final String BUY = "buy";
@@ -130,6 +140,7 @@ public class Text extends ListResourceBundle {
             {EXIT_DESC, "Exit the program"},
             {INFO, "(INFO) "},
             {ERROR, "(ERROR) "},
+            {DEBUG, "(DEBUG) "},
             {BUY, "Buy"},
             {SELL, "Sell"},
             {FEE, "Fee"},
@@ -156,6 +167,10 @@ public class Text extends ListResourceBundle {
             {CANCEL_CARD_WITHDRAW, "Cancel card withdraw"},
             {CARD_ORDER_FEE, "Card order fee"},
             {TRANSFER, "Transfer"},
+            {INVALID_OLDBB_CSV_PATH, "%s is invalid .csv path"},
+            {COULD_NOT_FIND_PATH_ARGUMENT, "Could not find path/to/old/bitbay/histories.csv argument for -oldbb parameter. It should look like: transactions -oldbb C:\\Users\\username\\Downloads\\report_2018-01-09 14-38-05.csv"},
+            {ACTIONS, "Actions"},
+            {TRANSACTIONS_PARAMETER, "Transactions parameters"},
 
 
     };

@@ -29,8 +29,9 @@ import com.stasbar.taxledger.Constants.dateFormat
 import com.stasbar.taxledger.Logger
 import com.stasbar.taxledger.OperationType
 import com.stasbar.taxledger.models.Transaction
+import org.jline.utils.InputStreamReader
+import java.io.BufferedReader
 import java.io.File
-import java.io.FileReader
 import java.io.IOException
 import java.math.BigDecimal
 
@@ -106,7 +107,7 @@ object BitBayCsvReader {
     fun readCsv(file: File): Collection<Transaction> {
         var transactions: List<Transaction> = emptyList()
         try {
-            FileReader(file).use {
+            BufferedReader(InputStreamReader(file.inputStream(), Charsets.UTF_8)).use {
                 val lines = it.readLines()
                 if (lines.isEmpty())
                     Logger.err("The file: $file is empty")
@@ -124,8 +125,9 @@ object BitBayCsvReader {
             e.printStackTrace()
             Logger.err(e.message)
         }
+        Logger.info("Parsed ${transactions.size} from old.bitbay.net .csv history file")
         return transactions
     }
 
-    fun isFiatLine(line: String) = line.split(";")[3].split(" ")[1] == "PLN"
+    fun isFiatLine(line: String) = line.contains("PLN")
 }

@@ -24,24 +24,33 @@
 
 package com.stasbar.taxledger
 
+import com.stasbar.taxledger.options.TransactionsOptions
 import com.stasbar.taxledger.translations.Text
-import org.fusesource.jansi.Ansi.ansi
-import org.fusesource.jansi.AnsiConsole
+import org.jline.reader.Candidate
+import org.jline.reader.Completer
+import org.jline.reader.LineReader
+import org.jline.reader.ParsedLine
 
-object Logger {
 
-    fun info(message: String?) {
-        AnsiConsole.out.println(ansi().a("\n").fgBrightCyan().a(0x2714.toChar()).a(getString(Text.Logger.INFO)).reset().a(message).a("\n"))
+class MyCompleter : Completer {
+    private val mCandidates: MutableSet<Candidate>
+
+    init {
+        mCandidates = Action.values()
+                .map { getString(it.title).toLowerCase() }.toMutableSet()
+                .map { Candidate(it, it, getString(Text.ACTIONS), null, null, null, true) }.toMutableSet()
+
+
+        mCandidates.addAll(TransactionsOptions.arguments
+                .map { Candidate(it, it, getString(Text.TRANSACTIONS_PARAMETER), null, null, null, true) })
     }
 
+    override fun complete(reader: LineReader?, line: ParsedLine?, candidates: MutableList<Candidate>?) {
+        assert(line != null)
+        assert(candidates != null)
 
-    fun err(message: String?) {
-        AnsiConsole.out.println(ansi().a("\n").fgBrightRed().a(0x2716.toChar()).a(getString(Text.Logger.ERROR)).reset().a(message).a("\n"))
-    }
+        candidates?.addAll(mCandidates)
 
-    fun d(message: String?) {
-        if (DEBUG)
-            AnsiConsole.out.println(ansi().a("\n").fgBrightGreen().a(0x2716.toChar()).a(getString(Text.Logger.DEBUG)).reset().a(message).a("\n"))
     }
 
 }

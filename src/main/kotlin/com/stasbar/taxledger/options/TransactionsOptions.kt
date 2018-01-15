@@ -26,6 +26,7 @@ package com.stasbar.taxledger.options
 
 import com.stasbar.taxledger.Exchange
 import com.stasbar.taxledger.ExchangeApi
+import com.stasbar.taxledger.completers.TransactionCandidate
 import com.stasbar.taxledger.models.Transaction
 import com.stasbar.taxledger.toCalendar
 import java.io.File
@@ -85,6 +86,7 @@ class DateRange {
     }
 }
 
+
 class TransactionsOptions(
         val dateRange: DateRange = DateRange(),
         val dateAfter: DateRange = DateRange(),
@@ -95,6 +97,20 @@ class TransactionsOptions(
         var fileName: StringBuilder = StringBuilder(),
         var showNonEssential: Boolean = false,
         var showNonFiat: Boolean = false) {
+
+    companion object {
+
+        val arguments: Set<TransactionCandidate> = setOf(TransactionCandidate("-before", "Limit results to before date"),
+                TransactionCandidate("-after", "Limit results to before date"),
+                TransactionCandidate("-reverse", "Reverse transactions order"),
+                TransactionCandidate("-oldBB", "Import history from .csv file downloadable from old.bitbay.net"),
+                TransactionCandidate("-onlyBB", "Use only Bitbay"),
+                TransactionCandidate("-onlyAbu", "Use only Abucoins"),
+                TransactionCandidate("-showNonEssential", "Show operations like deposit and withdraw"),
+                TransactionCandidate("-showNonFiat", "Show crypto-crypto transactions"),
+                TransactionCandidate("-all", "Show both -nonEssential and -nonFiat"))
+    }
+
     fun isInRange(it: Transaction): Boolean = dateRange.isInRange(it) && dateBefore.isBefore(it) && dateAfter.isAfter(it)
 
 }

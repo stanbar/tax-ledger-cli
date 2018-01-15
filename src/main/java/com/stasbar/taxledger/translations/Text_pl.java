@@ -85,6 +85,10 @@ public class Text_pl extends ListResourceBundle {
                 {LOAD_COMPLETE, "Pomyślnie wczytano %d transakcji"},
                 {NO_OPERATIONS, "Nie znaleziono żandych operacji"},
                 {TOTAL_OPERATIONS, "Łącznie %d operacji"},
+                {INVALID_OLDBB_CSV_PATH, "%s jest nie poprawną ściężką do pliku .csv"},
+                {COULD_NOT_FIND_PATH_ARGUMENT, "Nie podano sciezki/do/pliku/report_2018-01-09 14-38-05.csv jako argumentu do parametru -oldbb. Przykład jak powinno to wyglądać: transactions -oldbb C:\\Users\\username\\Downloads\\report_2018-01-09 14-38-05.csv"},
+                {ACTIONS, "Akcje"},
+                {TRANSACTIONS_PARAMETER, "Parametry do transakcji"},
         };
     }
 
