@@ -48,7 +48,7 @@ Podstawowa komenda `transakcje` łączy się z każdą skonfigurowaną giełdą 
  - `-showNonFiat` wyświetla również operacje crypto-crypto. Domyślnie wyłączone ponieważ do celów podatkowych jest to zbędna informacja.
  - `-showNonEssential` wyświetla również wpłaty i wypłaty PLNów na konto giełdowe. Domyślnie wyłączone ponieważ do celów podatkowych jest to zbędna informacja.
  - `-all` wyświetla wszystkie transakcje 
- - `-oldBb <plik.csv>` pozwala na importowanie operacji ze starego BitBay 2.0. Listę transakcji możemy pobrać logując się na https://old.bitbay.net i w zakładce Historia na dole strony znajduje się link do pobrania w .csv
+ - `-oldBb <plik.csv>` pozwala na importowanie operacji ze starego BitBay 2.0. Aby pobrać listę transakcji należy zalogować się do BitBay'a 2.0 https://old.bitbay.net , następnie w zakładce Historia, na dole strony kliknąć w "Pobierz historię zmian salda jako CSV". Pobrany plik zapisać do folderu z programem.
  ![GIF](https://i.imgur.com/8ctkN6g.gif)
 
 ### Informacje
