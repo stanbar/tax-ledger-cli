@@ -9,15 +9,15 @@ Jest programem który pozwala na wygenerowanie zestawienia kosztów i przychodó
 
 ##### Windows
 1. Upewnij się, że masz zainstalowaną Javę [Pobierz](https://www.java.com/pl/download/)
-2. Pobierz i uruchom najnowszą wersję programu (tax-ledger.exe)[Pobierz](https://github.com/stasbar/tax-ledger/releases)
+2. Pobierz i uruchom najnowszą wersję programu [tax-ledger.exe](https://github.com/stasbar/tax-ledger-cli/releases/download/v1.0.7/tax-ledger-windows.exe)
 ##### macOS
 ###### metoda 1 Polecana
 1. Upewnij się, że masz zainstalowaną Javę [Pobierz](https://www.java.com/pl/download/)
-2. Pobierz i zamontuj obraz (tax-ledger-macOS.dmg) [Pobierz](https://github.com/stasbar/tax-ledger/releases)
+2. Pobierz i zamontuj obraz [tax-ledger-macOS.dmg](https://github.com/stasbar/tax-ledger-cli/releases/download/v1.0.7/tax-ledger-macOS.dmg)
 3. Przeciągnij aplikację (Tax Ledger.app) na skrót folderu Applocations 
 ###### metoda 2 i Linux
 1. Upewnij się, że masz zainstalowaną Javę [Pobierz](https://www.java.com/pl/download/)
-2. Pobierz plik (tax-ledger.jar) [Pobierz](https://github.com/stasbar/tax-ledger/releases)
+2. Pobierz plik [tax-ledger.jar](https://github.com/stasbar/tax-ledger-cli/releases/download/v1.0.7/tax-ledger.jar)
 3. Otwórz terminal [macOS - Terminal.app] w miejsu pobranego pliku 
 4. Włącz program poleceniem
 

@@ -1,2 +1,5 @@
 theme: jekyll-theme-cayman
+plugins:
+  - jekyll-redirect-from
+
 show_downloads: false
