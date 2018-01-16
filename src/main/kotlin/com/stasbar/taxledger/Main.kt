@@ -414,6 +414,9 @@ fun performActions(action: String): Boolean {
         getString(Action.TRANSACTIONS.title).toUpperCase(), Action.TRANSACTIONS.name -> {
             performTransactionsAction()
         }
+        getString(Action.OPEN.title).toUpperCase(), Action.OPEN.name -> {
+            performOpenFolder()
+        }
         getString(Action.CONTACT.title).toUpperCase(), Action.CONTACT.name -> {
             AnsiConsole.out.println(Misc.contact)
         }
@@ -426,12 +429,34 @@ fun performActions(action: String): Boolean {
         getString(Action.EXIT.title).toUpperCase(), Action.EXIT.name -> {
             ConsoleWriter.printExitMessage()
             System.exit(0)
-
         }
         else -> return false
     }
 
     return true
+}
+
+fun performOpenFolder() {
+    val runtime = Runtime.getRuntime()
+    val os = System.getProperty("os.name").toLowerCase()
+    when {
+        os.indexOf("mac") >= 0 -> {
+            val command = "open ${PreferencesManager.workingDir.absolutePath}"
+            Logger.d(command)
+            runtime.exec(command)
+        }
+        os.indexOf("win") >= 0 -> {
+            val command = "cmd /c start ${PreferencesManager.workingDir.absolutePath}"
+            Logger.d(command)
+            runtime.exec(command)
+        }
+        os.indexOf("nix") >= 0 || os.indexOf("nux") >= 0 || os.indexOf("aix") >= 0 -> {
+            Logger.err("Unsupported action on your OS $$os ")
+        }
+        os.indexOf("sunos") >= 0 -> {
+            Logger.err("Unsupported action on your OS $$os ")
+        }
+    }
 }
 
 fun performTransactionsAction(): Boolean {

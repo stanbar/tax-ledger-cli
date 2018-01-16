@@ -118,7 +118,7 @@ object CsvWriter : OutputWriter() {
         val expense = getExpense(transactions)
         val fees = getFees(transactions)
         val expenseWithFees = expense + fees
-        val netIncome = grossIncome - expenseWithFees
+        val netIncome = getNetIncome(grossIncome, expenseWithFees)
         val withdraws = getWithdraws(transactions)
         val deposits = getDeposits(transactions)
 

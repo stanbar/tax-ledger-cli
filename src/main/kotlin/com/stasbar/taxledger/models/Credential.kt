@@ -27,7 +27,7 @@ package com.stasbar.taxledger.models
 class Credential(val name: String, val length: Int) {
     var value: String = ""
         set(value) {
-            if (value.trim().length != length)
+            if (value.trim().length < length)
                 throw IllegalStateException("")
             else field = value
         }

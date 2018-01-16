@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Stanislaw stasbar Baranski
+ * Copyright (c) 2018 Stanislaw stasbar Baranski
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import com.stasbar.taxledger.translations.Text.Actions.*
 
 enum class Action(val title: String, val symbol: Int, val description: String) {
     TRANSACTIONS(TRANSACTIONS_TITLE, 0x1F4D6, TRANSACTIONS_DESC),
+    OPEN(OPEN_FOLDER_TITLE, 0x1F4D6, OPEN_FOLDER_DESC),
     EXCHANGES(EXCHANGES_TITLE, 0x1F511, EXCHANGES_DESC),
     CONTACT(CONTACT_TITLE, 0x1F4E7, CONTACT_DESC),
     DONATE(DONATE_TITLE, 0x1F44D, DONATE_DESC),

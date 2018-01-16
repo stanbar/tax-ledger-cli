@@ -23,7 +23,7 @@
  */
 
 group 'com.stasbar'
-version '1.0.7'
+version '1.0.8'
 
 buildscript {
     ext.kotlin_version = '1.2.10'
@@ -53,6 +53,11 @@ jar {
                 'Implementation-Title': 'Gradle Quickstart',
                 'Implementation-Version': version
     }
+}
+shadowJar {
+    baseName = 'tax-ledger'
+    classifier = null
+    version = null
 }
 
 

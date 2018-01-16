@@ -29,6 +29,7 @@ import com.stasbar.taxledger.getString
 import com.stasbar.taxledger.models.Transaction
 import com.stasbar.taxledger.translations.Text
 import java.math.BigDecimal
+import java.math.RoundingMode
 
 abstract class OutputWriter {
     val essentialOperation = arrayOf(OperationType.BUY, OperationType.SELL, OperationType.FEE
@@ -44,34 +45,41 @@ abstract class OutputWriter {
         var expense: BigDecimal = BigDecimal.ZERO
         transactions.filter { it.paidCurrency.toUpperCase() == "PLN" && it.operationType == OperationType.BUY }
                 .forEach { expense += it.paid }
-        return expense
+        return expense.setScale(2, RoundingMode.DOWN)
     }
 
     fun getGrossIncome(transactions: Collection<Transaction>): BigDecimal {
         var grossIncome: BigDecimal = BigDecimal.ZERO
         transactions.filter { it.boughtCurrency.toUpperCase() == "PLN" && it.operationType == OperationType.SELL }
                 .forEach { grossIncome += it.bought }
-        return grossIncome
+        return grossIncome.setScale(2, RoundingMode.DOWN)
     }
 
     fun getFees(transactions: Collection<Transaction>): BigDecimal {
         var fees: BigDecimal = BigDecimal.ZERO
         transactions.filter { it.operationType == OperationType.FEE && it.paidCurrency.toUpperCase() == "PLN" }
                 .forEach { fees += it.paid }
-        return fees
+        return fees.setScale(2, RoundingMode.DOWN)
+    }
+
+    fun getNetIncome(grossIncome: BigDecimal, expenseWithFees: BigDecimal): BigDecimal {
+        val netIncome = grossIncome - expenseWithFees
+        return netIncome.setScale(2, RoundingMode.DOWN)
     }
 
     fun getWithdraws(transactions: Collection<Transaction>): BigDecimal {
         var withdraws: BigDecimal = BigDecimal.ZERO
         transactions.filter { it.operationType == OperationType.WITHDRAW && it.paidCurrency.toUpperCase() == "PLN" }
                 .forEach { withdraws += it.paid }
-        return withdraws
+        return withdraws.setScale(2, RoundingMode.DOWN)
     }
 
     fun getDeposits(transactions: Collection<Transaction>): BigDecimal {
         var deposits: BigDecimal = BigDecimal.ZERO
         transactions.filter { it.operationType == OperationType.DEPOSIT && it.boughtCurrency.toUpperCase() == "PLN" }
                 .forEach { deposits += it.bought }
-        return deposits
+        return deposits.setScale(2, RoundingMode.DOWN)
     }
+
+
 }

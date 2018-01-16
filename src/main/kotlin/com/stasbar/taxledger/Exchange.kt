@@ -40,7 +40,7 @@ object BitBay : Exchange<BitBayApi>(BitBayApi::class.java, "BitBay", "bb",
         linkedSetOf(Credential("publicKey", 36), Credential("privateKey", 36)), Ansi.Color.BLUE)
 
 object Abucoins : Exchange<AbuApi>(AbuApi::class.java, "Abucoins", "abu",
-        linkedSetOf(Credential("passphrase", 9),
+        linkedSetOf(Credential("passphrase", 8),
                 Credential("key", 41),
                 Credential("secret", 64))
         , Ansi.Color.GREEN)
