@@ -224,7 +224,7 @@ fun saveCredentials(supportedExchanges: Set<KClass<out Exchange<out ExchangeApi>
 
 fun parseAction() {
     for (action in Action.values()) {
-        val actionLine = ansi().a("\n\t").a(String(Character.toChars(action.symbol))).bold().a(getString(action.title)).boldOff()
+        val actionLine = ansi().a("\n\t").a(String(Character.toChars(action.symbol))).a("  ").bold().a(getString(action.title)).boldOff()
         if (getString(action.description).isNotBlank())
             actionLine.a(" - ${getString(action.description)}")
         AnsiConsole.out.println(actionLine)

@@ -24,6 +24,8 @@
 
 package com.stasbar.taxledger.translations;
 
+import com.stasbar.taxledger.Misc;
+
 import java.util.ListResourceBundle;
 
 import static com.stasbar.taxledger.translations.Text.Actions.*;
@@ -77,6 +79,8 @@ public class Text extends ListResourceBundle {
         public static final String OPEN_FOLDER_DESC = "open_folder_desc";
         public static final String CONTACT_TITLE = "contact_title";
         public static final String CONTACT_DESC = "contact_desc";
+        public static final String VERSION_TITLE = "version_title";
+        public static final String VERSION_DESC = "version_desc";
         public static final String EXCHANGES_TITLE = "exchanges_title";
         public static final String EXCHANGES_DESC = "exchanges_desc";
         public static final String DONATE_TITLE = "donate_title";
@@ -170,6 +174,8 @@ public class Text extends ListResourceBundle {
             {TRANSACTIONS_PARAMETER, "Transactions parameters"},
             {OPEN_FOLDER_TITLE, "Open"},
             {OPEN_FOLDER_DESC, "Open folder location"},
+            {VERSION_TITLE, "Version"},
+            {VERSION_DESC, 'v' + Misc.INSTANCE.getVersion()},
 
 
     };
