@@ -24,16 +24,15 @@
 
 package com.stasbar.taxledger
 
+import com.stasbar.taxledger.models.Credential
 import org.junit.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 internal class MainKtTest {
 
-
     @Test
     fun test_parseCredentials() {
-
         args.add("bb")
         args.add("fe0d3cd1-6cee-46f0-8c73-512304c40ff9")
         args.add("706c560d-bb31-42ea-8137-01232522d413")
@@ -70,6 +69,24 @@ internal class MainKtTest {
         assertTrue { exchangeByName("abu") == Abucoins::class }
         assertTrue { exchangeByName("ABUCOINS") == Abucoins::class }
         assertTrue { exchangeByName("AbU") == Abucoins::class }
+    }
+
+    @Test(expected = IllegalStateException::class)
+    fun test_failAddCredentialTooShort() {
+        val credential = Credential("publicKey", 32)
+        credential.value = "123"
+    }
+
+    @Test(expected = IllegalStateException::class)
+    fun test_failAddCredentialEmpty() {
+        val credential = Credential("publicKey", 32)
+        credential.value = ""
+    }
+
+    @Test(expected = IllegalStateException::class)
+    fun test_failAddCredentialTooLong() {
+        val credential = Credential("publicKey", 32)
+        credential.value = "asdxcvqwertygfdcvsdfglkskdhfjsdkss"
     }
 
 }

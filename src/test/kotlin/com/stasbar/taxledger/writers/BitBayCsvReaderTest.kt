@@ -28,7 +28,6 @@ import com.stasbar.taxledger.BitBay
 import com.stasbar.taxledger.Constants.dateFormat
 import com.stasbar.taxledger.OperationType
 import com.stasbar.taxledger.models.Transaction
-import org.junit.Before
 import org.junit.Test
 import java.io.File
 import java.math.BigDecimal
@@ -40,9 +39,6 @@ internal class BitBayCsvReaderTest {
 
     val oldBbHistoryCsvFile = File("old_bb_report.csv")
     // transactions -oldbb build/libs/report.csv -after 7.2017 -before 11.2017
-    @Before
-    fun setUp() {
-    }
 
     @Test
     fun test_readCsv() {

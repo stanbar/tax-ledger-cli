@@ -34,7 +34,6 @@ import com.stasbar.taxledger.DEBUG
 import com.stasbar.taxledger.ExchangeApi
 import com.stasbar.taxledger.Logger
 import com.stasbar.taxledger.exchanges.bitbay.models.BitBayHistory
-import com.stasbar.taxledger.exchanges.bitbay.models.BitBayTransaction
 import com.stasbar.taxledger.exchanges.bitbay.requests.HistoryRequest
 import com.stasbar.taxledger.models.Credential
 import com.stasbar.taxledger.models.Transaction
@@ -74,7 +73,7 @@ interface PrivateService {
      */
     @FormUrlEncoded
     @POST("tradingApi.php")
-    fun transactions(@FieldMap(encoded = true) fields: Map<String, String>): Call<List<BitBayTransaction>>
+    fun transactions(@FieldMap(encoded = true) fields: Map<String, String>): Call<JsonElement>
 }
 
 class BitBayApi(credentials: LinkedHashSet<Credential>, private val gson: Gson) : ExchangeApi {
@@ -99,6 +98,32 @@ class BitBayApi(credentials: LinkedHashSet<Credential>, private val gson: Gson) 
                 .build()
         retrofit.create(PrivateService::class.java)
     }
+
+    /**
+     * We can not use it since it has hardcoded limit to 50 and doesn't list fees
+     */
+
+//    override fun transactions(): List<Transaction> {
+//        val request = TransactionsRequest(limit = "10000000")
+//
+//        val response = service.value.transactions(request.toMap()).execute()
+//
+//        return if (response.isSuccessful) {
+//            val responseBody = response.body()
+//            try {
+//                val list: List<BitBayTransaction>? = gson.fromJson(responseBody, object : TypeToken<List<BitBayTransaction>>() {}.type)
+//                list?.map { it.toTransaction() } ?: emptyList()
+//            } catch (e: JsonSyntaxException) {
+//                Logger.err(responseBody.toString())
+//                emptyList<Transaction>()
+//            }
+//        } else {
+//            Logger.err("Unsuccessfully fetched transactions error code: ${response.code()} body: ${response.errorBody()} ")
+//            emptyList()
+//        }
+//
+//
+//    }
 
     override fun transactions(): List<Transaction> {
         val request = HistoryRequest(limit = "10000000", currency = "PLN")
