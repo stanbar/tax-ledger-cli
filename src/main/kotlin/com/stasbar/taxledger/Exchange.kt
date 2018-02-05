@@ -30,6 +30,7 @@ import com.stasbar.taxledger.exceptions.ApiNotSetException
 import com.stasbar.taxledger.exceptions.TooManyCredentialsException
 import com.stasbar.taxledger.exchanges.abucoins.AbuApi
 import com.stasbar.taxledger.exchanges.bitbay.BitBayApi
+import com.stasbar.taxledger.exchanges.bitbaynew.BitBayNewApi
 import com.stasbar.taxledger.exchanges.bitmarket.BitmarketApi
 import com.stasbar.taxledger.exchanges.coinroom.CoinroomApi
 import com.stasbar.taxledger.models.Credential
@@ -37,6 +38,9 @@ import org.fusesource.jansi.Ansi
 import java.io.PrintWriter
 
 object BitBay : Exchange<BitBayApi>(BitBayApi::class.java, "BitBay", "bb",
+        linkedSetOf(Credential("publicKey", 36), Credential("privateKey", 36)), Ansi.Color.BLUE)
+
+object BitBayNew : Exchange<BitBayNewApi>(BitBayNewApi::class.java, "BitBayNew", "bbnew",
         linkedSetOf(Credential("publicKey", 36), Credential("privateKey", 36)), Ansi.Color.BLUE)
 
 object Abucoins : Exchange<AbuApi>(AbuApi::class.java, "Abucoins", "abu",

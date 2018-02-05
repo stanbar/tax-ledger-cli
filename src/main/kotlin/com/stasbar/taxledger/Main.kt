@@ -71,7 +71,10 @@ val DEBUG = false
  * Set of all available exchanges.
  * We can threat this set of KClasses as set of kotlin objects (Singletons) with .objectInstance reflection method
  */
-val exchanges = setOf(BitBay::class, Abucoins::class)
+val exchanges = setOf(
+        BitBay::class,
+//        BitBayNew::class //currently disabled since this is pre-release version and doesn't allow to fetch fees
+        Abucoins::class)
 
 /**
  * Argument deque on which whole CLI is working on
@@ -284,6 +287,8 @@ fun parseTransactionOptions(): TransactionsOptions {
             "-reverse".toLowerCase() -> option.reverse = true
             "-bitbayOnly".toLowerCase(), "-bbOnly".toLowerCase()
                 , "-onlyBitbay".toLowerCase(), "-onlybb".toLowerCase() -> option.oneExchangeOnly = BitBay::class.objectInstance!!
+            "-bitbayNewOnly".toLowerCase(), "-bbNewOnly".toLowerCase()
+                , "-onlyBitbayNew".toLowerCase(), "-onlybbnew".toLowerCase() -> option.oneExchangeOnly = BitBayNew::class.objectInstance!!
             "-abucoinsOnly".toLowerCase(), "-abuOnly".toLowerCase()
                 , "-onlyAbucoins".toLowerCase(), "-onlyAbu".toLowerCase() -> option.oneExchangeOnly = Abucoins::class.objectInstance!!
 
