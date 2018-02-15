@@ -35,6 +35,7 @@ import java.io.File
 import java.io.IOException
 import java.math.BigDecimal
 
+@Throws(IllegalArgumentException::class)
 fun String.toTransaction(): Transaction {
     val values = split(";")
 
@@ -48,7 +49,8 @@ fun String.toTransaction(): Transaction {
         OperationType.FEE -> toBuyTransaction()
         OperationType.WITHDRAW -> toBuyTransaction()
         OperationType.DEPOSIT -> toSellTransaction()
-        else -> throw IllegalStateException("BitBay operation type $operationType is not supported \n whole line: $this")
+        else -> throw IllegalArgumentException("Unsupported operation type $values");
+
     }
 }
 
@@ -58,7 +60,9 @@ fun parseOperationType(string: String) = when (string) {
     "Zapłata za zakup waluty" -> OperationType.BUY
     "Otrzymanie środków" -> OperationType.DEPOSIT
     "Wypłata środków na konto" -> OperationType.WITHDRAW
-    else -> throw IllegalArgumentException("Could not map $string to OperationType")
+    "Wypłata z programu partnerskiego" -> OperationType.SELL
+    else -> OperationType.UNSUPPORTED
+//else -> throw IllegalArgumentException("Could not map $string to OperationType")
 }
 
 private fun String.toBuyTransaction(): Transaction {
@@ -118,10 +122,15 @@ object BitBayCsvReader {
                                         && line.isNotBlank()
                                         && isFiatLine(line)
                                         && line.split(";").size == 5
+                            }.mapNotNull {
+                                try {
+                                    it.toTransaction()
+                                } catch (e: IllegalArgumentException) {
+                                    Logger.err(e.message)
+                                    null
+                                }
                             }
-                            .map {
-                                it.toTransaction()
-                            }.filter { it.operationType == OperationType.FEE }
+                            .filter { it.operationType == OperationType.FEE }
             }
 
         } catch (e: IOException) {
