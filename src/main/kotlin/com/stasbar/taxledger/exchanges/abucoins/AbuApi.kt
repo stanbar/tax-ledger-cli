@@ -108,6 +108,8 @@ interface AbuService {
 }
 
 class AbuApi(credentials: LinkedHashSet<Credential>, private val gson: Gson) : ExchangeApi {
+
+
     private val passphrase: String = credentials.first { it.name == "passphrase" }.value
     private val accessKey: String = credentials.first { it.name == "key" }.value
     private val secretKey: String = credentials.first { it.name == "secret" }.value
@@ -166,7 +168,6 @@ class AbuApi(credentials: LinkedHashSet<Credential>, private val gson: Gson) : E
         } while (newTransactions.size == limit)
 
         return transactions
-
 
     }
 

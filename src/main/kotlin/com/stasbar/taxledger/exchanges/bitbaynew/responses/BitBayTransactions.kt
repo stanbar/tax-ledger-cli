@@ -22,11 +22,14 @@
  *            taxledger@stasbar.com
  */
 
-package com.stasbar.taxledger.exchanges.bitbaynew.models
+package com.stasbar.taxledger.exchanges.bitbaynew.responses
 
 import com.google.gson.JsonElement
+import com.stasbar.taxledger.exchanges.bitbaynew.models.BitBayTransaction
 
-data class BitBayNewTransactions(val status: String,
-                                 val totalRows: String,
-                                 val items: List<Item>,
-                                 val query: JsonElement)
+data class BitBayTransactions(val status: String,
+                              val totalRows: String,
+                              val items: List<BitBayTransaction>,
+                              val query: JsonElement,
+                              val nextPageCursor: Int?
+)

@@ -33,7 +33,7 @@ import java.util.*
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
 
-open class BitBayNewHeaderInterceptor(private val publicKey: String, private val privateKey: String) : Interceptor {
+open class BitBayHeaderInterceptor(private val publicKey: String, private val privateKey: String) : Interceptor {
 
     override fun intercept(chain: Interceptor.Chain): Response {
         val request = chain.request()

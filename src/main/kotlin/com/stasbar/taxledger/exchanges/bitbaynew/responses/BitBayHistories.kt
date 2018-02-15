@@ -22,21 +22,17 @@
  *            taxledger@stasbar.com
  */
 
-package com.stasbar.taxledger
+package com.stasbar.taxledger.exchanges.bitbaynew.responses
 
-import com.stasbar.taxledger.models.Transaction
+import com.google.gson.JsonElement
+import com.stasbar.taxledger.exchanges.bitbaynew.models.History
 
-
-interface ExchangeApi{
-    fun transactions(): List<Transaction>
-    fun fees(): List<Transaction> {
-        return emptyList()
-    }
-
-    fun depositsAndWithdraws(): List<Transaction> {
-        return emptyList()
-    }
-}
-
-
-
+class BitBayHistories(val status: String,
+                      val items: List<History>,
+                      val hasNextPage: Boolean,
+                      val fetchedRows: Int,
+                      val limit: Int,
+                      val offset: Int,
+                      val settings: JsonElement,
+                      val query: JsonElement?,
+                      val errors: JsonElement?)

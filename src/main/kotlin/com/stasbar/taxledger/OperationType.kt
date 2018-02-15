@@ -36,7 +36,8 @@ enum class OperationType(val key: String) {
     AFFILIATE_INCOME(Text.AFFILIATE_INCOME),
     CARD_WITHDRAW(Text.CARD_WITHDRAW),
     CANCEL_CARD_WITHDRAW(Text.CANCEL_CARD_WITHDRAW),
-    CARD_ORDER_FEE(Text.CARD_ORDER_FEE);
+    CARD_ORDER_FEE(Text.CARD_ORDER_FEE),
+    UNSUPPORTED(Text.UNSUPPORTED);
 
     override fun toString(): String {
         return getString(key)

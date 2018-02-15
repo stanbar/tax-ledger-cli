@@ -24,14 +24,14 @@
 
 package com.stasbar.taxledger.exchanges.bitbaynew.models
 
-import com.stasbar.taxledger.BitBayNew
+import com.stasbar.taxledger.BitBay
 import com.stasbar.taxledger.OperationType
 import com.stasbar.taxledger.models.Transaction
 import com.stasbar.taxledger.models.Transactionable
 import java.math.BigDecimal
 import java.util.*
 
-class Item(
+class BitBayTransaction(
         var id: UUID,
         var market: String,
         var time: Long,
@@ -61,7 +61,7 @@ class Item(
 
     private fun toTransaction(bought: BigDecimal, boughtCurrency: String, paid: BigDecimal, paidCurrency: String)
             : Transaction =
-            Transaction(exchange = BitBayNew
+            Transaction(exchange = BitBay
                     , id = id.toString()
                     , time = Date(time)
                     , operationType = operationType()

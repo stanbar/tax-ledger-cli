@@ -23,7 +23,7 @@
  */
 
 group 'com.stasbar'
-version '1.0.8'
+version '1.1.0-alpha'
 
 buildscript {
     ext.kotlin_version = '1.2.21'

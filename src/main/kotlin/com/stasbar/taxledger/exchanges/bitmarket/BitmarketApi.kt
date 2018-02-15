@@ -50,7 +50,6 @@ interface BitmarketService {
 }
 
 class BitmarketApi(private val publicKey: String, private val privateKey: String) : ExchangeApi {
-
     private val URI = "https://www.bitmarket.pl/"
 
     private val service: Lazy<BitmarketService> = lazy {

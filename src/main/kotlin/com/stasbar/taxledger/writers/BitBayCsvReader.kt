@@ -117,8 +117,11 @@ object BitBayCsvReader {
                                 index != 0 //Skip the header
                                         && line.isNotBlank()
                                         && isFiatLine(line)
+                                        && line.split(";").size == 5
                             }
-                            .map { it.toTransaction() }
+                            .map {
+                                it.toTransaction()
+                            }.filter { it.operationType == OperationType.FEE }
             }
 
         } catch (e: IOException) {

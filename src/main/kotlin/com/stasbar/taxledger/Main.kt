@@ -72,8 +72,7 @@ val DEBUG = false
  * We can threat this set of KClasses as set of kotlin objects (Singletons) with .objectInstance reflection method
  */
 val exchanges = setOf(
-        BitBay::class,
-//        BitBayNew::class //currently disabled since this is pre-release version and doesn't allow to fetch fees
+        BitBay::class, //currently disabled since this is pre-release version and doesn't allow to fetch fees
         Abucoins::class)
 
 /**
@@ -287,8 +286,6 @@ fun parseTransactionOptions(): TransactionsOptions {
             "-reverse".toLowerCase() -> option.reverse = true
             "-bitbayOnly".toLowerCase(), "-bbOnly".toLowerCase()
                 , "-onlyBitbay".toLowerCase(), "-onlybb".toLowerCase() -> option.oneExchangeOnly = BitBay::class.objectInstance!!
-            "-bitbayNewOnly".toLowerCase(), "-bbNewOnly".toLowerCase()
-                , "-onlyBitbayNew".toLowerCase(), "-onlybbnew".toLowerCase() -> option.oneExchangeOnly = BitBayNew::class.objectInstance!!
             "-abucoinsOnly".toLowerCase(), "-abuOnly".toLowerCase()
                 , "-onlyAbucoins".toLowerCase(), "-onlyAbu".toLowerCase() -> option.oneExchangeOnly = Abucoins::class.objectInstance!!
 
@@ -467,7 +464,7 @@ fun performOpenFolder() {
 fun performTransactionsAction(): Boolean {
     val options = parseTransactionOptions()
 
-    var transactions = ArrayList<Transaction>()
+    var transactions = HashSet<Transaction>()
     val apis = exchanges
             .map { it.objectInstance!! }
             .filter {
@@ -492,15 +489,20 @@ fun performTransactionsAction(): Boolean {
             }
 
             transactions.addAll(newTransactions)
+            transactions.addAll(it.getApi().fees())
+            transactions.addAll(it.getApi().depositsAndWithdraws())
+
 
         } catch (e: ApiNotSetException) {
             /* skip not set exchanges */
         }
     }
 
-    options.oldBitBayHistory?.let { transactions.addAll(BitBayCsvReader.readCsv(it)) }
+    options.oldBitBayHistory?.let {
+        transactions.addAll(BitBayCsvReader.readCsv(it))
+    }
 
-    transactions = ArrayList(transactions.filter { options.isInRange(it) })
+    transactions = HashSet(transactions.filter { options.isInRange(it) })
 
 
     if (transactions.isEmpty()) {
@@ -512,12 +514,13 @@ fun performTransactionsAction(): Boolean {
         kotlin.Comparator { o1, o2 -> o1.time.compareTo(o2.time) }
     else kotlin.Comparator { o1, o2 -> o2.time.compareTo(o1.time) }
 
-    transactions.sortWith(comparator)
+    val transactionList = transactions.toMutableList()
+    transactionList.sortWith(comparator)
 
-    ConsoleWriter.printTransactions(transactions, options)
-    ConsoleWriter.printSummary(transactions)
-    Logger.info(getString(Text.LOAD_COMPLETE).format(transactions.size))
-    CsvWriter.saveToFile(transactions, options)
+    ConsoleWriter.printTransactions(transactionList, options)
+    ConsoleWriter.printSummary(transactionList)
+    Logger.info(getString(Text.LOAD_COMPLETE).format(transactionList.size))
+    CsvWriter.saveToFile(transactionList, options)
     return true
 }
 

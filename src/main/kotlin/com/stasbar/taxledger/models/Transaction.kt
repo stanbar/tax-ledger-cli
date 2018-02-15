@@ -35,15 +35,15 @@ interface Transactionable {
     fun operationType(): OperationType
 }
 
-data class Transaction(val exchange: Exchange<out ExchangeApi>,
-                       var id: String = "",
-                       var time: Date = Date(),
-                       var operationType: OperationType,
-                       var bought: BigDecimal = BigDecimal.ZERO,
-                       var boughtCurrency: String = "",
-                       var paid: BigDecimal = BigDecimal.ZERO,
-                       var paidCurrency: String = "",
-                       var rate: BigDecimal = BigDecimal.ZERO) {
+class Transaction(val exchange: Exchange<out ExchangeApi>,
+                  var id: String = "",
+                  var time: Date = Date(),
+                  var operationType: OperationType,
+                  var bought: BigDecimal = BigDecimal.ZERO,
+                  var boughtCurrency: String = "",
+                  var paid: BigDecimal = BigDecimal.ZERO,
+                  var paidCurrency: String = "",
+                  var rate: BigDecimal = BigDecimal.ZERO) {
 
     fun toList(): List<String> {
         return listOf(exchange.name

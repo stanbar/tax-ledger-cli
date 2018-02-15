@@ -25,6 +25,7 @@
 package com.stasbar.taxledger.translations;
 
 import com.stasbar.taxledger.Misc;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ListResourceBundle;
 
@@ -63,6 +64,8 @@ public class Text extends ListResourceBundle {
 
     public static final String ACTIONS = "actions";
     public static final String TRANSACTIONS_PARAMETER = "transactions_parameter";
+    @NotNull
+    public static final String UNSUPPORTED = "unsupported";
 
     public static class Summary {
         public static final String GROSS_INCOME = "gross_income";
@@ -176,6 +179,7 @@ public class Text extends ListResourceBundle {
             {OPEN_FOLDER_DESC, "Open folder location"},
             {VERSION_TITLE, "Version"},
             {VERSION_DESC, 'v' + Misc.INSTANCE.getVersion()},
+            {UNSUPPORTED, "supported"},
 
 
     };
