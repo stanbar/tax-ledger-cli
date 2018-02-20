@@ -31,5 +31,5 @@ data class BitBayTransactions(val status: String,
                               val totalRows: String,
                               val items: List<BitBayTransaction>,
                               val query: JsonElement,
-                              val nextPageCursor: Int?
+                              val nextPageCursor: String
 )

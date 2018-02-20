@@ -37,9 +37,9 @@ import java.io.Writer
 import java.text.SimpleDateFormat
 import java.util.*
 
-object CsvWriter : OutputWriter() {
+class CsvWriter(transactions: Collection<Transaction>) : OutputWriter(transactions) {
 
-    fun saveToFile(transactions: Collection<Transaction>, options: TransactionsOptions) {
+    fun saveToFile(options: TransactionsOptions) {
         try {
             val file = File(PreferencesManager.transactionsDir, fileName(options.fileName.toString()))
             FileWriter(file).use {
@@ -114,13 +114,13 @@ object CsvWriter : OutputWriter() {
     }
 
     fun printSummary(writer: FileWriter, transactions: Collection<Transaction>) {
-        val grossIncome = getGrossIncome(transactions)
-        val expense = getExpense(transactions)
-        val fees = getFees(transactions)
+        val grossIncome = getGrossIncome()
+        val expense = getExpense()
+        val fees = getFees()
         val expenseWithFees = expense + fees
-        val netIncome = getNetIncome(grossIncome, expenseWithFees)
-        val withdraws = getWithdraws(transactions)
-        val deposits = getDeposits(transactions)
+        val netIncome = getNetIncome("PLN")
+        val withdraws = getWithdraws()
+        val deposits = getDeposits()
 
         writeLine(writer, listOf(getString(Text.Summary.SUMMARY)))
         writeLine(writer, listOf(getString(Text.Summary.GROSS_INCOME), getString(Text.Summary.EXPENSE_WITH_FEE), getString(Text.Summary.NET_INCOME)))

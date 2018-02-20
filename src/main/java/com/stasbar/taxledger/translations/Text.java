@@ -82,6 +82,8 @@ public class Text extends ListResourceBundle {
         public static final String OPEN_FOLDER_DESC = "open_folder_desc";
         public static final String CONTACT_TITLE = "contact_title";
         public static final String CONTACT_DESC = "contact_desc";
+        public static final String FOLLOW_TITLE = "follow_title";
+        public static final String FOLLOW_DESC = "follow_desc";
         public static final String VERSION_TITLE = "version_title";
         public static final String VERSION_DESC = "version_desc";
         public static final String EXCHANGES_TITLE = "exchanges_title";
@@ -140,6 +142,8 @@ public class Text extends ListResourceBundle {
             {EXCHANGES_DESC, "Configure exchange API credentials"},
             {DONATE_TITLE, "Donate"},
             {DONATE_DESC, "Prints the donation addresses"},
+            {FOLLOW_TITLE, "Follow"},
+            {FOLLOW_DESC, "Follow to get notified about changes and new releases"},
             {EXIT_TITLE, "Exit"},
             {EXIT_DESC, "Exit the program"},
             {INFO, "(INFO) "},

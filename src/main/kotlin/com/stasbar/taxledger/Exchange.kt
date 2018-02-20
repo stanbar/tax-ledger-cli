@@ -37,27 +37,31 @@ import org.fusesource.jansi.Ansi
 import java.io.PrintWriter
 
 object BitBay : Exchange<BitBayApi>(BitBayApi::class.java, "BitBay", "bb",
-        linkedSetOf(Credential("publicKey", 36), Credential("privateKey", 36)), Ansi.Color.BLUE)
+        linkedSetOf(Credential("publicKey", 36), Credential("privateKey", 36)), Ansi.Color.BLUE,
+        setOf("--onlybb", "--bbonly"))
+
 
 object Abucoins : Exchange<AbuApi>(AbuApi::class.java, "Abucoins", "abu",
         linkedSetOf(Credential("passphrase", 8),
                 Credential("key", 41),
                 Credential("secret", 64))
-        , Ansi.Color.GREEN)
+        , Ansi.Color.GREEN, setOf("--onlyabu", "--abuonly"))
 
 object BitMarket : Exchange<BitmarketApi>(BitmarketApi::class.java, "Bitmarket", "bm",
-        linkedSetOf(Credential("publicKey", 32), Credential("privateKey", 32)), Ansi.Color.GREEN)
+        linkedSetOf(Credential("publicKey", 32), Credential("privateKey", 32)), Ansi.Color.GREEN,
+        setOf("--onlybitmarket", "--bitmarketonly", "--onlybm", "--bmonly"))
 
 
 object Coinroom : Exchange<CoinroomApi>(CoinroomApi::class.java, "Coinroom", "cr",
-        linkedSetOf(Credential("publicKey", 36), Credential("privateKey", 36)), Ansi.Color.YELLOW)
+        linkedSetOf(Credential("publicKey", 36), Credential("privateKey", 36)), Ansi.Color.YELLOW,
+        setOf("--onlycoinroom", "--coinroomonly", "--onlycr", "--cronly"))
 
 
 abstract class Exchange<ApiType : ExchangeApi>(private val klass: Class<ApiType>,
                                                val name: String,
                                                private val shortcut: String,
                                                val credentials: LinkedHashSet<Credential>,
-                                               val color: Ansi.Color) {
+                                               val color: Ansi.Color, val filters: Set<String>) {
 
     val gson = GsonBuilder().setDateFormat(Constants.DATE_FORMAT).create()
     var apiHolder: ApiType? = null

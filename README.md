@@ -9,15 +9,15 @@ Jest programem który pozwala na wygenerowanie zestawienia kosztów i przychodó
 
 ##### Windows
 1. Upewnij się, że masz zainstalowaną Javę [Pobierz](https://www.java.com/pl/download/)
-2. Pobierz i uruchom najnowszą wersję programu [tax-ledger.exe](https://github.com/stasbar/tax-ledger-cli/releases/download/v1.0.8/tax-ledger-windows.exe)
+2. Pobierz i uruchom najnowszą wersję programu [tax-ledger.exe](https://github.com/stasbar/tax-ledger-cli/releases/download/v1.1.2/tax-ledger-windows.exe)
 ##### macOS
 ###### metoda 1 Polecana
 1. Upewnij się, że masz zainstalowaną Javę [Pobierz](https://www.java.com/pl/download/)
-2. Pobierz i zamontuj obraz [tax-ledger-macOS.dmg](https://github.com/stasbar/tax-ledger-cli/releases/download/v1.0.8/tax-ledger-macOS.dmg)
+2. Pobierz i zamontuj obraz [tax-ledger-macOS.dmg](https://github.com/stasbar/tax-ledger-cli/releases/download/v1.1.2/tax-ledger-macOS.dmg)
 3. Przeciągnij aplikację (Tax Ledger.app) na skrót folderu Applocations 
 ###### metoda 2 i Linux
 1. Upewnij się, że masz zainstalowaną Javę [Pobierz](https://www.java.com/pl/download/)
-2. Pobierz plik [tax-ledger.jar](https://github.com/stasbar/tax-ledger-cli/releases/download/v1.0.8/tax-ledger.jar)
+2. Pobierz plik [tax-ledger.jar](https://github.com/stasbar/tax-ledger-cli/releases/download/v1.1.2/tax-ledger.jar)
 3. Otwórz terminal [macOS - Terminal.app] w miejsu pobranego pliku 
 4. Włącz program poleceniem
 
@@ -40,16 +40,25 @@ Podstawowa komenda `transakcje` łączy się z każdą skonfigurowaną giełdą 
  - Zapisuje wyniki do pliku [nazwa komendy].csv w folderze /transactions
   
  Dostępne argumenty dla komendy `transactions`:
- - `-today`, `-yesterday`, `-thisYear`, `-prevYear`, `-thisMonth` lub `-prevMonth`
- - lub bezpośrednie określenie daty poprzez np. `-2017`, `-12.2017` lub `-28.12.2017`
- - jednostronne zakresy dat przez `-after 8.2017`, `-po 8.2017`, `-before 11.2017`  `-przed 11.2017`  
- - `-reverse` odwrócenie listy wyników 
- - `-onlyBitbay` wyświetla wyniki tylko dla BitBay analogicznie `-onlyAbu` dla Abucoins
- - `-showNonFiat` wyświetla również operacje crypto-crypto. Domyślnie wyłączone ponieważ do celów podatkowych jest to zbędna informacja.
- - `-showNonEssential` wyświetla również wpłaty i wypłaty PLNów na konto giełdowe. Domyślnie wyłączone ponieważ do celów podatkowych jest to zbędna informacja.
- - `-all` wyświetla wszystkie transakcje 
- - `-oldBb <plik.csv>` pozwala na importowanie operacji ze starego BitBay 2.0. Aby pobrać listę transakcji należy zalogować się do BitBay'a 2.0 https://old.bitbay.net , następnie w zakładce Historia, na dole strony kliknąć w "Pobierz historię zmian salda jako CSV". Pobrany plik zapisać do folderu z programem.
+ - `--today`, `--yesterday`, `--thisYear`, `--prevYear`, `--thisMonth` lub `--prevMonth`
+ - lub bezpośrednie określenie daty poprzez np. `--date 2017`, `--data 12.2017` lub `--date 28.12.2017`
+ - jednostronne zakresy dat przez `--after 8.2017`, `--po 8.2017`, `--before 11.2017`  `--przed 11.2017`  
+ - `--reverse` odwrócenie listy wyników 
+ - `--onlyBB` wyświetla wyniki tylko dla BitBay analogicznie `-onlyAbu` dla Abucoins
+ - `--showNonFiat` wyświetla również operacje crypto-crypto. Domyślnie wyłączone ponieważ do celów podatkowych jest to zbędna informacja.
+ - `--showNonEssential` wyświetla również wpłaty i wypłaty PLNów na konto giełdowe. Domyślnie wyłączone ponieważ do celów podatkowych jest to zbędna informacja.
+ - `--all` wyświetla wszystkie transakcje 
  ![GIF](https://i.imgur.com/8ctkN6g.gif)
+ 
+### Przykłady
+W celu rozlicznia dochodów za rok 2017
+`transakcje --date 2017`
+W celu rozliczenia dochodów za poprzedni miesiąc
+`trankakcje --lastMonth`
+W celu rozliczenia dochodów za styczeń 2018
+`transakcje --date 01.2018`
+W celu rozliczenia dochodów za pierwszy kwartał
+`tranksakcje --after 01.2017 --before 03.2017`
 
 ### Informacje
 - Program jest w pełni* przetłumaczony na język Polski. 
@@ -59,8 +68,6 @@ Podstawowa komenda `transakcje` łączy się z każdą skonfigurowaną giełdą 
 - Program jest w pełni argumentowalny np. `java -jar tax-ledger.jar transactions -lastMonth -onlyBitbay exit`) przetworzy transakcje z poprzedniego miesiąca, z giełdy bitbay i zakończy działanie
 
 ### Znane problemy
-- BitBay nie pozwala na pobranie starszych transakcji (z przed BitBay 3.0). Aby zaimportować starsze tranksację prosze skorzystać z parametru `-oldBb <siezka_do_pliku_csv>` opisanego powyżej.
-- BitBay nie pozwala na pobranie więcej niż 200 ostatnich pozycji historii. Aktualny stan: Oczekiwanie na poprawę przez BitBay
 - Abucoins nie pozwala na pobranie historii wpłat i wypłat. Aktualny stan: Oczekiwanie na poprawę przez Abucoins 
 
 ### Do zrobienia

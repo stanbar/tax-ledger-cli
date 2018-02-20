@@ -61,7 +61,7 @@ class BitBayTransaction(
 
     private fun toTransaction(bought: BigDecimal, boughtCurrency: String, paid: BigDecimal, paidCurrency: String)
             : Transaction =
-            Transaction(exchange = BitBay
+            Transaction(exchangeName = BitBay.name
                     , id = id.toString()
                     , time = Date(time)
                     , operationType = operationType()

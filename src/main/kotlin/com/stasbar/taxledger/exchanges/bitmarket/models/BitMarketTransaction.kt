@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Stanislaw stasbar Baranski
+ * Copyright (c) 2018 Stanislaw stasbar Baranski
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,7 +57,7 @@ data class Trade(val id:String,
     }
 
     private fun toBuyTransaction(): Transaction {
-        return Transaction(exchange = Abucoins
+        return Transaction(exchangeName = Abucoins.name
                 , id = id
                 , time = time
                 , operationType = operationType()
@@ -71,7 +71,7 @@ data class Trade(val id:String,
 
     private fun toSellTransaction(): Transaction {
 
-        return Transaction(exchange = Abucoins
+        return Transaction(exchangeName = Abucoins.name
                 , id = id
                 , time = time
                 , operationType = operationType()

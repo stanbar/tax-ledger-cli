@@ -24,7 +24,9 @@
 
 package com.stasbar.taxledger.models
 
-import com.stasbar.taxledger.*
+import com.stasbar.taxledger.Constants
+import com.stasbar.taxledger.OperationType
+import com.stasbar.taxledger.getString
 import org.fusesource.jansi.Ansi
 import org.fusesource.jansi.Ansi.ansi
 import java.math.BigDecimal
@@ -35,7 +37,7 @@ interface Transactionable {
     fun operationType(): OperationType
 }
 
-class Transaction(val exchange: Exchange<out ExchangeApi>,
+class Transaction(val exchangeName: String,
                   var id: String = "",
                   var time: Date = Date(),
                   var operationType: OperationType,
@@ -46,7 +48,7 @@ class Transaction(val exchange: Exchange<out ExchangeApi>,
                   var rate: BigDecimal = BigDecimal.ZERO) {
 
     fun toList(): List<String> {
-        return listOf(exchange.name
+        return listOf(exchangeName
                 , getString(operationType.key).substring(0, Math.min(getString(operationType.key).length, 4))
                 , Constants.dateFormat.format(time)
                 , rate.stripTrailingZeros().toPlainString()
@@ -68,7 +70,7 @@ class Transaction(val exchange: Exchange<out ExchangeApi>,
             else -> Ansi.Color.WHITE
         }
         return ansi()
-                .fg(exchange.color).a("%-11s".format("[${exchange.name}]")).reset()
+                .a("%-11s".format("[$exchangeName]")).reset()
                 .fg(operationColor).a("%-6s".format("[$operationType]")).reset()
                 .a(" ${Constants.dateFormat.format(time)} ")
                 .a("rate=%.8f%s".format(rate, paidCurrency)).reset()

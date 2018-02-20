@@ -31,9 +31,11 @@ import com.stasbar.taxledger.translations.Text
 import java.math.BigDecimal
 import java.math.RoundingMode
 
-abstract class OutputWriter {
+abstract class OutputWriter(val transactions: Collection<Transaction>) {
+
     val essentialOperation = arrayOf(OperationType.BUY, OperationType.SELL, OperationType.FEE
             , OperationType.AFFILIATE_INCOME)
+
     val headRow = listOf(getString(Text.EXCHANGE),
             getString(Text.TYPE),
             getString(Text.DATE),
@@ -41,42 +43,42 @@ abstract class OutputWriter {
             getString(Text.GET), "",
             getString(Text.PAID), "")
 
-    fun getExpense(transactions: Collection<Transaction>): BigDecimal {
+    fun getExpense(currency: String = "PLN"): BigDecimal {
         var expense: BigDecimal = BigDecimal.ZERO
-        transactions.filter { it.paidCurrency.toUpperCase() == "PLN" && it.operationType == OperationType.BUY }
+        transactions.filter { it.paidCurrency.toUpperCase() == currency && it.operationType == OperationType.BUY }
                 .forEach { expense += it.paid }
         return expense.setScale(2, RoundingMode.DOWN)
     }
 
-    fun getGrossIncome(transactions: Collection<Transaction>): BigDecimal {
+    fun getGrossIncome(currency: String = "PLN"): BigDecimal {
         var grossIncome: BigDecimal = BigDecimal.ZERO
-        transactions.filter { it.boughtCurrency.toUpperCase() == "PLN" && it.operationType == OperationType.SELL }
+        transactions.filter { it.boughtCurrency.toUpperCase() == currency && it.operationType == OperationType.SELL }
                 .forEach { grossIncome += it.bought }
         return grossIncome.setScale(2, RoundingMode.DOWN)
     }
 
-    fun getFees(transactions: Collection<Transaction>): BigDecimal {
+    fun getFees(currency: String = "PLN"): BigDecimal {
         var fees: BigDecimal = BigDecimal.ZERO
-        transactions.filter { it.operationType == OperationType.FEE && it.paidCurrency.toUpperCase() == "PLN" }
+        transactions.filter { it.operationType == OperationType.FEE && it.paidCurrency.toUpperCase() == currency }
                 .forEach { fees += it.paid }
         return fees.setScale(2, RoundingMode.DOWN)
     }
 
-    fun getNetIncome(grossIncome: BigDecimal, expenseWithFees: BigDecimal): BigDecimal {
-        val netIncome = grossIncome - expenseWithFees
+    fun getNetIncome(currency: String): BigDecimal {
+        val netIncome = getGrossIncome(currency) - getExpense(currency) - getFees(currency)
         return netIncome.setScale(2, RoundingMode.DOWN)
     }
 
-    fun getWithdraws(transactions: Collection<Transaction>): BigDecimal {
+    fun getWithdraws(currency: String = "PLN"): BigDecimal {
         var withdraws: BigDecimal = BigDecimal.ZERO
-        transactions.filter { it.operationType == OperationType.WITHDRAW && it.paidCurrency.toUpperCase() == "PLN" }
+        transactions.filter { it.operationType == OperationType.WITHDRAW && it.paidCurrency.toUpperCase() == currency }
                 .forEach { withdraws += it.paid }
         return withdraws.setScale(2, RoundingMode.DOWN)
     }
 
-    fun getDeposits(transactions: Collection<Transaction>): BigDecimal {
+    fun getDeposits(currency: String = "PLN"): BigDecimal {
         var deposits: BigDecimal = BigDecimal.ZERO
-        transactions.filter { it.operationType == OperationType.DEPOSIT && it.boughtCurrency.toUpperCase() == "PLN" }
+        transactions.filter { it.operationType == OperationType.DEPOSIT && it.boughtCurrency.toUpperCase() == currency }
                 .forEach { deposits += it.bought }
         return deposits.setScale(2, RoundingMode.DOWN)
     }

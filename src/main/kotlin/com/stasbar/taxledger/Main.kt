@@ -28,14 +28,11 @@ import com.stasbar.taxledger.completers.ActionsCompleter
 import com.stasbar.taxledger.completers.TransactionsCompleter
 import com.stasbar.taxledger.exceptions.ApiNotSetException
 import com.stasbar.taxledger.exceptions.CredentialsException
-import com.stasbar.taxledger.exceptions.IllegalDateRangeArgument
 import com.stasbar.taxledger.exceptions.TooManyCredentialsException
 import com.stasbar.taxledger.models.Credential
 import com.stasbar.taxledger.models.Transaction
-import com.stasbar.taxledger.options.DateRange
 import com.stasbar.taxledger.options.TransactionsOptions
 import com.stasbar.taxledger.translations.Text
-import com.stasbar.taxledger.writers.BitBayCsvReader
 import com.stasbar.taxledger.writers.ConsoleWriter
 import com.stasbar.taxledger.writers.CsvWriter
 import org.fusesource.jansi.Ansi.ansi
@@ -45,17 +42,15 @@ import org.jline.reader.UserInterruptException
 import org.jline.reader.impl.completer.ArgumentCompleter
 import org.jline.reader.impl.completer.StringsCompleter
 import org.jline.terminal.TerminalBuilder
-import java.nio.file.Paths
-import java.text.ParseException
-import java.text.ParsePosition
-import java.text.SimpleDateFormat
+import java.awt.Desktop
+import java.net.URI
 import java.util.*
 import kotlin.reflect.KClass
 
 /**
  * Abstraction for both UNIX terminal and Windows Console
  */
-val terminal = TerminalBuilder
+private val terminal = TerminalBuilder
         .builder()
         .dumb(true)
         .jansi(true)
@@ -71,19 +66,23 @@ val DEBUG = false
  * Set of all available exchanges.
  * We can threat this set of KClasses as set of kotlin objects (Singletons) with .objectInstance reflection method
  */
-val exchanges = setOf(
-        BitBay::class, //currently disabled since this is pre-release version and doesn't allow to fetch fees
+private val exchanges = setOf(
+        BitBay::class,
         Abucoins::class)
 
 /**
  * Argument deque on which whole CLI is working on
  */
-val args = ArrayDeque<String>()
+private val args = ArrayDeque<String>()
+
+fun injectArgs(newArgs: ArrayDeque<String>) {
+    args.addAll(newArgs)
+}
 
 fun main(cliArgs: Array<String>) {
     AnsiConsole.systemInstall()
 
-    ConsoleWriter.printIntro()
+    Misc.printIntro()
 
     val credentials = PreferencesManager.load()
 
@@ -119,10 +118,10 @@ fun parseExchangeName(): Boolean {
     try {
         exchangeNameTry = reader.readLine(prompt).trim().split(" ")[0]
     } catch (e: UserInterruptException) {
-        ConsoleWriter.printExitMessage()
+        Misc.printExitMessage()
         System.exit(0)
     } catch (e: IllegalStateException) {
-        ConsoleWriter.printExitMessage()
+        Misc.printExitMessage()
         System.exit(0)
     }
     for (exchange in exchanges)
@@ -200,10 +199,10 @@ fun promptUserForCredential(exchange: Exchange<out ExchangeApi>, credentialStep:
     try {
         stepAnswer = reader.readLine(prompt)
     } catch (e: UserInterruptException) {
-        ConsoleWriter.printExitMessage()
+        Misc.printExitMessage()
         System.exit(0)
     } catch (e: IllegalStateException) {
-        ConsoleWriter.printExitMessage()
+        Misc.printExitMessage()
         System.exit(0)
     }
     try {
@@ -241,171 +240,13 @@ fun parseAction() {
     try {
         line = reader.readLine(getString(Text.ACTION) + "> ")
     } catch (e: UserInterruptException) {
-        ConsoleWriter.printExitMessage()
+        Misc.printExitMessage()
         System.exit(0)
     } catch (e: IllegalStateException) {
-        ConsoleWriter.printExitMessage()
+        Misc.printExitMessage()
         System.exit(0)
     }
     line.split(" ").filter { it.isNotBlank() }.forEach { args.add(it) }
-
-}
-
-
-fun parseTransactionOptions(): TransactionsOptions {
-    val option = TransactionsOptions()
-    while (args.peekFirst() != null && args.peekFirst().contains("-")) {
-        val argument = args.pollFirst()
-        option.fileName.append(argument)
-
-        if (tryToParseOneSideBoundDateRange(option.dateBefore, argument, args.peekFirst(), "-before", "-przed"))
-            continue
-
-        if (tryToParseOneSideBoundDateRange(option.dateAfter, argument, args.peekFirst(), "-after", "-po"))
-            continue
-
-        if (tryToParseDateRange(option.dateRange, argument, false))
-            continue
-
-        if (tryToParseOldBitBayHistory(option, argument, args.peekFirst()))
-            continue
-
-        when (argument.toLowerCase()) {
-            "-showNonFiat".toLowerCase()
-                , "-showNoneFiat".toLowerCase()
-                , "-showNoFiat".toLowerCase() -> option.showNonFiat = true
-
-            "-showNonEssential".toLowerCase()
-                , "-showNoneEssential".toLowerCase()
-                , "-showNoEssential".toLowerCase() -> option.showNonEssential = true
-
-            "-all" -> {
-                option.showNonEssential = true
-                option.showNonFiat = true
-            }
-            "-reverse".toLowerCase() -> option.reverse = true
-            "-bitbayOnly".toLowerCase(), "-bbOnly".toLowerCase()
-                , "-onlyBitbay".toLowerCase(), "-onlybb".toLowerCase() -> option.oneExchangeOnly = BitBay::class.objectInstance!!
-            "-abucoinsOnly".toLowerCase(), "-abuOnly".toLowerCase()
-                , "-onlyAbucoins".toLowerCase(), "-onlyAbu".toLowerCase() -> option.oneExchangeOnly = Abucoins::class.objectInstance!!
-
-            else -> Logger.err(getString(Text.Exceptions.INVALID_ARG).format(argument))
-        }
-    }
-    return option
-}
-
-fun tryToParseOneSideBoundDateRange(sideDateRange: DateRange, argument: String?, nextArgument: String?, vararg synonyms: String): Boolean {
-    return if (argument in synonyms && nextArgument != null && nextArgument.isNotBlank()) {
-        val success = tryToParseDateRange(sideDateRange, nextArgument, true)
-        if (success) args.pop()
-        success
-    } else false
-}
-
-fun tryToParseDateRange(dateRange: DateRange, argument: String, parameterArgument: Boolean): Boolean {
-    var success = isLikelyToBeDateFormat(argument) && tryToParseExplicitDate(dateRange, argument, parameterArgument)
-    if (!success)
-        success = tryToParseImplicitDate(dateRange, argument)
-    return success
-}
-
-
-fun isLikelyToBeDateFormat(candidate: String) = candidate.matches(Regex("-?([0-9]{1,2}).([0-9]{1,2}).([0-9]{4})"))
-        || candidate.matches(Regex("-?([0-9]{1,2}).([0-9]{4})"))
-        || candidate.matches(Regex("-?([0-9]{4})"))
-
-
-fun tryToParseImplicitDate(dateRange: DateRange, argument: String): Boolean {
-    val calendar = Date().toCalendar()
-    when (argument.toLowerCase()) {
-        "-today".toLowerCase() -> {
-            dateRange.setToDay(calendar)
-        }
-        "-yesterday".toLowerCase() -> {
-            calendar.roll(Calendar.DAY_OF_MONTH, -1)
-            dateRange.setToDay(calendar)
-        }
-        "-thisMonth".toLowerCase() -> {
-            dateRange.setToMonth(calendar)
-        }
-        "-prevMonth".toLowerCase() -> {
-            calendar.roll(Calendar.MONTH, -1)
-            dateRange.setToMonth(calendar)
-        }
-        "-thisYear".toLowerCase() -> {
-            dateRange.setToYear(calendar)
-        }
-        "-prevYear".toLowerCase() -> {
-            calendar.roll(Calendar.YEAR, -1)
-            dateRange.setToYear(calendar)
-        }
-        else -> return false
-    }
-    return true
-}
-
-
-fun tryToParseExplicitDate(dateRange: DateRange, argument: String, parameterArgument: Boolean): Boolean {
-    val parsePosition = ParsePosition(if (parameterArgument) 0 else 1)
-    try {
-        val dateFormat = SimpleDateFormat("dd.MM.yyyy")
-
-        val calendar = dateFormat.parse(argument, parsePosition)
-                ?: throw IllegalDateRangeArgument(argument, parsePosition.errorIndex)
-        dateRange.setToDay(calendar.toCalendar())
-
-    } catch (e: Exception) {
-        try {
-            val dateFormat = SimpleDateFormat("MM.yyyy")
-            val calendar = dateFormat.parse(argument, parsePosition)
-                    ?: throw IllegalDateRangeArgument(argument, parsePosition.errorIndex)
-            dateRange.setToMonth(calendar.toCalendar())
-        } catch (e: Exception) {
-            try {
-                val dateFormat = SimpleDateFormat("yyyy")
-                dateFormat.isLenient = false
-                val calendar = dateFormat.parse(argument, parsePosition)
-                        ?: throw IllegalDateRangeArgument(argument, parsePosition.errorIndex)
-                dateRange.setToYear(calendar.toCalendar())
-            } catch (e: ParseException) {
-                Logger.err(e.message)
-                return false
-            } catch (e: IllegalDateRangeArgument) {
-                //if(e.arg.length >=2 && e.arg[1].isDigit())
-                Logger.err(e.message)
-                return false
-            }
-        }
-    }
-    return true
-}
-
-
-fun tryToParseOldBitBayHistory(option: TransactionsOptions, argument: String, nextArgument: String?): Boolean {
-    return if (validateOldBbArgument(argument, nextArgument)) {
-        option.oldBitBayHistory = Paths.get(nextArgument).toFile()
-        args.pop()
-        true
-    } else false
-
-}
-
-fun validateOldBbArgument(argument: String, nextArgument: String?): Boolean {
-    Logger.d("argument: $argument nextArgument: $nextArgument")
-    if (argument.toLowerCase() != "-oldbb") {
-        return false
-    }
-    if (nextArgument == null || nextArgument.isBlank()) {
-        Logger.err(getString(Text.COULD_NOT_FIND_PATH_ARGUMENT))
-        return false
-    }
-
-    if (!Paths.get(nextArgument).toFile().exists()) {
-        Logger.err(getString(Text.INVALID_OLDBB_CSV_PATH).format(nextArgument))
-        return false
-    }
-    return true
 
 }
 
@@ -426,12 +267,20 @@ fun performActions(action: String): Boolean {
             parseCredentials()
         }
         getString(Action.DONATE.title).toUpperCase(), Action.DONATE.name -> {
-            ConsoleWriter.printDonate()
+            Misc.printDonate()
         }
         getString(Action.EXIT.title).toUpperCase(), Action.EXIT.name -> {
-            ConsoleWriter.printExitMessage()
+            Misc.printExitMessage()
             System.exit(0)
         }
+        getString(Action.FOLLOW.title).toUpperCase(), Action.FOLLOW.name -> {
+            if (Desktop.isDesktopSupported()) {
+                Desktop.getDesktop().browse(URI(Misc.facebook))
+                Desktop.getDesktop().browse(URI(Misc.twitter))
+            }
+        }
+
+
         else -> return false
     }
 
@@ -462,7 +311,7 @@ fun performOpenFolder() {
 }
 
 fun performTransactionsAction(): Boolean {
-    val options = parseTransactionOptions()
+    val options = TransactionsOptions.parse(args, exchanges)
 
     var transactions = HashSet<Transaction>()
     val apis = exchanges
@@ -472,6 +321,7 @@ fun performTransactionsAction(): Boolean {
                 if (options.oneExchangeOnly == null) true
                 else it == options.oneExchangeOnly
             }
+
 
     apis.parallelStream().forEach {
         try {
@@ -498,9 +348,6 @@ fun performTransactionsAction(): Boolean {
         }
     }
 
-    options.oldBitBayHistory?.let {
-        transactions.addAll(BitBayCsvReader.readCsv(it))
-    }
 
     transactions = HashSet(transactions.filter { options.isInRange(it) })
 
@@ -517,10 +364,13 @@ fun performTransactionsAction(): Boolean {
     val transactionList = transactions.toMutableList()
     transactionList.sortWith(comparator)
 
-    ConsoleWriter.printTransactions(transactionList, options)
-    ConsoleWriter.printSummary(transactionList)
+    val consoleWriter = ConsoleWriter(transactions)
+    consoleWriter.printTransactions(options)
+    consoleWriter.printSummary()
+
     Logger.info(getString(Text.LOAD_COMPLETE).format(transactionList.size))
-    CsvWriter.saveToFile(transactionList, options)
+    val csvWriter = CsvWriter(transactions)
+    csvWriter.saveToFile(options)
     return true
 }
 

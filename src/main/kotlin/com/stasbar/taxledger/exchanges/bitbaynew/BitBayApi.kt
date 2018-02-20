@@ -42,6 +42,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
 import java.net.URLEncoder
+import java.util.*
 
 interface BitbayService {
     /**
@@ -110,18 +111,17 @@ class BitBayApi(credentials: LinkedHashSet<Credential>, private val gson: Gson) 
     }
 
     override fun transactions(): List<Transaction> {
-        var limit = 100000
-        var offset: Int? = null
-
+        var limit = 100
         val transactions = ArrayList<Transaction>()
         var newTransactions: List<Transaction>
-        var nextPageCursor: Int? = null
-
+        var nextPageCursor = "start"
+        var previousPageCursor = "start"
         do {
             val queryMap = HashMap<String, Any?>()
             queryMap["limit"] = limit.toString()
             //queryMap["offset"] = offset.toString()
-            queryMap["fromTime"] = null
+            queryMap["nextPageCursor"] = nextPageCursor
+            queryMap["fromTime"] = null //(System.currentTimeMillis() / 1000).toString()
             queryMap["toTime"] = null
             queryMap["markets"] = emptyArray<String>()
 
@@ -141,7 +141,9 @@ class BitBayApi(credentials: LinkedHashSet<Credential>, private val gson: Gson) 
                         newTransactions = transactionsResponse.items.map { it.toTransaction() }
                         transactions.addAll(newTransactions)
 
+                        previousPageCursor = nextPageCursor
                         nextPageCursor = transactionsResponse.nextPageCursor
+
                     }
                 } catch (e: JsonSyntaxException) {
                     Logger.err(e.message)
@@ -156,7 +158,7 @@ class BitBayApi(credentials: LinkedHashSet<Credential>, private val gson: Gson) 
                 Logger.err("Unsuccessfully fetched transactions error code: ${response.code()} body: ${response.errorBody()?.charStream()?.readText()} ")
                 return emptyList()
             }
-        } while (nextPageCursor != null)
+        } while (nextPageCursor != previousPageCursor)
 
         return transactions
     }

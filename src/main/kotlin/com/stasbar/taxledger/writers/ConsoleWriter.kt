@@ -25,8 +25,6 @@
 package com.stasbar.taxledger.writers
 
 import com.stasbar.taxledger.Logger
-import com.stasbar.taxledger.Misc
-import com.stasbar.taxledger.Misc.donateMap
 import com.stasbar.taxledger.getString
 import com.stasbar.taxledger.models.Transaction
 import com.stasbar.taxledger.options.TransactionsOptions
@@ -35,15 +33,11 @@ import de.vandermeer.asciitable.AsciiTable
 import de.vandermeer.asciitable.CWC_FixedWidth
 import de.vandermeer.asciithemes.TA_GridThemes
 import de.vandermeer.skb.interfaces.transformers.textformat.TextAlignment
-import org.fusesource.jansi.Ansi
 import org.fusesource.jansi.AnsiConsole
 
-object ConsoleWriter : OutputWriter() {
-    fun printIntro() {
-        AnsiConsole.out.println(Misc.taxledger)
-    }
+class ConsoleWriter(transactions: Collection<Transaction>) : OutputWriter(transactions) {
 
-    fun printTransactions(transactions: Collection<Transaction>, options: TransactionsOptions) {
+    fun printTransactions(options: TransactionsOptions) {
         val filteredTransactions = transactions
                 .filter { options.showNonFiat || it.isFiatTransaction() }
                 .filter { options.showNonEssential || it.operationType in essentialOperation }
@@ -78,12 +72,12 @@ object ConsoleWriter : OutputWriter() {
     }
 
 
-    fun printSummary(transactions: Collection<Transaction>) {
-        val grossIncome = getGrossIncome(transactions)
-        val expense = getExpense(transactions)
-        val fees = getFees(transactions)
+    fun printSummary() {
+        val grossIncome = getGrossIncome()
+        val expense = getExpense()
+        val fees = getFees()
         val expenseWithFees = expense + fees
-        val netIncome = getNetIncome(grossIncome, expenseWithFees)
+        val netIncome = getNetIncome("PLN")
         val atSummary = AsciiTable()
 
         atSummary.addRule()
@@ -98,13 +92,13 @@ object ConsoleWriter : OutputWriter() {
         atSummary.setPaddingLeftRight(1)
         AnsiConsole.out.println(atSummary.render())
 
-        printDepositsAndWithdraws(transactions)
+        printDepositsAndWithdraws()
 
     }
 
-    private fun printDepositsAndWithdraws(transactions: Collection<Transaction>) {
-        val withdraws = getWithdraws(transactions)
-        val deposits = getDeposits(transactions)
+    private fun printDepositsAndWithdraws() {
+        val withdraws = getWithdraws()
+        val deposits = getDeposits()
         val at = AsciiTable()
         at.addRule()
         at.addRow(getString(Text.DEPOSIT), getString(Text.WITHDRAW))
@@ -117,17 +111,6 @@ object ConsoleWriter : OutputWriter() {
 
     }
 
-
-    fun printDonate() {
-        donateMap.forEach { t, u -> AnsiConsole.out.println(Ansi.ansi().fg(u.first).bgDefault().a("$t -> ${u.second}").reset()) }
-    }
-
-    fun printExitMessage() {
-        AnsiConsole.out.println(Misc.contact)
-        Logger.info(getString(Text.DONATE))
-
-        printDonate()
-    }
 
 
 }

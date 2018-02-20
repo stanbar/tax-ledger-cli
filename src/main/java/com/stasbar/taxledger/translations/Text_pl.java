@@ -60,6 +60,8 @@ public class Text_pl extends ListResourceBundle {
                 {EXCHANGES_DESC, "Konfiguruje kody dostępu do API giełd"},
                 {DONATE_TITLE, "Darowizny"},
                 {DONATE_DESC, "Wyświetla liste adresów do darowizn"},
+                {FOLLOW_TITLE, "Subskrybuj"},
+                {FOLLOW_DESC, "Subskrybuj aby dostawać powiadomienia o zmianach i nowych wersjach"},
                 {EXIT_TITLE, "Zamknij"},
                 {EXIT_DESC, ""},
                 {INFO, "(INFO) "},

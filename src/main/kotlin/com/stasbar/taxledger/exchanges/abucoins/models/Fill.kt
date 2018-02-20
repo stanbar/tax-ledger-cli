@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Stanislaw stasbar Baranski
+ * Copyright (c) 2018 Stanislaw stasbar Baranski
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,7 +48,7 @@ data class Fill(val trade_id: Int,
     }
 
     private fun toBuyTransaction(): Transaction {
-        return Transaction(exchange = Abucoins
+        return Transaction(exchangeName = Abucoins.name
                 , id = order_id
                 , time = created_at
                 , operationType = operationType()
@@ -62,7 +62,7 @@ data class Fill(val trade_id: Int,
 
     private fun toSellTransaction(): Transaction {
 
-        return Transaction(exchange = Abucoins
+        return Transaction(exchangeName = Abucoins.name
                 , id = order_id
                 , time = created_at
                 , operationType = operationType()

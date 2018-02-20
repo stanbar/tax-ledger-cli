@@ -24,8 +24,10 @@
 
 package com.stasbar.taxledger
 
+import com.stasbar.taxledger.translations.Text
 import org.fusesource.jansi.Ansi
 import org.fusesource.jansi.Ansi.ansi
+import org.fusesource.jansi.AnsiConsole
 import java.util.*
 
 object Misc {
@@ -66,6 +68,24 @@ object Misc {
         map.put("IOTA", Pair(Ansi.Color.WHITE, "WZWTQQPJHRIHBDUQA9UZSIBPIRGWNJRPDHXJDSXKWPEQXBXFUCSORRJFAWCXANZNHRXMEWPPTBDVRMTXZFXQMJUOYD"))
         map
     }
+
+    fun printIntro() {
+        AnsiConsole.out.println(taxledger)
+    }
+
+    fun printDonate() {
+        donateMap.forEach { t, u -> AnsiConsole.out.println(Ansi.ansi().fg(u.first).bgDefault().a("$t -> ${u.second}").reset()) }
+    }
+
+    fun printExitMessage() {
+        AnsiConsole.out.println(Misc.contact)
+        Logger.info(getString(Text.DONATE))
+
+        printDonate()
+    }
+
+    val facebook: String = "https://www.facebook.com/TaxLedgerPL"
+    val twitter: String = "https://twitter.com/taxledger"
 
 
 }

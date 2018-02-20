@@ -50,7 +50,7 @@ data class CoinroomOrder(val id: Int,
     }
 
     override fun toTransaction(): Transaction {
-        return Transaction(exchange = Coinroom
+        return Transaction(exchangeName = Coinroom.name
                 , time = creationTime
                 , operationType = operationType()
                 , bought = BigDecimal.ZERO

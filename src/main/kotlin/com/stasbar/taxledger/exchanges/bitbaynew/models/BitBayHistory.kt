@@ -58,21 +58,21 @@ data class History(val balance: Balance,
                    val detailId: String) : Transactionable {
     override fun toTransaction(): Transaction {
         return when (operationType()) {
-            OperationType.FEE -> Transaction(exchange = BitBay,
+            OperationType.FEE -> Transaction(exchangeName = BitBay.name,
                     time = Date(time),
                     operationType = operationType(),
                     bought = BigDecimal.ZERO,
                     boughtCurrency = "",
                     paid = value.abs(),
                     paidCurrency = balance.currency)
-            OperationType.DEPOSIT -> Transaction(exchange = BitBay,
+            OperationType.DEPOSIT -> Transaction(exchangeName = BitBay.name,
                     time = Date(time),
                     operationType = operationType(),
                     bought = value.abs(),
                     boughtCurrency = balance.currency,
                     paid = BigDecimal.ZERO,
                     paidCurrency = "")
-            OperationType.WITHDRAW -> Transaction(exchange = BitBay,
+            OperationType.WITHDRAW -> Transaction(exchangeName = BitBay.name,
                     time = Date(time),
                     operationType = operationType(),
                     bought = BigDecimal.ZERO,
