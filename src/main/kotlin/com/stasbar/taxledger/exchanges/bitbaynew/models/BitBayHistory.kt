@@ -47,6 +47,12 @@ data class Balance(val id: String,
     }
 }
 
+enum class BitBayHistoryType {
+    FUNDS_MIGRATION, TRANSACTION_PRE_LOCKING, TRANSACTION_OFFER_STOP_CLOSED, TRANSACTION_POST_INCOME,
+    TRANSACTION_POST_OUTCOME, TRANSACTION_COMMISSION_OUTCOME, TRANSACTION_OFFER_ABORTED_RETURN, ADD_FUNDS,
+    WITHDRAWAL_LOCK_FUNDS, WITHDRAWAL_SUBTRACT_FUNDS, CREATE_BALANCE, TRANSACTION_OFFER_COMPLETED_RETURN
+}
+
 data class BitBayHistory(val balance: Balance,
                          val change: Change,
                          val fundsBefore: Change,
@@ -56,6 +62,7 @@ data class BitBayHistory(val balance: Balance,
                          val value: BigDecimal,
                          val type: String,
                          val detailId: String) : Transactionable {
+
     override fun toTransaction(): Transaction {
         return when (operationType()) {
             OperationType.FEE -> Transaction(exchangeName = BitBay.name,
@@ -84,20 +91,19 @@ data class BitBayHistory(val balance: Balance,
 
     }
 
-
     override fun operationType() = when (type) {
-        "FUNDS_MIGRATION" -> OperationType.DEPOSIT
-        "TRANSACTION_PRE_LOCKING" -> OperationType.UNSUPPORTED
-        "TRANSACTION_POST_OUTCOME" -> OperationType.UNSUPPORTED
-        "TRANSACTION_OFFER_ABORTED_RETURN" -> OperationType.UNSUPPORTED
-        "TRANSACTION_OFFER_STOP_CLOSED" -> OperationType.UNSUPPORTED
-        "TRANSACTION_POST_INCOME" -> OperationType.SELL
-        "TRANSACTION_COMMISSION_OUTCOME" -> OperationType.FEE
-        "ADD_FUNDS" -> OperationType.DEPOSIT
-        "WITHDRAWAL_LOCK_FUNDS" -> OperationType.UNSUPPORTED
-        "WITHDRAWAL_SUBTRACT_FUNDS" -> OperationType.WITHDRAW
-        "CREATE_BALANCE" -> OperationType.UNSUPPORTED
-        "TRANSACTION_OFFER_COMPLETED_RETURN" -> OperationType.UNSUPPORTED
+        BitBayHistoryType.FUNDS_MIGRATION.name -> OperationType.DEPOSIT
+        BitBayHistoryType.TRANSACTION_PRE_LOCKING.name -> OperationType.UNSUPPORTED
+        BitBayHistoryType.TRANSACTION_POST_OUTCOME.name -> OperationType.UNSUPPORTED
+        BitBayHistoryType.TRANSACTION_OFFER_ABORTED_RETURN.name -> OperationType.UNSUPPORTED
+        BitBayHistoryType.TRANSACTION_OFFER_STOP_CLOSED.name -> OperationType.UNSUPPORTED
+        BitBayHistoryType.TRANSACTION_POST_INCOME.name -> OperationType.SELL
+        BitBayHistoryType.TRANSACTION_COMMISSION_OUTCOME.name -> OperationType.FEE
+        BitBayHistoryType.ADD_FUNDS.name -> OperationType.DEPOSIT
+        BitBayHistoryType.WITHDRAWAL_LOCK_FUNDS.name -> OperationType.UNSUPPORTED
+        BitBayHistoryType.WITHDRAWAL_SUBTRACT_FUNDS.name -> OperationType.WITHDRAW
+        BitBayHistoryType.CREATE_BALANCE.name -> OperationType.UNSUPPORTED
+        BitBayHistoryType.TRANSACTION_OFFER_COMPLETED_RETURN.name -> OperationType.UNSUPPORTED
         else -> OperationType.UNSUPPORTED
     }
 
@@ -106,8 +112,3 @@ data class BitBayHistory(val balance: Balance,
     }
 }
 
-enum class BitBayHistoryType {
-    FUNDS_MIGRATION, TRANSACTION_PRE_LOCKING, TRANSACTION_OFFER_STOP_CLOSED, TRANSACTION_POST_INCOME, TRANSACTION_POST_OUTCOME,
-    TRANSACTION_COMMISSION_OUTCOME, TRANSACTION_OFFER_ABORTED_RETURN, ADD_FUNDS, WITHDRAWAL_LOCK_FUNDS, WITHDRAWAL_SUBTRACT_FUNDS,
-    CREATE_BALANCE, TRANSACTION_OFFER_COMPLETED_RETURN
-}

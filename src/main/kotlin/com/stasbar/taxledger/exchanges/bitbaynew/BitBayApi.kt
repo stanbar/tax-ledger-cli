@@ -90,7 +90,9 @@ class BitBayError(val errorsJsonArray: JsonArray) : Exception() {
 
 }
 
-class BitBayApi(credentials: LinkedHashSet<Credential>, private val gson: Gson) : ExchangeApi<BitBayTransaction, BitBayHistory> {
+class BitBayApi(credentials: LinkedHashSet<Credential>, private val gson: Gson)
+    : ExchangeApi<BitBayTransaction, BitBayHistory> {
+
     private val publicKey: String = credentials.first { it.name == "publicKey" }.value
     private val privateKey: String = credentials.first { it.name == "privateKey" }.value
     override val URL = "https://api.bitbay.net/rest/"
@@ -178,19 +180,18 @@ class BitBayApi(credentials: LinkedHashSet<Credential>, private val gson: Gson) 
     }
 
     fun getHistory(types: List<BitBayHistoryType>): List<BitBayHistory> {
+        val transactions = ArrayList<BitBayHistory>()
+
         var limit = 200
         var offset: Int? = null
-
-        val transactions = ArrayList<BitBayHistory>()
-        var newTransactions: List<BitBayHistory>
         var hasNextPages = false
+
         do {
             val queryMap = HashMap<String, Any?>()
             queryMap["limit"] = limit
             queryMap["offset"] = offset
             queryMap["types"] = types
-            //Currently only PLN supported
-            queryMap["balanceCurrencies"] = arrayOf("PLN")
+            queryMap["balanceCurrencies"] = arrayOf("PLN") //Currently only PLN supported
 
             val query = gson.toJson(queryMap)
 
@@ -204,7 +205,8 @@ class BitBayApi(credentials: LinkedHashSet<Credential>, private val gson: Gson) 
 
                         if (transactionsResponse.status == "Fail")
                             throw BitBayError(responseBody?.asJsonObject?.getAsJsonArray("errors")!!)
-                        newTransactions = transactionsResponse.items
+
+                        val newTransactions = transactionsResponse.items
                                 //Sorry BitBay, but I don't trust you
                                 .filter { it.type in types.map { it.name } }
                         transactions.addAll(newTransactions)
@@ -225,7 +227,8 @@ class BitBayApi(credentials: LinkedHashSet<Credential>, private val gson: Gson) 
 
                 }
             } else {
-                Logger.err("Unsuccessfully fetched transactions error code: ${response.code()} body: ${response.errorBody()?.charStream()?.readText()} ")
+                Logger.err("Unsuccessfully fetched transactions error code: ${response.code()} " +
+                        "body: ${response.errorBody()?.charStream()?.readText()} ")
 
             }
         } while (hasNextPages)
