@@ -31,6 +31,7 @@ import com.stasbar.taxledger.exceptions.CredentialsException
 import com.stasbar.taxledger.exceptions.TooManyCredentialsException
 import com.stasbar.taxledger.models.Credential
 import com.stasbar.taxledger.models.Transaction
+import com.stasbar.taxledger.models.Transactionable
 import com.stasbar.taxledger.options.TransactionsOptions
 import com.stasbar.taxledger.translations.Text
 import com.stasbar.taxledger.writers.ConsoleWriter
@@ -187,7 +188,7 @@ fun parseCredentials() {
 fun exchangeByName(pollFirst: String) = exchanges.first { it.objectInstance!!.isNameOf(pollFirst) }
 
 
-fun promptUserForCredential(exchange: Exchange<out ExchangeApi>, credentialStep: Credential): Boolean {
+fun promptUserForCredential(exchange: Exchange<out ExchangeApi<Transactionable, Transactionable>>, credentialStep: Credential): Boolean {
     val reader = LineReaderBuilder.builder()
             .terminal(terminal)
             .build()
@@ -217,7 +218,7 @@ fun promptUserForCredential(exchange: Exchange<out ExchangeApi>, credentialStep:
     return false
 }
 
-fun saveCredentials(supportedExchanges: Set<KClass<out Exchange<out ExchangeApi>>>) {
+fun saveCredentials(supportedExchanges: Set<KClass<out Exchange<out ExchangeApi<Transactionable, Transactionable>>>>) {
     PreferencesManager.save(supportedExchanges)
     Logger.info(getString(Text.CREDENTIALS_SAVED).format(PreferencesManager.credentials.absoluteFile))
 }
@@ -313,7 +314,7 @@ fun performOpenFolder() {
 fun performTransactionsAction(): Boolean {
     val options = TransactionsOptions.parse(args, exchanges)
 
-    var transactions = HashSet<Transaction>()
+    var transactions: MutableList<Transaction> = arrayListOf<Transaction>()
     val apis = exchanges
             .map { it.objectInstance!! }
             .filter {
@@ -327,11 +328,11 @@ fun performTransactionsAction(): Boolean {
         try {
 
             val newTransactions: List<Transaction> = try {
-                it.getApi().transactions()
+                it.getApi().transactions().map { it.toTransaction() }
             } catch (e: IllegalStateException) {
                 println("Reconnecting to ${it.name}")
                 try {
-                    it.getApi().transactions()
+                    it.getApi().transactions().map { it.toTransaction() }
                 } catch (e: IllegalStateException) {
                     Logger.err("Failed $e")
                     emptyList()
@@ -339,8 +340,8 @@ fun performTransactionsAction(): Boolean {
             }
 
             transactions.addAll(newTransactions)
-            transactions.addAll(it.getApi().fees())
-            transactions.addAll(it.getApi().depositsAndWithdraws())
+            transactions.addAll(it.getApi().fees().map { it.toTransaction() })
+            transactions.addAll(it.getApi().depositsAndWithdraws().map { it.toTransaction() })
 
 
         } catch (e: ApiNotSetException) {
@@ -349,7 +350,7 @@ fun performTransactionsAction(): Boolean {
     }
 
 
-    transactions = HashSet(transactions.filter { options.isInRange(it) })
+    transactions = transactions.filter { options.isInRange(it) }.toMutableList()
 
 
     if (transactions.isEmpty()) {
@@ -361,14 +362,14 @@ fun performTransactionsAction(): Boolean {
         kotlin.Comparator { o1, o2 -> o1.time.compareTo(o2.time) }
     else kotlin.Comparator { o1, o2 -> o2.time.compareTo(o1.time) }
 
-    val transactionList = transactions.toMutableList()
-    transactionList.sortWith(comparator)
+    transactions = transactions.toMutableList()
+    transactions.sortWith(comparator)
 
     val consoleWriter = ConsoleWriter(transactions)
     consoleWriter.printTransactions(options)
     consoleWriter.printSummary()
 
-    Logger.info(getString(Text.LOAD_COMPLETE).format(transactionList.size))
+    Logger.info(getString(Text.LOAD_COMPLETE).format(transactions.size))
     val csvWriter = CsvWriter(transactions)
     csvWriter.saveToFile(options)
     return true

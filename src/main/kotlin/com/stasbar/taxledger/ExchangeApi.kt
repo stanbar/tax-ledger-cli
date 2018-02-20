@@ -24,16 +24,19 @@
 
 package com.stasbar.taxledger
 
-import com.stasbar.taxledger.models.Transaction
+import com.stasbar.taxledger.models.Transactionable
 
 
-interface ExchangeApi{
-    fun transactions(): List<Transaction>
-    fun fees(): List<Transaction> {
+interface ExchangeApi<out Type : Transactionable, out History : Transactionable> {
+    val URL: String
+    val service: Lazy<*>
+    fun transactions(): List<Type>
+
+    fun fees(): List<History> {
         return emptyList()
     }
 
-    fun depositsAndWithdraws(): List<Transaction> {
+    fun depositsAndWithdraws(): List<History> {
         return emptyList()
     }
 }

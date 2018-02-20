@@ -22,17 +22,18 @@
  *            taxledger@stasbar.com
  */
 
-package com.stasbar.taxledger.exchanges.bitbaynew.responses
+package com.stasbar.taxledger.exchanges.bitfinex.models
 
-import com.google.gson.JsonElement
-import com.stasbar.taxledger.exchanges.bitbaynew.models.BitBayHistory
+import com.stasbar.taxledger.OperationType
+import com.stasbar.taxledger.models.Transaction
+import com.stasbar.taxledger.models.Transactionable
 
-class BitBayHistories(val status: String,
-                      val items: List<BitBayHistory>,
-                      val hasNextPage: Boolean,
-                      val fetchedRows: Int,
-                      val limit: Int,
-                      val offset: Int,
-                      val settings: JsonElement,
-                      val query: JsonElement?,
-                      val errors: JsonElement?)
+class BitfinexTransaction : Transactionable {
+    override fun toTransaction(): Transaction {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun operationType(): OperationType {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+}

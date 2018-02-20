@@ -28,6 +28,7 @@ import com.stasbar.taxledger.*
 import com.stasbar.taxledger.completers.TransactionCandidate
 import com.stasbar.taxledger.exceptions.IllegalDateRangeArgument
 import com.stasbar.taxledger.models.Transaction
+import com.stasbar.taxledger.models.Transactionable
 import com.stasbar.taxledger.translations.Text
 import java.text.ParseException
 import java.text.ParsePosition
@@ -94,7 +95,7 @@ class TransactionsOptions(
         val dateRange: DateRange = DateRange(),
         val dateAfter: DateRange = DateRange(),
         val dateBefore: DateRange = DateRange(),
-        var oneExchangeOnly: Exchange<out ExchangeApi>? = null,
+        var oneExchangeOnly: Exchange<out ExchangeApi<Transactionable, Transactionable>>? = null,
         var fileName: StringBuilder = StringBuilder(),
         var reverse: Boolean = false,
         var showNonEssential: Boolean = false,
@@ -112,7 +113,7 @@ class TransactionsOptions(
                 TransactionCandidate("-showNonFiat", "Show crypto-crypto transactions"),
                 TransactionCandidate("-all", "Show both -nonEssential and -nonFiat"))
 
-        fun parse(args: ArrayDeque<String>, exchanges: Set<KClass<out Exchange<out ExchangeApi>>>): TransactionsOptions {
+        fun parse(args: ArrayDeque<String>, exchanges: Set<KClass<out Exchange<out ExchangeApi<Transactionable, Transactionable>>>>): TransactionsOptions {
 
             val option = TransactionsOptions()
             while (args.peekFirst() != null && args.peekFirst().contains("-")) {
@@ -161,7 +162,7 @@ class TransactionsOptions(
             return option
         }
 
-        private fun tryToParseOneExchange(option: TransactionsOptions, argument: String, exchanges: Set<KClass<out Exchange<out ExchangeApi>>>): Boolean {
+        private fun tryToParseOneExchange(option: TransactionsOptions, argument: String, exchanges: Set<KClass<out Exchange<out ExchangeApi<Transactionable, Transactionable>>>>): Boolean {
             if (!argument.contains("only") || argument.length <= "only".length)
                 return false
             val exchange = exchanges.firstOrNull {

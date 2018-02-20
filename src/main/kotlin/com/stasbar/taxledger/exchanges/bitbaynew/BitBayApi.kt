@@ -24,17 +24,20 @@
 
 package com.stasbar.taxledger.exchanges.bitbaynew
 
-import com.google.gson.*
+import com.google.gson.Gson
+import com.google.gson.JsonArray
+import com.google.gson.JsonElement
+import com.google.gson.JsonSyntaxException
 import com.google.gson.reflect.TypeToken
-import com.stasbar.taxledger.Constants
 import com.stasbar.taxledger.DEBUG
 import com.stasbar.taxledger.ExchangeApi
 import com.stasbar.taxledger.Logger
+import com.stasbar.taxledger.exchanges.bitbaynew.models.BitBayHistory
 import com.stasbar.taxledger.exchanges.bitbaynew.models.BitBayHistoryType
+import com.stasbar.taxledger.exchanges.bitbaynew.models.BitBayTransaction
 import com.stasbar.taxledger.exchanges.bitbaynew.responses.BitBayHistories
 import com.stasbar.taxledger.exchanges.bitbaynew.responses.BitBayTransactions
 import com.stasbar.taxledger.models.Credential
-import com.stasbar.taxledger.models.Transaction
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Call
@@ -87,12 +90,12 @@ class BitBayError(val errorsJsonArray: JsonArray) : Exception() {
 
 }
 
-class BitBayApi(credentials: LinkedHashSet<Credential>, private val gson: Gson) : ExchangeApi {
+class BitBayApi(credentials: LinkedHashSet<Credential>, private val gson: Gson) : ExchangeApi<BitBayTransaction, BitBayHistory> {
     private val publicKey: String = credentials.first { it.name == "publicKey" }.value
     private val privateKey: String = credentials.first { it.name == "privateKey" }.value
-    private val URI = "https://api.bitbay.net/rest/"
+    override val URL = "https://api.bitbay.net/rest/"
 
-    private val service: Lazy<BitbayService> = lazy {
+    override val service: Lazy<BitbayService> = lazy {
         val logInterceptor = HttpLoggingInterceptor()
         logInterceptor.level = if (DEBUG) HttpLoggingInterceptor.Level.BODY else HttpLoggingInterceptor.Level.NONE
 
@@ -101,19 +104,17 @@ class BitBayApi(credentials: LinkedHashSet<Credential>, private val gson: Gson) 
                 .addNetworkInterceptor(logInterceptor)
                 .build()
 
-        val gson = GsonBuilder().setDateFormat(Constants.DATE_FORMAT).create()
         val retrofit = Retrofit.Builder()
                 .client(httpClient)
                 .addConverterFactory(GsonConverterFactory.create(gson))
-                .baseUrl(URI)
+                .baseUrl(URL)
                 .build()
         retrofit.create(BitbayService::class.java)
     }
 
-    override fun transactions(): List<Transaction> {
-        var limit = 100
-        val transactions = ArrayList<Transaction>()
-        var newTransactions: List<Transaction>
+    override fun transactions(): List<BitBayTransaction> {
+        val limit = 100
+        val transactions = ArrayList<BitBayTransaction>()
         var nextPageCursor = "start"
         var previousPageCursor = "start"
         do {
@@ -138,8 +139,7 @@ class BitBayApi(credentials: LinkedHashSet<Credential>, private val gson: Gson) 
                         if (it.status == "Fail")
                             throw BitBayError(responseBody?.asJsonObject?.getAsJsonArray("errors")!!)
 
-                        newTransactions = transactionsResponse.items.map { it.toTransaction() }
-                        transactions.addAll(newTransactions)
+                        transactions.addAll(transactionsResponse.items)
 
                         previousPageCursor = nextPageCursor
                         nextPageCursor = transactionsResponse.nextPageCursor
@@ -164,25 +164,25 @@ class BitBayApi(credentials: LinkedHashSet<Credential>, private val gson: Gson) 
     }
 
 
-    override fun fees(): List<Transaction> {
+    override fun fees(): List<BitBayHistory> {
         return getHistory(listOf(
                 BitBayHistoryType.TRANSACTION_COMMISSION_OUTCOME))
     }
 
 
-    override fun depositsAndWithdraws(): List<Transaction> {
+    override fun depositsAndWithdraws(): List<BitBayHistory> {
         return getHistory(listOf(
                 BitBayHistoryType.FUNDS_MIGRATION,
                 BitBayHistoryType.ADD_FUNDS,
                 BitBayHistoryType.WITHDRAWAL_SUBTRACT_FUNDS))
     }
 
-    fun getHistory(types: List<BitBayHistoryType>): List<Transaction> {
-        var limit = 50
+    fun getHistory(types: List<BitBayHistoryType>): List<BitBayHistory> {
+        var limit = 200
         var offset: Int? = null
 
-        val transactions = ArrayList<Transaction>()
-        var newTransactions: List<Transaction>
+        val transactions = ArrayList<BitBayHistory>()
+        var newTransactions: List<BitBayHistory>
         var hasNextPages = false
         do {
             val queryMap = HashMap<String, Any?>()
@@ -200,15 +200,13 @@ class BitBayApi(credentials: LinkedHashSet<Credential>, private val gson: Gson) 
                 val responseBody = response.body()
                 try {
                     val transactionsResponse: BitBayHistories? = gson.fromJson(responseBody, object : TypeToken<BitBayHistories>() {}.type)
+                    if (transactionsResponse != null) {
 
-                    transactionsResponse?.let {
-                        if (it.status == "Fail")
+                        if (transactionsResponse.status == "Fail")
                             throw BitBayError(responseBody?.asJsonObject?.getAsJsonArray("errors")!!)
-
-                        newTransactions = it.items
+                        newTransactions = transactionsResponse.items
                                 //Sorry BitBay, but I don't trust you
                                 .filter { it.type in types.map { it.name } }
-                                .map { it.toTransaction() }
                         transactions.addAll(newTransactions)
 
                         hasNextPages = transactionsResponse.hasNextPage

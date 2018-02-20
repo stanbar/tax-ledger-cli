@@ -47,15 +47,15 @@ data class Balance(val id: String,
     }
 }
 
-data class History(val balance: Balance,
-                   val change: Change,
-                   val fundsBefore: Change,
-                   val fundsAfter: Change,
-                   val time: Long,
-                   val historyId: String,
-                   val value: BigDecimal,
-                   val type: String,
-                   val detailId: String) : Transactionable {
+data class BitBayHistory(val balance: Balance,
+                         val change: Change,
+                         val fundsBefore: Change,
+                         val fundsAfter: Change,
+                         val time: Long,
+                         val historyId: String,
+                         val value: BigDecimal,
+                         val type: String,
+                         val detailId: String) : Transactionable {
     override fun toTransaction(): Transaction {
         return when (operationType()) {
             OperationType.FEE -> Transaction(exchangeName = BitBay.name,
@@ -88,11 +88,11 @@ data class History(val balance: Balance,
     override fun operationType() = when (type) {
         "FUNDS_MIGRATION" -> OperationType.DEPOSIT
         "TRANSACTION_PRE_LOCKING" -> OperationType.UNSUPPORTED
+        "TRANSACTION_POST_OUTCOME" -> OperationType.UNSUPPORTED
+        "TRANSACTION_OFFER_ABORTED_RETURN" -> OperationType.UNSUPPORTED
         "TRANSACTION_OFFER_STOP_CLOSED" -> OperationType.UNSUPPORTED
         "TRANSACTION_POST_INCOME" -> OperationType.SELL
-        "TRANSACTION_POST_OUTCOME" -> OperationType.UNSUPPORTED
         "TRANSACTION_COMMISSION_OUTCOME" -> OperationType.FEE
-        "TRANSACTION_OFFER_ABORTED_RETURN" -> OperationType.UNSUPPORTED
         "ADD_FUNDS" -> OperationType.DEPOSIT
         "WITHDRAWAL_LOCK_FUNDS" -> OperationType.UNSUPPORTED
         "WITHDRAWAL_SUBTRACT_FUNDS" -> OperationType.WITHDRAW

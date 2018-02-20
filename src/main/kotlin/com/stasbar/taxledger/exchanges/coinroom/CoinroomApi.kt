@@ -58,7 +58,7 @@ import com.stasbar.taxledger.ExchangeApi
 import com.stasbar.taxledger.exchanges.coinroom.models.CoinroomOrdersResponse
 import com.stasbar.taxledger.exchanges.coinroom.requests.CoinroomOrdersRequest
 import com.stasbar.taxledger.models.Credential
-import com.stasbar.taxledger.models.Transaction
+import com.stasbar.taxledger.models.Transactionable
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Call
@@ -88,13 +88,14 @@ interface PrivateService {
 
 }
 
-class CoinroomApi(credentials: HashSet<Credential>, private val gson: Gson) : ExchangeApi {
+class CoinroomApi(credentials: HashSet<Credential>, private val gson: Gson)
+    : ExchangeApi<Transactionable, Transactionable> {
     private val publicKey: String = credentials.first { it.name == "publicKey" }.value
     private val privateKey: String = credentials.first { it.name == "privateKey" }.value
 
-    private val URI = "https://coinroom.com/api/"
+    override val URL = "https://coinroom.com/api/"
 
-    private val service: Lazy<PrivateService> = lazy {
+    override val service: Lazy<PrivateService> = lazy {
         val logInterceptor = HttpLoggingInterceptor()
         logInterceptor.level = if (DEBUG) HttpLoggingInterceptor.Level.BODY else HttpLoggingInterceptor.Level.NONE
 
@@ -107,16 +108,16 @@ class CoinroomApi(credentials: HashSet<Credential>, private val gson: Gson) : Ex
         val retrofit = Retrofit.Builder()
                 .client(httpClient)
                 .addConverterFactory(GsonConverterFactory.create(gson))
-                .baseUrl(URI)
+                .baseUrl(URL)
                 .build()
         retrofit.create(PrivateService::class.java)
     }
 
-    override fun transactions(): List<Transaction> {
+    override fun transactions(): List<Transactionable> {
         val request = CoinroomOrdersRequest()
         val response = service.value.orders(request.toMap(privateKey)).execute()
         return if (response.isSuccessful && response.body() != null && response.body()!!.result)
-            response.body()?.data?.map { it.toTransaction() } ?: ArrayList()
+            response.body()?.data ?: ArrayList()
         else {
             println("Unsuccessfully fetched transactions error code: ${response.code()} body: ${response.errorBody()} ")
             emptyList()

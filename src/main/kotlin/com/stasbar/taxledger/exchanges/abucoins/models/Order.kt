@@ -55,15 +55,15 @@ data class Order(
 //        else -> OperationType.UNKNOWN
 //    }
 //
-//    override fun toTransaction(): History {
+//    override fun toTransaction(): BitBayHistory {
 //        return if(operationType() == OperationType.BUY) toBuyHistory() else toSellHistory()
 //    }
 //
-//    private fun toBuyHistory(): History {
+//    private fun toBuyHistory(): BitBayHistory {
 //        val rate = if(type == "market") price/filled_size else price
 //        val paid = if(type == "market") rate * filled_size else filled_size * price
 //
-//        return History(exchange = Abucoins
+//        return BitBayHistory(exchange = Abucoins
 //                , id = id
 //                , status = status
 //                , time = created_at
@@ -77,13 +77,13 @@ data class Order(
 //
 //    }
 //
-//    private fun toSellHistory(): History {
+//    private fun toSellHistory(): BitBayHistory {
 //        if(type == "market")
 //            AnsiConsole.out.println(toString())
 //        val rate = if(type == "market") price/filled_size else price
 //        val ammount = if(type == "market") price/filled_size else price
 //
-//        return History(exchange = Abucoins.SHORTCUT
+//        return BitBayHistory(exchange = Abucoins.SHORTCUT
 //                , id = id
 //                , status = status
 //                , time = created_at

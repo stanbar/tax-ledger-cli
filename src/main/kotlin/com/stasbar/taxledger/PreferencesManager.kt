@@ -24,6 +24,7 @@
 
 package com.stasbar.taxledger
 
+import com.stasbar.taxledger.models.Transactionable
 import java.io.File
 import java.io.FileReader
 import java.io.PrintWriter
@@ -47,7 +48,7 @@ object PreferencesManager {
     }
     val credentials: File = File(workingDir, "credentials.txt")
 
-    fun save(supportedExchanges: Set<KClass<out Exchange<out ExchangeApi>>>) {
+    fun save(supportedExchanges: Set<KClass<out Exchange<out ExchangeApi<Transactionable, Transactionable>>>>) {
         val writer = PrintWriter(credentials)
         supportedExchanges.map { it.objectInstance!! }.filter { it.isSet() }.forEach { it.printCredentials(writer) }
     }

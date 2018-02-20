@@ -22,17 +22,10 @@
  *            taxledger@stasbar.com
  */
 
-package com.stasbar.taxledger.exchanges.bitbaynew.responses
+package com.stasbar.taxledger.exchanges.bitfinex.responses
 
-import com.google.gson.JsonElement
-import com.stasbar.taxledger.exchanges.bitbaynew.models.BitBayHistory
+import com.stasbar.taxledger.exchanges.bitfinex.models.BitfinexTransaction
 
-class BitBayHistories(val status: String,
-                      val items: List<BitBayHistory>,
-                      val hasNextPage: Boolean,
-                      val fetchedRows: Int,
-                      val limit: Int,
-                      val offset: Int,
-                      val settings: JsonElement,
-                      val query: JsonElement?,
-                      val errors: JsonElement?)
+class BitfinexTradesReponse(
+        val items: List<BitfinexTransaction>
+)

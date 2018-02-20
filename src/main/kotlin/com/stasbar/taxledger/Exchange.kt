@@ -33,6 +33,7 @@ import com.stasbar.taxledger.exchanges.bitbaynew.BitBayApi
 import com.stasbar.taxledger.exchanges.bitmarket.BitmarketApi
 import com.stasbar.taxledger.exchanges.coinroom.CoinroomApi
 import com.stasbar.taxledger.models.Credential
+import com.stasbar.taxledger.models.Transactionable
 import org.fusesource.jansi.Ansi
 import java.io.PrintWriter
 
@@ -57,11 +58,11 @@ object Coinroom : Exchange<CoinroomApi>(CoinroomApi::class.java, "Coinroom", "cr
         setOf("--onlycoinroom", "--coinroomonly", "--onlycr", "--cronly"))
 
 
-abstract class Exchange<ApiType : ExchangeApi>(private val klass: Class<ApiType>,
-                                               val name: String,
-                                               private val shortcut: String,
-                                               val credentials: LinkedHashSet<Credential>,
-                                               val color: Ansi.Color, val filters: Set<String>) {
+abstract class Exchange<ApiType : ExchangeApi<Transactionable, Transactionable>>(private val klass: Class<ApiType>,
+                                                                                 val name: String,
+                                                                                 private val shortcut: String,
+                                                                                 val credentials: LinkedHashSet<Credential>,
+                                                                                 val color: Ansi.Color, val filters: Set<String>) {
 
     val gson = GsonBuilder().setDateFormat(Constants.DATE_FORMAT).create()
     var apiHolder: ApiType? = null

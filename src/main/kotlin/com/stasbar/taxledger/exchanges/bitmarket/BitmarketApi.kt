@@ -24,12 +24,11 @@
 
 package com.stasbar.taxledger.exchanges.bitmarket
 
-import com.google.gson.GsonBuilder
-import com.stasbar.taxledger.Constants.DATE_FORMAT
+import com.google.gson.Gson
 import com.stasbar.taxledger.ExchangeApi
 import com.stasbar.taxledger.exchanges.bitmarket.models.BitMarketTransaction
 import com.stasbar.taxledger.exchanges.bitmarket.requests.TransactionsRequest
-import com.stasbar.taxledger.models.Transaction
+import com.stasbar.taxledger.models.Transactionable
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Call
@@ -49,10 +48,10 @@ interface BitmarketService {
     fun transactions(@FieldMap(encoded = true) fields: Map<String, String>): Call<BitMarketTransaction>
 }
 
-class BitmarketApi(private val publicKey: String, private val privateKey: String) : ExchangeApi {
-    private val URI = "https://www.bitmarket.pl/"
+class BitmarketApi(private val publicKey: String, private val privateKey: String, val gson: Gson) : ExchangeApi<Transactionable, Transactionable> {
+    override val URL = "https://www.bitmarket.pl/"
 
-    private val service: Lazy<BitmarketService> = lazy {
+    override val service: Lazy<BitmarketService> = lazy {
         val logInterceptor = HttpLoggingInterceptor()
         logInterceptor.level = if (true) HttpLoggingInterceptor.Level.BODY else HttpLoggingInterceptor.Level.NONE
 
@@ -61,19 +60,18 @@ class BitmarketApi(private val publicKey: String, private val privateKey: String
                 .addNetworkInterceptor(logInterceptor)
                 .build()
 
-        val gson = GsonBuilder().setDateFormat(DATE_FORMAT).create()
         val retrofit = Retrofit.Builder()
                 .client(httpClient)
                 .addConverterFactory(GsonConverterFactory.create(gson))
-                .baseUrl(URI)
+                .baseUrl(URL)
                 .build()
         retrofit.create(BitmarketService::class.java)
     }
 
-    override fun transactions(): List<Transaction> {
+    override fun transactions(): List<Transactionable> {
         val request = TransactionsRequest()
         //TODO Fix it, it's just mockup
-        return service.value.transactions(request.toMap()).execute().body()?.results?.map { it.toTransaction() } ?: emptyList()
+        return service.value.transactions(request.toMap()).execute().body()?.results!! ?: emptyList()
 
     }
 

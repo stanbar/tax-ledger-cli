@@ -31,7 +31,7 @@ import com.stasbar.taxledger.ExchangeApi
 import com.stasbar.taxledger.Logger
 import com.stasbar.taxledger.exchanges.abucoins.models.*
 import com.stasbar.taxledger.models.Credential
-import com.stasbar.taxledger.models.Transaction
+import com.stasbar.taxledger.models.Transactionable
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Call
@@ -107,25 +107,26 @@ interface AbuService {
 
 }
 
-class AbuApi(credentials: LinkedHashSet<Credential>, private val gson: Gson) : ExchangeApi {
+class AbuApi(credentials: LinkedHashSet<Credential>, private val gson: Gson)
+    : ExchangeApi<TransactionAbu, Transactionable> {
 
 
     private val passphrase: String = credentials.first { it.name == "passphrase" }.value
     private val accessKey: String = credentials.first { it.name == "key" }.value
     private val secretKey: String = credentials.first { it.name == "secret" }.value
+    override val URL = "https://api.abucoins.com"
 
     companion object {
-        const val URI = "https://api.abucoins.com"
         val DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss'Z'"
     }
 
 
-    val service: Lazy<AbuService> = lazy {
+    override val service: Lazy<AbuService> = lazy {
         val logInterceptor = HttpLoggingInterceptor()
         logInterceptor.level = if (DEBUG) HttpLoggingInterceptor.Level.BODY else HttpLoggingInterceptor.Level.NONE
 
         val httpClient = OkHttpClient.Builder()
-                .addNetworkInterceptor(AbuHeaderInterceptor(accessKey, passphrase, secretKey, URI))
+                .addNetworkInterceptor(AbuHeaderInterceptor(accessKey, passphrase, secretKey, URL))
                 .addNetworkInterceptor(logInterceptor)
                 .build()
 
@@ -133,18 +134,18 @@ class AbuApi(credentials: LinkedHashSet<Credential>, private val gson: Gson) : E
         val retrofit = Retrofit.Builder()
                 .client(httpClient)
                 .addConverterFactory(GsonConverterFactory.create(gson))
-                .baseUrl(URI)
+                .baseUrl(URL)
                 .build()
         retrofit.create(AbuService::class.java)
     }
 
     @Throws(IllegalStateException::class)
-    override fun transactions(): List<Transaction> {
+    override fun transactions(): List<TransactionAbu> {
         val limit = 1000
         var after: Int? = null
 
-        val transactions = ArrayList<Transaction>()
-        var newTransactions: List<Transaction> = emptyList()
+        val transactions = ArrayList<TransactionAbu>()
+        var newTransactions: List<TransactionAbu> = emptyList()
 
         do {
             val response = service.value.fills(null, after, limit).execute()
@@ -152,8 +153,8 @@ class AbuApi(credentials: LinkedHashSet<Credential>, private val gson: Gson) : E
                 val responseBody = response.body()
                 after = response.headers().get("ac-after")?.toInt()
                 try {
-                    val list: List<Fill> = gson.fromJson(responseBody, object : TypeToken<List<Fill>>() {}.type)
-                    newTransactions = list.map { it.toTransaction() }
+                    val list: List<TransactionAbu> = gson.fromJson(responseBody, object : TypeToken<List<TransactionAbu>>() {}.type)
+                    newTransactions = list
                     transactions.addAll(newTransactions)
 
                 } catch (e: JsonSyntaxException) {
