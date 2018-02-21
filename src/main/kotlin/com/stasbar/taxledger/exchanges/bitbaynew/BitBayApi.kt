@@ -115,11 +115,16 @@ class BitBayApi(credentials: LinkedHashSet<Credential>, private val gson: Gson)
     }
 
     override fun transactions(): List<BitBayTransaction> {
-        val limit = 100
+        val limit = 1000
         val transactions = ArrayList<BitBayTransaction>()
         var nextPageCursor = "start"
         var previousPageCursor = "start"
+        var isFirstRequest = true
         do {
+            if (isFirstRequest) {
+                isFirstRequest = false
+                Thread.sleep(1000)
+            }
             val queryMap = HashMap<String, Any?>()
             queryMap["limit"] = limit.toString()
             //queryMap["offset"] = offset.toString()
@@ -182,11 +187,15 @@ class BitBayApi(credentials: LinkedHashSet<Credential>, private val gson: Gson)
     fun getHistory(types: List<BitBayHistoryType>): List<BitBayHistory> {
         val transactions = ArrayList<BitBayHistory>()
 
-        var limit = 200
+        var limit = 1000
         var offset: Int? = null
         var hasNextPages = false
-
+        var isFirstRequest = true
         do {
+            if (isFirstRequest) {
+                isFirstRequest = false
+                Thread.sleep(1000)
+            }
             val queryMap = HashMap<String, Any?>()
             queryMap["limit"] = limit
             queryMap["offset"] = offset

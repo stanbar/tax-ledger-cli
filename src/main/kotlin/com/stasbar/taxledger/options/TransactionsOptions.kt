@@ -103,15 +103,16 @@ class TransactionsOptions(
 
     companion object {
 
-        val arguments: Set<TransactionCandidate> = setOf(TransactionCandidate("-before", "Limit results to before date"),
-                TransactionCandidate("-after", "Limit results to before date"),
-                TransactionCandidate("-reverse", "Reverse transactions order"),
-                TransactionCandidate("-oldBB", "Import history from .csv file downloadable from old.bitbay.net"),
-                TransactionCandidate("-onlyBB", "Use only Bitbay"),
-                TransactionCandidate("-onlyAbu", "Use only Abucoins"),
-                TransactionCandidate("-showNonEssential", "Show operations like deposit and withdraw"),
-                TransactionCandidate("-showNonFiat", "Show crypto-crypto transactions"),
-                TransactionCandidate("-all", "Show both -nonEssential and -nonFiat"))
+        val arguments: Set<TransactionCandidate> = setOf(
+                TransactionCandidate("--date", "Limit results to date range eg. --date 2017"),
+                TransactionCandidate("--before", "Limit results to before date eg. --before 03.2017"),
+                TransactionCandidate("--after", "Limit results to before date eg. --after 01.02.2016"),
+                TransactionCandidate("--reverse", "Reverse transactions order"),
+                TransactionCandidate("--onlyBB", "Use only Bitbay"),
+                TransactionCandidate("--onlyAbu", "Use only Abucoins"),
+                TransactionCandidate("--showNonEssential", "Show operations like deposit and withdraw"),
+                TransactionCandidate("--showNonFiat", "Show crypto-crypto transactions"),
+                TransactionCandidate("--all", "Show both -nonEssential and -nonFiat"))
 
         fun parse(args: ArrayDeque<String>, exchanges: Set<KClass<out Exchange<out ExchangeApi<Transactionable, Transactionable>>>>): TransactionsOptions {
 
