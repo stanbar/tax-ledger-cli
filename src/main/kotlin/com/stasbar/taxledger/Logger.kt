@@ -27,8 +27,11 @@ package com.stasbar.taxledger
 import com.stasbar.taxledger.translations.Text
 import org.fusesource.jansi.Ansi.ansi
 import org.fusesource.jansi.AnsiConsole
+import java.text.SimpleDateFormat
+import java.util.*
 
 object Logger {
+    val dateFormat = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
 
     fun info(message: String?) {
         AnsiConsole.out.println(ansi().a("\n").fgBrightCyan().a(0x2714.toChar()).a(getString(Text.Logger.INFO)).reset().a(message).a("\n"))
@@ -40,8 +43,18 @@ object Logger {
     }
 
     fun d(message: String?) {
+        val time = dateFormat.format(Date(System.currentTimeMillis()))
         if (DEBUG)
-            AnsiConsole.out.println(ansi().a("\n").fgBrightGreen().a(0x2716.toChar()).a(getString(Text.Logger.DEBUG)).reset().a(message).a("\n"))
+            AnsiConsole.out.println(ansi()
+                    .a("\n")
+                    .fgBrightGreen()
+                    .a(0x2716.toChar())
+                    .a(getString(Text.Logger.DEBUG))
+                    .reset()
+                    .a(time)
+                    .a(" ")
+                    .a(message)
+                    .a("\n"))
     }
 
 }

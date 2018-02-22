@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Stanislaw stasbar Baranski
+ * Copyright (c) 2018 Stanislaw stasbar Baranski
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,12 +24,12 @@
 
 package com.stasbar.taxledger.exchanges.bitmarket.requests
 
-class TransactionsRequest(val market: String? = null, val count : String? = null, val start : String? = null) : BaseRequest() {
+class TransactionsRequest(val market: String, val count: String? = null, val start: String? = null) : BitmarketBaseRequest() {
     override val method: Method = Method.TRADES
 
     override fun toMap(): MutableMap<String, String> {
         val map = super.toMap()
-        market?.let { map.put("market", it) }
+        map.put("market", market)
         count?.let { map.put("count", it) }
         start?.let { map.put("start", it) }
         return map

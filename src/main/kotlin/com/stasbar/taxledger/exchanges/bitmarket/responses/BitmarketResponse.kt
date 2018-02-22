@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Stanislaw stasbar Baranski
+ * Copyright (c) 2018 Stanislaw stasbar Baranski
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,29 +22,21 @@
  *            taxledger@stasbar.com
  */
 
-package com.stasbar.taxledger.exchanges.bitmarket.requests
+package com.stasbar.taxledger.exchanges.bitmarket.responses
 
-import com.google.gson.annotations.SerializedName
+import com.stasbar.taxledger.exchanges.bitmarket.models.BitmarketTransaction
 
-abstract class BaseRequest{
-    abstract val method : Method
-    val tonce : Long = System.currentTimeMillis() / 1000
+class Limit(val allowed: Int,
+            val expires: Int,
+            val used: Int)
 
-    open fun toMap(): MutableMap<String, String> {
-        val map: MutableMap<String, String> = HashMap()
-        map.put("method",method.methodName)
-        map.put("tonce",tonce.toString())
-        return map
-    }
+class Payload(val total: Int,
+              val start: Int,
+              val count: Int,
+              val results: List<BitmarketTransaction>)
 
-}
-enum class Method(val methodName: String){
-    @SerializedName("trades")TRADES("trades"),
-    @SerializedName("info")INFO("info");
+class BitmarketResponse(val limit: Limit,
+                        val time: String,
+                        val data: Payload,
+                        val success: Boolean)
 
-    override fun toString(): String {
-        return methodName
-    }
-
-
-}

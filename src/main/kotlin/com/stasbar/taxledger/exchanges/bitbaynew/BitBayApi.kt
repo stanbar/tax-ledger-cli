@@ -115,16 +115,15 @@ class BitBayApi(credentials: LinkedHashSet<Credential>, private val gson: Gson)
     }
 
     override fun transactions(): List<BitBayTransaction> {
-        val limit = 1000
+        val limit = 400
         val transactions = ArrayList<BitBayTransaction>()
         var nextPageCursor = "start"
         var previousPageCursor = "start"
-        var isFirstRequest = true
         do {
-            if (isFirstRequest) {
-                isFirstRequest = false
-                Thread.sleep(1000)
-            }
+            Logger.d("transactions() sleeping 1sec")
+            Thread.sleep(1000)
+            Logger.d("transactions() woke up")
+
             val queryMap = HashMap<String, Any?>()
             queryMap["limit"] = limit.toString()
             //queryMap["offset"] = offset.toString()
@@ -187,15 +186,15 @@ class BitBayApi(credentials: LinkedHashSet<Credential>, private val gson: Gson)
     fun getHistory(types: List<BitBayHistoryType>): List<BitBayHistory> {
         val transactions = ArrayList<BitBayHistory>()
 
-        var limit = 1000
+        var limit = 400
         var offset: Int? = null
         var hasNextPages = false
-        var isFirstRequest = true
         do {
-            if (isFirstRequest) {
-                isFirstRequest = false
-                Thread.sleep(1000)
-            }
+            Logger.d("getHistory() sleeping 1sec")
+            Thread.sleep(1000)
+            Logger.d("getHistory() woke up")
+
+
             val queryMap = HashMap<String, Any?>()
             queryMap["limit"] = limit
             queryMap["offset"] = offset
@@ -218,6 +217,7 @@ class BitBayApi(credentials: LinkedHashSet<Credential>, private val gson: Gson)
                         val newTransactions = transactionsResponse.items
                                 //Sorry BitBay, but I don't trust you
                                 .filter { it.type in types.map { it.name } }
+
                         transactions.addAll(newTransactions)
 
                         hasNextPages = transactionsResponse.hasNextPage

@@ -25,10 +25,17 @@
 package com.stasbar.taxledger.exchanges.bitmarket
 
 import com.google.gson.Gson
+import com.google.gson.JsonElement
+import com.google.gson.JsonSyntaxException
+import com.google.gson.reflect.TypeToken
 import com.stasbar.taxledger.ExchangeApi
-import com.stasbar.taxledger.exchanges.bitmarket.models.BitMarketTransaction
+import com.stasbar.taxledger.Logger
+import com.stasbar.taxledger.exchanges.bitmarket.models.BitmarketTransaction
+import com.stasbar.taxledger.exchanges.bitmarket.requests.BitmarketHistoryRequest
 import com.stasbar.taxledger.exchanges.bitmarket.requests.TransactionsRequest
+import com.stasbar.taxledger.exchanges.bitmarket.responses.BitmarketResponse
 import com.stasbar.taxledger.models.Transactionable
+import com.stasbar.taxledger.silentTry
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Call
@@ -44,8 +51,12 @@ interface BitmarketService {
     fun info(): Call<String>
 
     @FormUrlEncoded
-    @POST("api2")
-    fun transactions(@FieldMap(encoded = true) fields: Map<String, String>): Call<BitMarketTransaction>
+    @POST("api2/")
+    fun transactions(@FieldMap(encoded = true) fields: Map<String, String>): Call<JsonElement>
+
+    @FormUrlEncoded
+    @POST("api2/")
+    fun history(@FieldMap(encoded = true) fields: Map<String, String>): Call<JsonElement>
 }
 
 class BitmarketApi(private val publicKey: String, private val privateKey: String, val gson: Gson) : ExchangeApi<Transactionable, Transactionable> {
@@ -69,12 +80,68 @@ class BitmarketApi(private val publicKey: String, private val privateKey: String
     }
 
     override fun transactions(): List<Transactionable> {
-        val request = TransactionsRequest()
-        //TODO Fix it, it's just mockup
-        return service.value.transactions(request.toMap()).execute().body()?.results!! ?: emptyList()
+        //TODO pagination
+
+        val request = TransactionsRequest("LTCPLN")
+        val transactions = arrayListOf<BitmarketTransaction>()
+        val response = service.value.transactions(request.toMap()).execute()
+        if (response.isSuccessful) {
+            val responseBody = response.body()
+            try {
+                silentTry {
+                    println(responseBody?.asJsonObject)
+                    println(responseBody?.asJsonArray)
+                }
+
+                val transactionsResponse: BitmarketResponse? = gson.fromJson(responseBody, object : TypeToken<BitmarketResponse>() {}.type)
+                if (transactionsResponse != null) {
+                    transactions.addAll(transactionsResponse.data.results)
+                }
+            } catch (e: JsonSyntaxException) {
+                Logger.err(e.message)
+                Logger.err(responseBody.toString())
+                return emptyList()
+            }
+        } else {
+            Logger.err("Unsuccessfully fetched transactions error code: ${response.code()} body: ${response.errorBody()?.charStream()?.readText()} ")
+            return emptyList()
+        }
+        return transactions
 
     }
 
+    override fun depositsAndWithdraws(): List<Transactionable> {
+
+        val request = BitmarketHistoryRequest("PLN")
+        val transactions = arrayListOf<BitmarketTransaction>()
+        val response = service.value.transactions(request.toMap()).execute()
+        if (response.isSuccessful) {
+            val responseBody = response.body()
+            try {
+                silentTry {
+                    println(responseBody?.asJsonObject)
+                    println(responseBody?.asJsonArray)
+                }
+
+                val transactionsResponse: BitmarketResponse? = gson.fromJson(responseBody, object : TypeToken<BitmarketResponse>() {}.type)
+                if (transactionsResponse != null) {
+                    transactions.addAll(transactionsResponse.data.results)
+                }
+            } catch (e: JsonSyntaxException) {
+                Logger.err(e.message)
+                Logger.err(responseBody.toString())
+                return emptyList()
+            }
+        } else {
+            Logger.err("Unsuccessfully fetched transactions error code: ${response.code()} body: ${response.errorBody()?.charStream()?.readText()} ")
+            return emptyList()
+        }
+        return transactions
+    }
 
 }
+
+
+
+
 

@@ -60,7 +60,7 @@ private val terminal = TerminalBuilder
 /**
  * In debug mode logs are printed onto console
  */
-val DEBUG = false
+var DEBUG = false
 
 
 /**
@@ -279,6 +279,9 @@ fun performActions(action: String): Boolean {
                 Desktop.getDesktop().browse(URI(Misc.facebook))
                 Desktop.getDesktop().browse(URI(Misc.twitter))
             }
+        }
+        "DEBUG" -> {
+            DEBUG = true
         }
 
 

@@ -31,35 +31,34 @@ import com.stasbar.taxledger.models.Transactionable
 import java.math.BigDecimal
 import java.util.*
 
-class BitMarketTransaction(val total : Int,
-                           val start : Int,
-                           val count : Int,
-                           val results : List<Trade>) {
 
-}
+data class BitmarketTransaction(val id: String,
+                                val type: String,
+                                val amountCrypto: BigDecimal,
+                                val currencyCrypto: String,
+                                val amountFiat: BigDecimal,
+                                val currencyFiat: String,
+                                val rate: BigDecimal,
+                                val commission: BigDecimal?,
+                                val time: Long) : Transactionable {
 
+    override fun operationType() = when (type) {
+        "buy" -> OperationType.BUY
+        "sell" -> OperationType.SELL
+        "deposit" -> OperationType.DEPOSIT
+        "withdraw" -> OperationType.WITHDRAW
+        else -> OperationType.UNSUPPORTED
 
-data class Trade(val id:String,
-                 val type : String,
-                 val amountCrypto : BigDecimal,
-                 val currencyCrypto : String,
-                 val amountFiat : BigDecimal,
-                 val currencyFiat : String,
-                 val rate : BigDecimal,
-                 val time : Date) : Transactionable  {
-
-    override fun operationType(): OperationType {
-        return if (type == "buy") OperationType.BUY else OperationType.SELL
     }
 
     override fun toTransaction(): Transaction {
-        return if(operationType() == OperationType.BUY) toBuyTransaction() else toSellTransaction()
+        return if (operationType() == OperationType.BUY) toBuyTransaction() else toSellTransaction()
     }
 
     private fun toBuyTransaction(): Transaction {
         return Transaction(exchangeName = Abucoins.name
                 , id = id
-                , time = time
+                , time = Date(time)
                 , operationType = operationType()
                 , bought = amountCrypto
                 , boughtCurrency = currencyCrypto
@@ -73,7 +72,7 @@ data class Trade(val id:String,
 
         return Transaction(exchangeName = Abucoins.name
                 , id = id
-                , time = time
+                , time = Date(time)
                 , operationType = operationType()
                 , bought = amountFiat
                 , boughtCurrency = currencyFiat

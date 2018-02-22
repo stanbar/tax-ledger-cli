@@ -24,4 +24,14 @@
 
 package com.stasbar.taxledger.exchanges.bitmarket.requests
 
-class InfoRequest(override val method: Method = Method.INFO) : BitmarketBaseRequest()
+class BitmarketHistoryRequest(val currency: String, val count: Int? = null, val start: Int? = null) : BitmarketBaseRequest() {
+    override val method: Method = Method.HISTORY
+
+    override fun toMap(): MutableMap<String, String> {
+        val map = super.toMap()
+        map["currency"] = currency
+        count?.let { map.put("count", it.toString()) }
+        start?.let { map.put("start", it.toString()) }
+        return super.toMap()
+    }
+}

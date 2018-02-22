@@ -24,4 +24,29 @@
 
 package com.stasbar.taxledger.exchanges.bitmarket.requests
 
-class InfoRequest(override val method: Method = Method.INFO) : BitmarketBaseRequest()
+import com.google.gson.annotations.SerializedName
+
+abstract class BitmarketBaseRequest {
+    abstract val method : Method
+
+    open fun toMap(): MutableMap<String, String> {
+        val map: MutableMap<String, String> = HashMap()
+        map.put("method",method.methodName)
+        map.put("tonce", (System.currentTimeMillis() / 1000).toString())
+        return map
+    }
+
+}
+enum class Method(val methodName: String){
+    @SerializedName("trades")TRADES("trades"),
+    @SerializedName("info")
+    INFO("info"),
+    @SerializedName("history")
+    HISTORY("history");
+
+    override fun toString(): String {
+        return methodName
+    }
+
+
+}

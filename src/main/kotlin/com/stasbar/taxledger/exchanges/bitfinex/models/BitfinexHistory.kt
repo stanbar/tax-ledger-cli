@@ -29,7 +29,7 @@ import com.stasbar.taxledger.models.Transaction
 import com.stasbar.taxledger.models.Transactionable
 
 class BitfinexHistory(
-        val ID: Int, //Trade database id
+        val ID: Int, //BitmarketTransaction database id
         val PAIR: String, //Pair (BTCUSD, …)
         val MTS_CREATE: Int, //Execution timestamp
         val ORDER_ID: Int, //Order id

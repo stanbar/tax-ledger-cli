@@ -24,10 +24,18 @@
 
 package com.stasbar.taxledger
 
+import com.stasbar.taxledger.models.Transactionable
 import java.util.*
 
 fun Date.toCalendar(): Calendar {
     val cal = Calendar.getInstance()
     cal.time = this
     return cal
+}
+
+fun ExchangeApi<Transactionable, Transactionable>.silentTry(block: () -> Unit) {
+    try {
+        block()
+    } catch (e: Throwable) {
+    }
 }
