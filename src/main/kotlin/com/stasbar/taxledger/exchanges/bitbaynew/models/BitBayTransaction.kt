@@ -32,7 +32,7 @@ import java.math.BigDecimal
 import java.util.*
 
 class BitBayTransaction(
-        var id: UUID,
+        var id: String,
         var market: String,
         var time: Long,
         var amount: BigDecimal,

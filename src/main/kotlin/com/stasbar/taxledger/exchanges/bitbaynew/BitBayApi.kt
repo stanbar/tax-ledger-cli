@@ -46,6 +46,8 @@ import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
 import java.net.URLEncoder
 import java.util.*
+import kotlin.collections.HashMap
+import kotlin.system.measureTimeMillis
 
 interface BitbayService {
     /**
@@ -66,24 +68,32 @@ interface BitbayService {
 }
 
 
-class BitBayError(val errorsJsonArray: JsonArray) : Exception() {
-    val errorToDescription = mapOf(
-            Pair("PERMISSIONS_NOT_SUFFICIENT", "Uprawnienia nadane kluczowi API nie są wystarczające do wykonania akcji"),
-            Pair("INVALID_HASH_SIGNATURE", "Wygenerowany podpis zapytania (API-Hash) jest niepoprawny"),
-            Pair("ACTION_BLOCKED", "Akcja jest zablokowana na koncie użytkownika"),
-            Pair("ACTION_LIMIT_EXCEEDED", "Limit wywołań akcji został wykorzystany, należy odczekać kilka minut przed kolejnym zapytaniem"),
-            Pair("USER_OFFER_COUNT_LIMIT_EXCEEDED", "Limit ofert wystawionych do marketu dla danego rynku został wyczerpany"),
-            Pair("MALFORMED_REQUEST", "JSON przesłany w zapytaniu jest uszkodzony"),
-            Pair("INVALID_REQUEST", "Zapytanie zostało skonstruowane nieprawidłowo"),
-            Pair("MARKET_CODE_CANNOT_BE_EMPTY", "Nie podano kodu marketu")
-    )
+class BitBayError(val errorsJsonArray: JsonArray) : RuntimeException() {
+    enum class ERRORS(val description: String) {
+        PERMISSIONS_NOT_SUFFICIENT("Uprawnienia nadane kluczowi API nie są wystarczające do wykonania akcji"),
+        INVALID_HASH_SIGNATURE("Wygenerowany podpis zapytania (API-Hash) jest niepoprawny"),
+        ACTION_BLOCKED("Akcja jest zablokowana na koncie użytkownika"),
+        ACTION_LIMIT_EXCEEDED("Limit wywołań akcji został wykorzystany, należy odczekać kilka minut przed kolejnym zapytaniem"),
+        USER_OFFER_COUNT_LIMIT_EXCEEDED("Limit ofert wystawionych do marketu dla danego rynku został wyczerpany"),
+        MALFORMED_REQUEST("JSON przesłany w zapytaniu jest uszkodzony"),
+        INVALID_REQUEST("Zapytanie zostało skonstruowane nieprawidłowo"),
+        MARKET_CODE_CANNOT_BE_EMPTY("Nie podano kodu marketu")
+    }
+
+    val errors: MutableList<ERRORS> = ArrayList()
 
     override val message: String?
         get() = toString()
 
     override fun toString(): String {
         val stringBuilder = StringBuilder()
-        errorsJsonArray.forEach { stringBuilder.appendln("${it.asString} : ${errorToDescription[it.asString]}") }
+        errorsJsonArray.forEach {
+            val error = ERRORS.valueOf(it.asString)
+            errors.add(error)
+            if (error == ERRORS.ACTION_LIMIT_EXCEEDED)
+                return@forEach // don't show this error to user, handle it manually in catch
+            stringBuilder.appendln("${error.name} : ${error.description}")
+        }
         return stringBuilder.toString()
 
     }
@@ -99,7 +109,7 @@ class BitBayApi(credentials: LinkedHashSet<Credential>, private val gson: Gson)
 
     override val service: Lazy<BitbayService> = lazy {
         val logInterceptor = HttpLoggingInterceptor()
-        logInterceptor.level = if (DEBUG) HttpLoggingInterceptor.Level.BODY else HttpLoggingInterceptor.Level.NONE
+        logInterceptor.level = if (DEBUG) HttpLoggingInterceptor.Level.NONE else HttpLoggingInterceptor.Level.NONE
 
         val httpClient = OkHttpClient.Builder()
                 .addNetworkInterceptor(BitBayHeaderInterceptor(publicKey, privateKey))
@@ -114,58 +124,71 @@ class BitBayApi(credentials: LinkedHashSet<Credential>, private val gson: Gson)
         retrofit.create(BitbayService::class.java)
     }
 
+    val ACTION_LIMIT_EXCEEDED_SLEEP = 60000L
+
     override fun transactions(): List<BitBayTransaction> {
         val limit = 400
         val transactions = ArrayList<BitBayTransaction>()
         var nextPageCursor = "start"
         var previousPageCursor = "start"
-        do {
-            Logger.d("transactions() sleeping 1sec")
-            Thread.sleep(1000)
-            Logger.d("transactions() woke up")
+        var iteration = 0
+        val time = measureTimeMillis {
+            do {
+                Logger.d("Iteration ${++iteration} transactions parsed: ${transactions.size}")
 
-            val queryMap = HashMap<String, Any?>()
-            queryMap["limit"] = limit.toString()
-            //queryMap["offset"] = offset.toString()
-            queryMap["nextPageCursor"] = nextPageCursor
-            queryMap["fromTime"] = null //(System.currentTimeMillis() / 1000).toString()
-            queryMap["toTime"] = null
-            queryMap["markets"] = emptyArray<String>()
+                val queryMap = HashMap<String, Any?>()
+                queryMap["limit"] = limit.toString()
+                //queryMap["offset"] = offset.toString()
+                queryMap["nextPageCursor"] = nextPageCursor
+                queryMap["fromTime"] = null //(System.currentTimeMillis() / 1000).toString()
+                queryMap["toTime"] = null
+                queryMap["markets"] = emptyArray<String>()
 
-            val query = gson.toJson(queryMap)
+                val query = gson.toJson(queryMap)
 
-            val encodedQuery = URLEncoder.encode(query, "UTF-8")
-            val response = service.value.transactions(encodedQuery).execute()
+                val encodedQuery = URLEncoder.encode(query, "UTF-8")
+                val response = service.value.transactions(encodedQuery).execute()
 
-            if (response.isSuccessful) {
-                val responseBody = response.body()
-                try {
-                    val transactionsResponse: BitBayTransactions? = gson.fromJson(responseBody, object : TypeToken<BitBayTransactions>() {}.type)
-                    transactionsResponse?.let {
-                        if (it.status == "Fail")
+                if (response.isSuccessful) {
+                    val responseBody = response.body()
+
+                    Logger.d(responseBody)
+
+                    try {
+                        val transactionsResponse: BitBayTransactions = gson.fromJson(responseBody, object : TypeToken<BitBayTransactions>() {}.type)
+                                ?: throw NullPointerException()
+
+                        if (transactionsResponse.status == "Fail") {
                             throw BitBayError(responseBody?.asJsonObject?.getAsJsonArray("errors")!!)
+                        } else {
+                            transactions.addAll(transactionsResponse.items)
+                            previousPageCursor = nextPageCursor
+                            nextPageCursor = transactionsResponse.nextPageCursor
+                        }
 
-                        transactions.addAll(transactionsResponse.items)
+                    } catch (e: JsonSyntaxException) {
+                        Logger.err(e.message)
+                        Logger.err(responseBody.toString())
+                        return emptyList()
+                    } catch (e: NullPointerException) {
+                        e.printStackTrace()
+                        Logger.err("Could not parse the response into object")
+                    } catch (e: BitBayError) {
+                        Logger.err(e)
+                        if (e.errors.contains(BitBayError.ERRORS.ACTION_LIMIT_EXCEEDED)) {
+                            Logger.info("Waiting ${ACTION_LIMIT_EXCEEDED_SLEEP / 1000} sec to prevent limit exceed on BitBay API")
+                            Thread.sleep(ACTION_LIMIT_EXCEEDED_SLEEP)
 
-                        previousPageCursor = nextPageCursor
-                        nextPageCursor = transactionsResponse.nextPageCursor
-
+                        }
                     }
-                } catch (e: JsonSyntaxException) {
-                    Logger.err(e.message)
-                    Logger.err(responseBody.toString())
-                    return emptyList()
-                } catch (e: BitBayError) {
-                    e.printStackTrace()
-                    Logger.err(e.message)
+                } else {
+                    Logger.err("Unsuccessfully fetched transactions error code: ${response.code()} body: ${response.errorBody()?.charStream()?.readText()} ")
                     return emptyList()
                 }
-            } else {
-                Logger.err("Unsuccessfully fetched transactions error code: ${response.code()} body: ${response.errorBody()?.charStream()?.readText()} ")
-                return emptyList()
-            }
-        } while (nextPageCursor != previousPageCursor)
+            } while (nextPageCursor != previousPageCursor)
+        }
 
+        Logger.d("Fetched ${transactions.size} transactions in $iteration iterations and ${time / 1000}sec")
         return transactions
     }
 
@@ -183,33 +206,35 @@ class BitBayApi(credentials: LinkedHashSet<Credential>, private val gson: Gson)
                 BitBayHistoryType.WITHDRAWAL_SUBTRACT_FUNDS))
     }
 
+
     fun getHistory(types: List<BitBayHistoryType>): List<BitBayHistory> {
         val transactions = ArrayList<BitBayHistory>()
 
         var limit = 400
         var offset: Int? = null
         var hasNextPages = false
-        do {
-            Logger.d("getHistory() sleeping 1sec")
-            Thread.sleep(1000)
-            Logger.d("getHistory() woke up")
+        var iteration = 0
+        val time = measureTimeMillis {
+            do {
+                Logger.d("Iteration ${++iteration} histories parsed: ${transactions.size}")
 
+                val queryMap = HashMap<String, Any?>()
+                queryMap["limit"] = limit
+                queryMap["offset"] = offset
+                queryMap["types"] = types
+                queryMap["balanceCurrencies"] = arrayOf("PLN") //Currently only PLN supported
 
-            val queryMap = HashMap<String, Any?>()
-            queryMap["limit"] = limit
-            queryMap["offset"] = offset
-            queryMap["types"] = types
-            queryMap["balanceCurrencies"] = arrayOf("PLN") //Currently only PLN supported
+                val query = gson.toJson(queryMap)
 
-            val query = gson.toJson(queryMap)
+                val encodedQuery = URLEncoder.encode(query, "UTF-8")
+                val response = service.value.history(encodedQuery).execute()
+                if (response.isSuccessful) {
+                    val responseBody = response.body()
+                    Logger.d(responseBody)
 
-            val encodedQuery = URLEncoder.encode(query, "UTF-8")
-            val response = service.value.history(encodedQuery).execute()
-            if (response.isSuccessful) {
-                val responseBody = response.body()
-                try {
-                    val transactionsResponse: BitBayHistories? = gson.fromJson(responseBody, object : TypeToken<BitBayHistories>() {}.type)
-                    if (transactionsResponse != null) {
+                    try {
+                        val transactionsResponse: BitBayHistories = gson.fromJson(responseBody, object : TypeToken<BitBayHistories>() {}.type)
+                                ?: throw NullPointerException()
 
                         if (transactionsResponse.status == "Fail")
                             throw BitBayError(responseBody?.asJsonObject?.getAsJsonArray("errors")!!)
@@ -223,25 +248,32 @@ class BitBayApi(credentials: LinkedHashSet<Credential>, private val gson: Gson)
                         hasNextPages = transactionsResponse.hasNextPage
                         limit = transactionsResponse.fetchedRows
                         offset = transactionsResponse.offset + transactionsResponse.fetchedRows
+
+
+                    } catch (e: JsonSyntaxException) {
+                        e.printStackTrace()
+                        Logger.err(e.message)
+                        Logger.err(responseBody.toString())
+
+                    } catch (e: NullPointerException) {
+                        e.printStackTrace()
+                        Logger.err("Could not parse the response into object")
+                    } catch (e: BitBayError) {
+                        Logger.err(e)
+                        if (e.errors.contains(BitBayError.ERRORS.ACTION_LIMIT_EXCEEDED)) {
+                            Logger.info("Waiting ${ACTION_LIMIT_EXCEEDED_SLEEP / 1000} sec to prevent limit exceed on BitBay API")
+                            Thread.sleep(ACTION_LIMIT_EXCEEDED_SLEEP)
+                        }
                     }
-
-                } catch (e: JsonSyntaxException) {
-                    e.printStackTrace()
-                    Logger.err(e.message)
-                    Logger.err(responseBody.toString())
-
-                } catch (e: BitBayError) {
-                    e.printStackTrace()
-                    Logger.err(e.message)
+                } else {
+                    Logger.err("Unsuccessfully fetched transactions error code: ${response.code()} " +
+                            "body: ${response.errorBody()?.charStream()?.readText()} ")
 
                 }
-            } else {
-                Logger.err("Unsuccessfully fetched transactions error code: ${response.code()} " +
-                        "body: ${response.errorBody()?.charStream()?.readText()} ")
 
-            }
-        } while (hasNextPages)
-
+            } while (hasNextPages)
+        }
+        Logger.d("Fetched ${transactions.size} histories in $iteration iterations and ${time / 1000}sec")
         return transactions
     }
 

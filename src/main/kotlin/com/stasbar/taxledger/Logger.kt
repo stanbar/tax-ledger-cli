@@ -33,28 +33,53 @@ import java.util.*
 object Logger {
     val dateFormat = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
 
-    fun info(message: String?) {
-        AnsiConsole.out.println(ansi().a("\n").fgBrightCyan().a(0x2714.toChar()).a(getString(Text.Logger.INFO)).reset().a(message).a("\n"))
-    }
-
-
-    fun err(message: String?) {
-        AnsiConsole.out.println(ansi().a("\n").fgBrightRed().a(0x2716.toChar()).a(getString(Text.Logger.ERROR)).reset().a(message).a("\n"))
-    }
-
-    fun d(message: String?) {
+    fun info(obj: Any?) {
+        val message = obj.toString()
         val time = dateFormat.format(Date(System.currentTimeMillis()))
-        if (DEBUG)
+        if (message.isNotBlank())
             AnsiConsole.out.println(ansi()
                     .a("\n")
-                    .fgBrightGreen()
-                    .a(0x2716.toChar())
-                    .a(getString(Text.Logger.DEBUG))
+                    .fgBrightCyan()
+                    .a(0x2714.toChar())
+                    .a(getString(Text.Logger.INFO))
                     .reset()
                     .a(time)
                     .a(" ")
                     .a(message)
                     .a("\n"))
+    }
+
+
+    fun err(obj: Any?) {
+        val message = obj.toString()
+        val time = dateFormat.format(Date(System.currentTimeMillis()))
+        if (message.isNotBlank())
+            AnsiConsole.out.println(ansi()
+                    .a("\n")
+                    .fgBrightRed()
+                    .a(0x2716.toChar())
+                    .a(getString(Text.Logger.ERROR))
+                    .reset()
+                    .a(time)
+                    .a(" ")
+                    .a(message)
+                    .a("\n"))
+    }
+
+    fun d(obj: Any?) {
+        if (!DEBUG) return
+        val message = obj.toString()
+        val time = dateFormat.format(Date(System.currentTimeMillis()))
+        AnsiConsole.out.println(ansi()
+                .a("\n")
+                .fgBrightGreen()
+                .a(0x2716.toChar())
+                .a(getString(Text.Logger.DEBUG))
+                .reset()
+                .a(time)
+                .a(" ")
+                .a(message)
+                .a("\n"))
     }
 
 }

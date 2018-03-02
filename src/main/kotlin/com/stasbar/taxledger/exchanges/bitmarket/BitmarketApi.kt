@@ -45,6 +45,9 @@ import retrofit2.http.FieldMap
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.POST
 
+/**
+ * https://github.com/bitmarket-net/api
+ */
 interface BitmarketService {
     @FormUrlEncoded
     @POST()

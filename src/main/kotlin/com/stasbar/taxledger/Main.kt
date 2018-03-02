@@ -329,24 +329,9 @@ fun performTransactionsAction(): Boolean {
 
     apis.parallelStream().forEach {
         try {
-
-            val newTransactions: List<Transaction> = try {
-                it.getApi().transactions().map { it.toTransaction() }
-            } catch (e: IllegalStateException) {
-                println("Reconnecting to ${it.name}")
-                try {
-                    it.getApi().transactions().map { it.toTransaction() }
-                } catch (e: IllegalStateException) {
-                    Logger.err("Failed $e")
-                    emptyList()
-                }
-            }
-
-            transactions.addAll(newTransactions)
+            transactions.addAll(it.getApi().transactions().map { it.toTransaction() })
             transactions.addAll(it.getApi().fees().map { it.toTransaction() })
             transactions.addAll(it.getApi().depositsAndWithdraws().map { it.toTransaction() })
-
-
         } catch (e: ApiNotSetException) {
             /* skip not set exchanges */
         }
