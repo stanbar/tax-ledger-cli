@@ -28,6 +28,7 @@ import com.google.gson.Gson
 import com.google.gson.JsonElement
 import com.google.gson.JsonSyntaxException
 import com.google.gson.reflect.TypeToken
+import com.stasbar.taxledger.DEBUG
 import com.stasbar.taxledger.ExchangeApi
 import com.stasbar.taxledger.Logger
 import com.stasbar.taxledger.exchanges.bitmarket.models.BitmarketTransaction
@@ -67,7 +68,7 @@ class BitmarketApi(private val publicKey: String, private val privateKey: String
 
     override val service: Lazy<BitmarketService> = lazy {
         val logInterceptor = HttpLoggingInterceptor()
-        logInterceptor.level = if (true) HttpLoggingInterceptor.Level.BODY else HttpLoggingInterceptor.Level.NONE
+        logInterceptor.level = if (DEBUG) HttpLoggingInterceptor.Level.BODY else HttpLoggingInterceptor.Level.NONE
 
         val httpClient = OkHttpClient.Builder()
                 .addNetworkInterceptor(BitMarketHeaderInterceptor(publicKey, privateKey))
