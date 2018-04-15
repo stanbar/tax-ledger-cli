@@ -1,3 +1,5 @@
+### Projekt dalej rozwijany w wersji graficznej pod adresem https://tax-ledger.com
+
 ![Image](https://i.imgur.com/wBVi8X4.png)
 ### Tax Ledger
 Jest programem który pozwala na wygenerowanie zestawienia kosztów i przychodów z giełd kryptowalut.  

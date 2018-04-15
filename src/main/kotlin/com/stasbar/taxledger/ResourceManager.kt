@@ -24,7 +24,6 @@
 
 package com.stasbar.taxledger
 
-import com.stasbar.taxledger.translations.Text
 import java.util.*
 
 
@@ -35,13 +34,3 @@ var resourceBundle = ResourceBundle.getBundle(BUNDLE_NAME, Locale.getDefault())!
  * Get language specific string
  */
 fun getString(key: String) = resourceBundle.getString(key)
-
-/**
- * Change app language
- */
-fun selectLanguage(lang: String) {
-    when {
-        Locale.forLanguageTag(lang) != null -> resourceBundle = ResourceBundle.getBundle(BUNDLE_NAME, Locale.forLanguageTag(lang))
-        else -> throw IllegalStateException(getString(Text.UNKNOWN_LANGUAGE))
-    }
-}
