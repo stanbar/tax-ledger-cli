@@ -25,6 +25,7 @@
 package com.stasbar.taxledger
 
 import com.stasbar.taxledger.models.Transaction
+import com.stasbar.taxledger.options.TransactionsOptions
 import com.stasbar.taxledger.writers.ConsoleWriter
 import org.junit.Test
 import java.math.BigDecimal
@@ -285,6 +286,7 @@ internal class TestFifo {
 
         val transactions = generateTransactions(sells, buys)
         val outputWriter = ConsoleWriter(transactions)
+        outputWriter.printTransactions(TransactionsOptions())
         outputWriter.printSummary()
         println("Oraz zosatło mi:")
         buys.forEach {
