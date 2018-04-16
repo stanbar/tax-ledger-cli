@@ -27,13 +27,32 @@ package com.stasbar.taxledger
 import com.stasbar.taxledger.models.Transaction
 import com.stasbar.taxledger.options.TransactionsOptions
 import com.stasbar.taxledger.writers.ConsoleWriter
+import org.junit.After
+import org.junit.Before
 import org.junit.Test
+import java.io.ByteArrayOutputStream
+import java.io.PrintStream
 import java.math.BigDecimal
 import java.util.*
 import kotlin.collections.ArrayList
+import kotlin.test.assertEquals
 
 
 internal class TestFifo {
+    private val outContent = ByteArrayOutputStream()
+    private val errContent = ByteArrayOutputStream()
+
+    @Before
+    fun setUpStreams() {
+        System.setOut(PrintStream(outContent))
+        System.setErr(PrintStream(errContent))
+    }
+
+    @After
+    fun restoreStreams() {
+        System.setOut(System.out)
+        System.setErr(System.err)
+    }
 
     @Test
     fun testFifo() {
@@ -284,23 +303,51 @@ internal class TestFifo {
         printLeftCurrencies(rawTransactions)
 
 
-        //┌──────────────────────────────────────────────────────────────────────────────┐
-        //│                                 Podsumowanie                                 │
-        //├──────────────────────────┬─────────────────────────┬─────────────────────────┤
-        //│ Przychód (Brutto)        │ Koszty (w tym prowizje) │ Dochód (Netto)          │
-        //├──────────────────────────┼─────────────────────────┼─────────────────────────┤
-        //│ 70779.26                 │ 66633.99 (0)            │ 4145.27                 │
-        //└──────────────────────────┴─────────────────────────┴─────────────────────────┘
-        //┌───────────────────────────────────────┬──────────────────────────────────────┐
-        //│ Wpłata                                │ Wypłata                              │
-        //├───────────────────────────────────────┼──────────────────────────────────────┤
-        //│ 0                                     │ 0                                    │
-        //└───────────────────────────────────────┴──────────────────────────────────────┘
-        //Left with:
-        //BTC -> 0E-8
-        //LSK -> 956.93374233
-        //DASH -> 7.94268349
 
+        assertEquals(outContent.toString(),
+                " ─────────────────────────────────────────────────────────────────────────────────────────────────────── \n" +
+                        "   Giełda   Typ         Data                Kurs                 Kupiłem               Zapłaciłem        \n" +
+                        " ─────────────────────────────────────────────────────────────────────────────────────────────────────── \n" +
+                        " BitBay     Buy  2018-04-17 13:02:03              0 PLN          0.07901089 BTC     2047.2480103544 PLN  \n" +
+                        " BitBay     Buy  2018-04-17 13:02:03              0 PLN          0.05801814 BTC     1503.5308151976 PLN  \n" +
+                        " BitBay     Buy  2018-04-17 13:02:03              0 PLN          0.02873944 BTC      744.8828882456 PLN  \n" +
+                        " BitBay     Buy  2018-04-17 13:02:03              0 PLN          0.08013902 BTC     2075.2864730416 PLN  \n" +
+                        " BitBay     Buy  2018-04-17 13:02:03              0 PLN          0.04361441 BTC     1129.0519015433 PLN  \n" +
+                        " BitBay     Buy  2018-04-17 13:02:03              0 PLN          0.17441688 BTC      10000.02007058 PLN  \n" +
+                        " BitBay     Sell 2018-04-17 13:02:03              0 BTC        12735.119511 PLN          0.46393878 BTC  \n" +
+                        " BitBay     Buy  2018-04-17 13:02:03              0 PLN                 0.2 BTC      10000.02007058 PLN  \n" +
+                        " BitBay     Sell 2018-04-17 13:02:03              0 BTC              5490.2 PLN                 0.2 BTC  \n" +
+                        " BitBay     Buy  2018-04-27 13:02:03              0 PLN          0.00097334 BTC      10000.02007058 PLN  \n" +
+                        " BitBay     Buy  2018-04-27 13:02:03              0 PLN          0.22113676 BTC      10000.00024172 PLN  \n" +
+                        " BitBay     Sell 2018-04-27 13:02:03              0 BTC          7440.68835 PLN           0.2221101 BTC  \n" +
+                        " BitBay     Buy  2018-04-27 13:02:03              0 PLN          0.11574507 BTC      10000.00024172 PLN  \n" +
+                        " BitBay     Buy  2018-04-27 13:02:03              0 PLN          0.00134272 BTC       46.6448709248 PLN  \n" +
+                        " BitBay     Buy  2018-04-27 13:02:03              0 PLN          0.02358727 BTC         819.4217598 PLN  \n" +
+                        " BitBay     Buy  2018-04-27 13:02:03              0 PLN           0.0055936 BTC     4133.9333986361 PLN  \n" +
+                        " BitBay     Sell 2018-04-27 13:02:03              0 BTC          4900.00011 PLN          0.14626866 BTC  \n" +
+                        " BitBay     Buy  2018-04-27 13:02:03              0 PLN          0.11340279 BTC     4133.9333986361 PLN  \n" +
+                        " BitBay     Sell 2018-04-27 13:02:03              0 BTC               33500 PLN                   1 BTC  \n" +
+                        " BitBay     Sell 2018-04-27 13:02:03              0 BTC           450.00014 PLN          0.01343284 BTC  \n" +
+                        " BitBay     Sell 2018-04-27 13:02:03              0 BTC         2845.600215 PLN          0.08494329 BTC  \n" +
+                        " BitBay     Sell 2018-04-27 13:02:03              0 BTC         3417.658945 PLN          0.10201967 BTC  \n" +
+                        " ─────────────────────────────────────────────────────────────────────────────────────────────────────── \n" +
+                        "Łącznie 22 operacji\n" +
+                        "┌──────────────────────────────────────────────────────────────────────────────┐\n" +
+                        "│                                 Podsumowanie                                 │\n" +
+                        "├──────────────────────────┬─────────────────────────┬─────────────────────────┤\n" +
+                        "│ Przychód (Brutto)        │ Koszty (w tym prowizje) │ Dochód (Netto)          │\n" +
+                        "├──────────────────────────┼─────────────────────────┼─────────────────────────┤\n" +
+                        "│ 70779.26                 │ 66633.99 (0)            │ 4145.27                 │\n" +
+                        "└──────────────────────────┴─────────────────────────┴─────────────────────────┘\n" +
+                        "┌───────────────────────────────────────┬──────────────────────────────────────┐\n" +
+                        "│ Wpłata                                │ Wypłata                              │\n" +
+                        "├───────────────────────────────────────┼──────────────────────────────────────┤\n" +
+                        "│ 0                                     │ 0                                    │\n" +
+                        "└───────────────────────────────────────┴──────────────────────────────────────┘\n" +
+                        "Left with:\n" +
+                        "BTC -> 0E-8\n" +
+                        "LSK -> 956.93374233\n" +
+                        "DASH -> 7.94268349\n")
     }
 
     private fun recalculateWithFifo(rawTransactions: ArrayList<Transaction>)
@@ -386,6 +433,10 @@ internal class TestFifo {
     }
 
 
-
-    private fun day(dayArg: Int) = Calendar.getInstance().apply { set(Calendar.DAY_OF_MONTH, dayArg) }.time!!
+    private fun day(dayArg: Int) = Calendar.getInstance().apply {
+        set(Calendar.DAY_OF_MONTH, dayArg)
+        set(Calendar.HOUR, 1)
+        set(Calendar.MINUTE, 2)
+        set(Calendar.SECOND, 3)
+    }.time!!
 }
