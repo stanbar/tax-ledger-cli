@@ -273,11 +273,16 @@ internal class TestFifo {
                 paid = 4133.9333986361.toBigDecimal(),
                 paidCurrency = "PLN"))
 
-        val transactions = recalculateWithFifo(rawTransactions) //simple as y = f(x)
+        //simple as y = f(x)
+        val transactions = recalculateWithFifo(rawTransactions)
 
-        val outputWriter = ConsoleWriter(transactions)
-        outputWriter.printTransactions(TransactionsOptions())
-        outputWriter.printSummary()
+        ConsoleWriter(transactions).run {
+            printTransactions(TransactionsOptions())
+            printSummary()
+        }
+
+        printLeftCurrencies(rawTransactions)
+
 
         //┌──────────────────────────────────────────────────────────────────────────────┐
         //│                                 Podsumowanie                                 │
@@ -291,38 +296,18 @@ internal class TestFifo {
         //├───────────────────────────────────────┼──────────────────────────────────────┤
         //│ 0                                     │ 0                                    │
         //└───────────────────────────────────────┴──────────────────────────────────────┘
+        //Left with:
+        //BTC -> 0E-8
+        //LSK -> 956.93374233
+        //DASH -> 7.94268349
 
     }
 
-    private fun recalculateWithFifo(rawTransactions: ArrayList<Transaction>): ArrayList<Transaction> {
-        rawTransactions.sortBy { it.time } // sort by time, just in case we mix our transactions from different exchanges
-
-        val sells = ArrayDeque<Transaction>()
-        //Fill sells queue
-        rawTransactions.filter { it.operationType == OperationType.SELL }
-                .forEach { sells.add(it) }
-
-        //Create map with queue for each buy currency
-        val buys = HashMap<String, ArrayDeque<Transaction>>()
-
-        //init buys map with empty queues for each currency
-        rawTransactions
-                .filter { it.operationType == OperationType.BUY } //Take only buy operations
-                .distinctBy { it.boughtCurrency } // distinct by currency
-                .forEach { buys[it.boughtCurrency] = ArrayDeque() } //init buys map to empty queue
-
-
-        //Fill buys queue
-        rawTransactions.filter { it.operationType == OperationType.BUY }
-                .forEach { buys[it.boughtCurrency]!!.add(it) }
-
-        return generateTransactions(sells, buys)
-    }
-
-
-    private fun generateTransactions(sells: ArrayDeque<Transaction>, buys: HashMap<String, ArrayDeque<Transaction>>)
+    private fun recalculateWithFifo(rawTransactions: ArrayList<Transaction>)
             : ArrayList<Transaction> {
-
+        rawTransactions.sortBy { it.time } // sort by time, just in case we mix our transactions from different exchanges
+        val sells = toSellQueue(rawTransactions)
+        val buys = toBuysMapQueue(rawTransactions)
         val transactions = ArrayList<Transaction>()
         while (sells.isNotEmpty()) {
             val income = sells.pop()
@@ -363,6 +348,44 @@ internal class TestFifo {
 
         return transactions
     }
+
+    private fun toBuysMapQueue(rawTransactions: ArrayList<Transaction>): HashMap<String, ArrayDeque<Transaction>> {
+        val buys = HashMap<String, ArrayDeque<Transaction>>()
+
+        //init buys map with empty queues for each currency
+        rawTransactions
+                .filter { it.operationType == OperationType.BUY } //Take only buy operations
+                .distinctBy { it.boughtCurrency } // distinct by currency
+                .forEach { buys[it.boughtCurrency] = ArrayDeque() } //init buys map to empty queue
+
+
+        //Fill buys queue
+        rawTransactions.filter { it.operationType == OperationType.BUY }
+                .forEach { buys[it.boughtCurrency]!!.add(it) }
+        return buys
+    }
+
+    private fun toSellQueue(rawTransactions: ArrayList<Transaction>): ArrayDeque<Transaction> {
+        val sells = ArrayDeque<Transaction>()
+        //Fill sells queue
+        rawTransactions.filter { it.operationType == OperationType.SELL }
+                .forEach { sells.add(it) }
+        return sells
+    }
+
+    private fun printLeftCurrencies(rawTransactions: ArrayList<Transaction>) {
+        val buys = toBuysMapQueue(rawTransactions)
+        println("Left with:")
+        buys.forEach {
+            var left = BigDecimal.ZERO
+            it.value.forEach {
+                left += it.bought
+            }
+            println("${it.key} -> $left")
+        }
+    }
+
+
 
     private fun day(dayArg: Int) = Calendar.getInstance().apply { set(Calendar.DAY_OF_MONTH, dayArg) }.time!!
 }
