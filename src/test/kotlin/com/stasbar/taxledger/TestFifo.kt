@@ -273,6 +273,28 @@ internal class TestFifo {
                 paid = 4133.9333986361.toBigDecimal(),
                 paidCurrency = "PLN"))
 
+        val transactions = recalculateWithFifo(rawTransactions) //simple as y = f(x)
+
+        val outputWriter = ConsoleWriter(transactions)
+        outputWriter.printTransactions(TransactionsOptions())
+        outputWriter.printSummary()
+
+        //┌──────────────────────────────────────────────────────────────────────────────┐
+        //│                                 Podsumowanie                                 │
+        //├──────────────────────────┬─────────────────────────┬─────────────────────────┤
+        //│ Przychód (Brutto)        │ Koszty (w tym prowizje) │ Dochód (Netto)          │
+        //├──────────────────────────┼─────────────────────────┼─────────────────────────┤
+        //│ 70779.26                 │ 66633.99 (0)            │ 4145.27                 │
+        //└──────────────────────────┴─────────────────────────┴─────────────────────────┘
+        //┌───────────────────────────────────────┬──────────────────────────────────────┐
+        //│ Wpłata                                │ Wypłata                              │
+        //├───────────────────────────────────────┼──────────────────────────────────────┤
+        //│ 0                                     │ 0                                    │
+        //└───────────────────────────────────────┴──────────────────────────────────────┘
+
+    }
+
+    private fun recalculateWithFifo(rawTransactions: ArrayList<Transaction>): ArrayList<Transaction> {
         rawTransactions.sortBy { it.time } // sort by time, just in case we mix our transactions from different exchanges
 
         val sells = ArrayDeque<Transaction>()
@@ -294,38 +316,9 @@ internal class TestFifo {
         rawTransactions.filter { it.operationType == OperationType.BUY }
                 .forEach { buys[it.boughtCurrency]!!.add(it) }
 
-
-        val transactions = generateTransactions(sells, buys)
-        val outputWriter = ConsoleWriter(transactions)
-        outputWriter.printTransactions(TransactionsOptions())
-        outputWriter.printSummary()
-
-        println("And left with:")
-        buys.forEach {
-            var left = BigDecimal.ZERO
-            it.value.forEach {
-                left += it.bought
-            }
-            println("${it.key} -> $left")
-        }
-
-        //┌──────────────────────────────────────────────────────────────────────────────┐
-        //│                                 Podsumowanie                                 │
-        //├──────────────────────────┬─────────────────────────┬─────────────────────────┤
-        //│ Przychód (Brutto)        │ Koszty (w tym prowizje) │ Dochód (Netto)          │
-        //├──────────────────────────┼─────────────────────────┼─────────────────────────┤
-        //│ 70779.26                 │ 66633.99 (0)            │ 4145.27                 │
-        //└──────────────────────────┴─────────────────────────┴─────────────────────────┘
-        //┌───────────────────────────────────────┬──────────────────────────────────────┐
-        //│ Wpłata                                │ Wypłata                              │
-        //├───────────────────────────────────────┼──────────────────────────────────────┤
-        //│ 0                                     │ 0                                    │
-        //└───────────────────────────────────────┴──────────────────────────────────────┘
-        //Oraz zosatło mi:
-        //BTC -> 0
-        //LSK -> 956.93374233
-        //DASH -> 7.94268349
+        return generateTransactions(sells, buys)
     }
+
 
     private fun generateTransactions(sells: ArrayDeque<Transaction>, buys: HashMap<String, ArrayDeque<Transaction>>)
             : ArrayList<Transaction> {
@@ -373,4 +366,3 @@ internal class TestFifo {
 
     private fun day(dayArg: Int) = Calendar.getInstance().apply { set(Calendar.DAY_OF_MONTH, dayArg) }.time!!
 }
-
