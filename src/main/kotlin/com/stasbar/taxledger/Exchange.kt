@@ -90,7 +90,7 @@ abstract class Exchange<ApiType : ExchangeApi<Transactionable, Transactionable>>
 
     fun isSet() = credentials.all { it.value.isNotBlank() }
 
-    fun isNotSet() = !isSet()
+    private fun isNotSet() = !isSet()
 
     fun isNameOf(candidate: String) = candidate.toLowerCase() in arrayOf(name.toLowerCase(), shortcut.toLowerCase())
 

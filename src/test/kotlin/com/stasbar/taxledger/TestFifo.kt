@@ -55,7 +55,7 @@ internal class TestFifo {
     }
 
     @Test
-    fun testFifo() {
+    fun testFifoNovemberOnlyCryptoFiat() {
 
         // Collect transactions like we always did
         val rawTransactions = ArrayList<Transaction>()
@@ -313,17 +313,20 @@ internal class TestFifo {
                         " BitBay     Buy  2018-04-17 13:02:03              0 PLN          0.02873944 BTC      744.8828882456 PLN  \n" +
                         " BitBay     Buy  2018-04-17 13:02:03              0 PLN          0.08013902 BTC     2075.2864730416 PLN  \n" +
                         " BitBay     Buy  2018-04-17 13:02:03              0 PLN          0.04361441 BTC     1129.0519015433 PLN  \n" +
-                        " BitBay     Buy  2018-04-17 13:02:03              0 PLN          0.17441688 BTC      10000.02007058 PLN  \n" +
+                        " BitBay     Buy  2018-04-17 13:02:03              0 PLN          0.17441688 BTC  4646.2912253572576 PLN  \n" +
+                        "                                                                                                502      \n" +
                         " BitBay     Sell 2018-04-17 13:02:03              0 BTC        12735.119511 PLN          0.46393878 BTC  \n" +
                         " BitBay     Buy  2018-04-17 13:02:03              0 PLN                 0.2 BTC      10000.02007058 PLN  \n" +
                         " BitBay     Sell 2018-04-17 13:02:03              0 BTC              5490.2 PLN                 0.2 BTC  \n" +
                         " BitBay     Buy  2018-04-27 13:02:03              0 PLN          0.00097334 BTC      10000.02007058 PLN  \n" +
-                        " BitBay     Buy  2018-04-27 13:02:03              0 PLN          0.22113676 BTC      10000.00024172 PLN  \n" +
+                        " BitBay     Buy  2018-04-27 13:02:03              0 PLN          0.22113676 BTC  6564.2235586704080 PLN  \n" +
+                        "                                                                                                248      \n" +
                         " BitBay     Sell 2018-04-27 13:02:03              0 BTC          7440.68835 PLN           0.2221101 BTC  \n" +
                         " BitBay     Buy  2018-04-27 13:02:03              0 PLN          0.11574507 BTC      10000.00024172 PLN  \n" +
                         " BitBay     Buy  2018-04-27 13:02:03              0 PLN          0.00134272 BTC       46.6448709248 PLN  \n" +
                         " BitBay     Buy  2018-04-27 13:02:03              0 PLN          0.02358727 BTC         819.4217598 PLN  \n" +
-                        " BitBay     Buy  2018-04-27 13:02:03              0 PLN           0.0055936 BTC     4133.9333986361 PLN  \n" +
+                        " BitBay     Buy  2018-04-27 13:02:03              0 PLN           0.0055936 BTC  194.32161628498587 PLN  \n" +
+                        "                                                                                               5567      \n" +
                         " BitBay     Sell 2018-04-27 13:02:03              0 BTC          4900.00011 PLN          0.14626866 BTC  \n" +
                         " BitBay     Buy  2018-04-27 13:02:03              0 PLN          0.11340279 BTC     4133.9333986361 PLN  \n" +
                         " BitBay     Sell 2018-04-27 13:02:03              0 BTC               33500 PLN                   1 BTC  \n" +
@@ -337,7 +340,291 @@ internal class TestFifo {
                         "├──────────────────────────┬─────────────────────────┬─────────────────────────┤\n" +
                         "│ Przychód (Brutto)        │ Koszty (w tym prowizje) │ Dochód (Netto)          │\n" +
                         "├──────────────────────────┼─────────────────────────┼─────────────────────────┤\n" +
-                        "│ 70779.26                 │ 66633.99 (0)            │ 4145.27                 │\n" +
+                        "│ 70779.26                 │ 53904.87 (0)            │ 16874.39                │\n" +
+                        "└──────────────────────────┴─────────────────────────┴─────────────────────────┘\n" +
+                        "┌───────────────────────────────────────┬──────────────────────────────────────┐\n" +
+                        "│ Wpłata                                │ Wypłata                              │\n" +
+                        "├───────────────────────────────────────┼──────────────────────────────────────┤\n" +
+                        "│ 0                                     │ 0                                    │\n" +
+                        "└───────────────────────────────────────┴──────────────────────────────────────┘\n" +
+                        "Left with:\n" +
+                        "BTC -> 0E-8\n" +
+                        "LSK -> 956.93374233\n" +
+                        "DASH -> 7.94268349\n")
+    }
+
+    @Test
+    fun testFifoJanuaryAllTypes() {
+
+        // Collect transactions like we always did
+        val rawTransactions = ArrayList<Transaction>()
+        rawTransactions.add(Transaction(BitBay.name,
+                operationType = OperationType.SELL,
+                time = day(10),
+                bought = 13.4807062413.toBigDecimal(),
+                boughtCurrency = "PLN",
+                paid = 0.00271477.toBigDecimal(),
+                paidCurrency = "ETH"))
+        rawTransactions.add(Transaction(BitBay.name,
+                operationType = OperationType.BUY,
+                time = day(10),
+                bought = 0.00020833.toBigDecimal(),
+                boughtCurrency = "ETH",
+                paid = 0.9999964998.toBigDecimal(),
+                paidCurrency = "PLN"))
+        rawTransactions.add(Transaction(BitBay.name,
+                operationType = OperationType.BUY,
+                time = day(10),
+                bought = 0.00020887.toBigDecimal(),
+                boughtCurrency = "ETH",
+                paid = 0.9999818346.toBigDecimal(),
+                paidCurrency = "PLN"))
+        rawTransactions.add(Transaction(BitBay.name,
+                operationType = OperationType.BUY,
+                time = day(10),
+                bought = 0.00020887.toBigDecimal(),
+                boughtCurrency = "ETH",
+                paid = 0.9999818346.toBigDecimal(),
+                paidCurrency = "PLN"))
+        rawTransactions.add(Transaction(BitBay.name,
+                operationType = OperationType.BUY,
+                time = day(10),
+                bought = 0.00020887.toBigDecimal(),
+                boughtCurrency = "ETH",
+                paid = 0.9999818346.toBigDecimal(),
+                paidCurrency = "PLN"))
+        rawTransactions.add(Transaction(BitBay.name,
+                operationType = OperationType.BUY,
+                time = day(10),
+                bought = 0.00020887.toBigDecimal(),
+                boughtCurrency = "ETH",
+                paid = 0.9999818346.toBigDecimal(),
+                paidCurrency = "PLN"))
+        rawTransactions.add(Transaction(BitBay.name,
+                operationType = OperationType.BUY,
+                time = day(10),
+                bought = 0.00020887.toBigDecimal(),
+                boughtCurrency = "ETH",
+                paid = 0.9999818346.toBigDecimal(),
+                paidCurrency = "PLN"))
+        rawTransactions.add(Transaction(BitBay.name,
+                operationType = OperationType.BUY,
+                time = day(10),
+                bought = 0.00020887.toBigDecimal(),
+                boughtCurrency = "ETH",
+                paid = 0.9999818346.toBigDecimal(),
+                paidCurrency = "PLN"))
+        rawTransactions.add(Transaction(BitBay.name,
+                operationType = OperationType.BUY,
+                time = day(10),
+                bought = 0.00020887.toBigDecimal(),
+                boughtCurrency = "ETH",
+                paid = 0.9999818346.toBigDecimal(),
+                paidCurrency = "PLN"))
+        rawTransactions.add(Transaction(BitBay.name,
+                operationType = OperationType.BUY,
+                time = day(10),
+                bought = 0.00020887.toBigDecimal(),
+                boughtCurrency = "ETH",
+                paid = 0.9999818346.toBigDecimal(),
+                paidCurrency = "PLN"))
+        rawTransactions.add(Transaction(BitBay.name,
+                operationType = OperationType.BUY,
+                time = day(10),
+                bought = 0.00020887.toBigDecimal(),
+                boughtCurrency = "ETH",
+                paid = 0.9999818346.toBigDecimal(),
+                paidCurrency = "PLN"))
+        rawTransactions.add(Transaction(BitBay.name,
+                operationType = OperationType.BUY,
+                time = day(10),
+                bought = 0.00020887.toBigDecimal(),
+                boughtCurrency = "ETH",
+                paid = 0.9999818346.toBigDecimal(),
+                paidCurrency = "PLN"))
+        rawTransactions.add(Transaction(BitBay.name,
+                operationType = OperationType.BUY,
+                time = day(10),
+                bought = 0.00020887.toBigDecimal(),
+                boughtCurrency = "ETH",
+                paid = 0.9999818346.toBigDecimal(),
+                paidCurrency = "PLN"))
+        rawTransactions.add(Transaction(BitBay.name,
+                operationType = OperationType.BUY,
+                time = day(10),
+                bought = 0.00020887.toBigDecimal(),
+                boughtCurrency = "ETH",
+                paid = 0.9999818346.toBigDecimal(),
+                paidCurrency = "PLN"))
+        rawTransactions.add(Transaction(BitBay.name,
+                operationType = OperationType.SELL,
+                time = day(3),
+                bought = 0.00583711325.toBigDecimal(),
+                boughtCurrency = "BTC",
+                paid = 0.23348453.toBigDecimal(),
+                paidCurrency = "XMR"))
+        rawTransactions.add(Transaction(BitBay.name,
+                operationType = OperationType.SELL,
+                time = day(3),
+                bought = 0.03302415575.toBigDecimal(),
+                boughtCurrency = "BTC",
+                paid = 1.32096623.toBigDecimal(),
+                paidCurrency = "XMR"))
+        rawTransactions.add(Transaction(BitBay.name,
+                operationType = OperationType.SELL,
+                time = day(3),
+                bought = 0.01634368225.toBigDecimal(),
+                boughtCurrency = "BTC",
+                paid = 0.65374729.toBigDecimal(),
+                paidCurrency = "XMR"))
+        rawTransactions.add(Transaction(BitBay.name,
+                operationType = OperationType.SELL,
+                time = day(3),
+                bought = 0.0248876605.toBigDecimal(),
+                boughtCurrency = "BTC",
+                paid = 0.99550642.toBigDecimal(),
+                paidCurrency = "XMR"))
+        rawTransactions.add(Transaction(BitBay.name,
+                operationType = OperationType.SELL,
+                time = day(3),
+                bought = 0.0051278.toBigDecimal(),
+                boughtCurrency = "BTC",
+                paid = 0.205112.toBigDecimal(),
+                paidCurrency = "XMR"))
+        rawTransactions.add(Transaction(BitBay.name,
+                operationType = OperationType.SELL,
+                time = day(3),
+                bought = 0.00092047.toBigDecimal(),
+                boughtCurrency = "BTC",
+                paid = 0.0368188.toBigDecimal(),
+                paidCurrency = "XMR"))
+        rawTransactions.add(Transaction(BitBay.name,
+                operationType = OperationType.SELL,
+                time = day(3),
+                bought = 0.03576167.toBigDecimal(),
+                boughtCurrency = "BTC",
+                paid = 1.4304668.toBigDecimal(),
+                paidCurrency = "XMR"))
+        rawTransactions.add(Transaction(BitBay.name,
+                operationType = OperationType.SELL,
+                time = day(3),
+                bought = 0.00092936.toBigDecimal(),
+                boughtCurrency = "BTC",
+                paid = 0.0371744.toBigDecimal(),
+                paidCurrency = "XMR"))
+        rawTransactions.add(Transaction(BitBay.name,
+                operationType = OperationType.BUY,
+                time = day(2),
+                bought = 0.17196162.toBigDecimal(),
+                boughtCurrency = "LTC",
+                paid = 0.00309530916.toBigDecimal(),
+                paidCurrency = "BTC"))
+        rawTransactions.add(Transaction(BitBay.name,
+                operationType = OperationType.BUY,
+                time = day(2),
+                bought = 4.974.toBigDecimal(),
+                boughtCurrency = "LTC",
+                paid = 0.089532.toBigDecimal(),
+                paidCurrency = "BTC"))
+        rawTransactions.add(Transaction(BitBay.name,
+                operationType = OperationType.BUY,
+                time = day(2),
+                bought = 11.toBigDecimal(),
+                boughtCurrency = "LTC",
+                paid = 0.198.toBigDecimal(),
+                paidCurrency = "BTC"))
+        rawTransactions.add(Transaction(BitBay.name,
+                operationType = OperationType.BUY,
+                time = day(2),
+                bought = 0.53013139.toBigDecimal(),
+                boughtCurrency = "LTC",
+                paid = 0.00954236502.toBigDecimal(),
+                paidCurrency = "BTC"))
+        rawTransactions.add(Transaction(BitBay.name,
+                operationType = OperationType.BUY,
+                time = day(2),
+                bought = 0.25782559.toBigDecimal(),
+                boughtCurrency = "LTC",
+                paid = 0.00464086062.toBigDecimal(),
+                paidCurrency = "BTC"))
+        rawTransactions.add(Transaction(BitBay.name,
+                operationType = OperationType.BUY,
+                time = day(2),
+                bought = 0.57517591.toBigDecimal(),
+                boughtCurrency = "LTC",
+                paid = 0.01035316638.toBigDecimal(),
+                paidCurrency = "BTC"))
+        rawTransactions.add(Transaction(BitBay.name,
+                operationType = OperationType.BUY,
+                time = day(2),
+                bought = 0.03359605.toBigDecimal(),
+                boughtCurrency = "LTC",
+                paid = 0.0006047289.toBigDecimal(),
+                paidCurrency = "BTC"))
+        rawTransactions.add(Transaction(BitBay.name,
+                operationType = OperationType.BUY,
+                time = day(2),
+                bought = 0.28.toBigDecimal(),
+                boughtCurrency = "LTC",
+                paid = 0.00504.toBigDecimal(),
+                paidCurrency = "BTC"))
+        rawTransactions.add(Transaction(BitBay.name,
+                operationType = OperationType.BUY,
+                time = day(2),
+                bought = 0.2.toBigDecimal(),
+                boughtCurrency = "LTC",
+                paid = 0.0036.toBigDecimal(),
+                paidCurrency = "BTC"))
+
+        //simple as y = f(x)
+        val transactions = recalculateWithFifo(rawTransactions)
+
+        ConsoleWriter(transactions).run {
+            printTransactions(TransactionsOptions())
+            printSummary()
+        }
+
+        printLeftCurrencies(rawTransactions)
+
+
+
+        assertEquals(outContent.toString(),
+                " ─────────────────────────────────────────────────────────────────────────────────────────────────────── \n" +
+                        "   Giełda   Typ         Data                Kurs                 Kupiłem               Zapłaciłem        \n" +
+                        " ─────────────────────────────────────────────────────────────────────────────────────────────────────── \n" +
+                        " BitBay     Buy  2018-04-17 13:02:03              0 PLN          0.07901089 BTC     2047.2480103544 PLN  \n" +
+                        " BitBay     Buy  2018-04-17 13:02:03              0 PLN          0.05801814 BTC     1503.5308151976 PLN  \n" +
+                        " BitBay     Buy  2018-04-17 13:02:03              0 PLN          0.02873944 BTC      744.8828882456 PLN  \n" +
+                        " BitBay     Buy  2018-04-17 13:02:03              0 PLN          0.08013902 BTC     2075.2864730416 PLN  \n" +
+                        " BitBay     Buy  2018-04-17 13:02:03              0 PLN          0.04361441 BTC     1129.0519015433 PLN  \n" +
+                        " BitBay     Buy  2018-04-17 13:02:03              0 PLN          0.17441688 BTC  4646.2912253572576 PLN  \n" +
+                        "                                                                                                502      \n" +
+                        " BitBay     Sell 2018-04-17 13:02:03              0 BTC        12735.119511 PLN          0.46393878 BTC  \n" +
+                        " BitBay     Buy  2018-04-17 13:02:03              0 PLN                 0.2 BTC      10000.02007058 PLN  \n" +
+                        " BitBay     Sell 2018-04-17 13:02:03              0 BTC              5490.2 PLN                 0.2 BTC  \n" +
+                        " BitBay     Buy  2018-04-27 13:02:03              0 PLN          0.00097334 BTC      10000.02007058 PLN  \n" +
+                        " BitBay     Buy  2018-04-27 13:02:03              0 PLN          0.22113676 BTC  6564.2235586704080 PLN  \n" +
+                        "                                                                                                248      \n" +
+                        " BitBay     Sell 2018-04-27 13:02:03              0 BTC          7440.68835 PLN           0.2221101 BTC  \n" +
+                        " BitBay     Buy  2018-04-27 13:02:03              0 PLN          0.11574507 BTC      10000.00024172 PLN  \n" +
+                        " BitBay     Buy  2018-04-27 13:02:03              0 PLN          0.00134272 BTC       46.6448709248 PLN  \n" +
+                        " BitBay     Buy  2018-04-27 13:02:03              0 PLN          0.02358727 BTC         819.4217598 PLN  \n" +
+                        " BitBay     Buy  2018-04-27 13:02:03              0 PLN           0.0055936 BTC  194.32161628498587 PLN  \n" +
+                        "                                                                                               5567      \n" +
+                        " BitBay     Sell 2018-04-27 13:02:03              0 BTC          4900.00011 PLN          0.14626866 BTC  \n" +
+                        " BitBay     Buy  2018-04-27 13:02:03              0 PLN          0.11340279 BTC     4133.9333986361 PLN  \n" +
+                        " BitBay     Sell 2018-04-27 13:02:03              0 BTC               33500 PLN                   1 BTC  \n" +
+                        " BitBay     Sell 2018-04-27 13:02:03              0 BTC           450.00014 PLN          0.01343284 BTC  \n" +
+                        " BitBay     Sell 2018-04-27 13:02:03              0 BTC         2845.600215 PLN          0.08494329 BTC  \n" +
+                        " BitBay     Sell 2018-04-27 13:02:03              0 BTC         3417.658945 PLN          0.10201967 BTC  \n" +
+                        " ─────────────────────────────────────────────────────────────────────────────────────────────────────── \n" +
+                        "Łącznie 22 operacji\n" +
+                        "┌──────────────────────────────────────────────────────────────────────────────┐\n" +
+                        "│                                 Podsumowanie                                 │\n" +
+                        "├──────────────────────────┬─────────────────────────┬─────────────────────────┤\n" +
+                        "│ Przychód (Brutto)        │ Koszty (w tym prowizje) │ Dochód (Netto)          │\n" +
+                        "├──────────────────────────┼─────────────────────────┼─────────────────────────┤\n" +
+                        "│ 70779.26                 │ 53904.87 (0)            │ 16874.39                │\n" +
                         "└──────────────────────────┴─────────────────────────┴─────────────────────────┘\n" +
                         "┌───────────────────────────────────────┬──────────────────────────────────────┐\n" +
                         "│ Wpłata                                │ Wypłata                              │\n" +
@@ -371,12 +658,13 @@ internal class TestFifo {
                 // Calculate how much will I take from this transaction (may be all or part of, depends of what was smaller)
                 val consumeAmount = remainingBuyAmount.min(buy.bought)
                 // And enter this amount as expenses
+                val paid = consumeAmount/buy.bought * buy.paid
                 transactions.add(Transaction(exchangeName = buy.exchangeName,
                         id = buy.id, time = income.time,
                         operationType = buy.operationType,
                         bought = consumeAmount,
                         boughtCurrency = buy.boughtCurrency,
-                        paid = buy.paid,
+                        paid = paid,
                         paidCurrency = buy.paidCurrency,
                         rate = buy.rate))
 

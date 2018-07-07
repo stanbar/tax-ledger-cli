@@ -84,8 +84,5 @@ object Misc {
         printDonate()
     }
 
-    val facebook: String = "https://www.facebook.com/TaxLedgerPL"
-    val twitter: String = "https://twitter.com/taxledger"
-
 
 }

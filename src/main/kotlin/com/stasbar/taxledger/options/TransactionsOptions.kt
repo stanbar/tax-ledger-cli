@@ -99,7 +99,9 @@ class TransactionsOptions(
         var fileName: StringBuilder = StringBuilder(),
         var reverse: Boolean = false,
         var showNonEssential: Boolean = false,
-        var showNonFiat: Boolean = false) {
+        var showNonFiat: Boolean = false,
+        var fifo: Boolean = false) {
+
 
     companion object {
 
@@ -108,6 +110,7 @@ class TransactionsOptions(
                 TransactionCandidate("--before", "Limit results to before date eg. --before 03.2017"),
                 TransactionCandidate("--after", "Limit results to before date eg. --after 01.02.2016"),
                 TransactionCandidate("--reverse", "Reverse transactions order"),
+                TransactionCandidate("--fifo", "Calculate with FIFO method (suggested for non business individuals"),
                 TransactionCandidate("--onlyBB", "Use only Bitbay"),
                 TransactionCandidate("--onlyAbu", "Use only Abucoins"),
                 TransactionCandidate("--showNonEssential", "Show operations like deposit and withdraw"),
@@ -156,6 +159,7 @@ class TransactionsOptions(
                         option.showNonFiat = true
                     }
                     "reverse" -> option.reverse = true
+                    "fifo" -> option.fifo = true
 
                     else -> Logger.err(getString(Text.Exceptions.INVALID_ARG).format(argument))
                 }

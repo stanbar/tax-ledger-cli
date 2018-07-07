@@ -24,17 +24,21 @@
 
 package com.stasbar.taxledger
 
-import java.util.*
-
-fun Date.toCalendar(): Calendar {
-    val cal = Calendar.getInstance()
-    cal.time = this
-    return cal
-}
-
-fun silentTry(block: () -> Unit) {
-    try {
-        block()
-    } catch (e: Throwable) {
+fun performOpenFolder() {
+    val runtime = Runtime.getRuntime()
+    val os = System.getProperty("os.name").toLowerCase()
+    when {
+        os.contains("mac") -> {
+            val command = "open ${PreferencesManager.workingDir.absolutePath}"
+            Logger.d(command)
+            runtime.exec(command)
+        }
+        os.contains("win") -> {
+            val command = "cmd /c start ${PreferencesManager.workingDir.absolutePath}"
+            Logger.d(command)
+            runtime.exec(command)
+        }
+        os.contains("nix") || os.contains("nux") || os.contains("aix") || os.contains("sunos") ->
+            Logger.err("Unsupported action on your OS $$os ")
     }
 }

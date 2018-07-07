@@ -30,4 +30,7 @@ import java.util.*
 object Constants{
     const val DATE_FORMAT = "yyyy-MM-dd HH:mm:ss"
     val dateFormat = SimpleDateFormat(DATE_FORMAT, Locale.getDefault())
+    val facebook: String = "https://www.facebook.com/TaxLedgerPL"
+    val twitter: String = "https://twitter.com/taxledger"
+
 }
