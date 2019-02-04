@@ -1,4 +1,4 @@
-### Projekt dalej rozwijany w wersji graficznej pod adresem https://tax-ledger.com
+# Projekt dalej rozwijany w wersji graficznej pod adresem https://tax-ledger.com
 
 ![Image](https://i.imgur.com/wBVi8X4.png)
 ### Tax Ledger
