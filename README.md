@@ -6,7 +6,7 @@ Jest programem który pozwala na wygenerowanie zestawienia kosztów i przychodó
 
 [![TAX LEDGER DEMO](https://img.youtube.com/vi/9FUEPTlwf4w/0.jpg)](https://www.youtube.com/watch?v=9FUEPTlwf4w)
 
-
+# Projekt dalej rozwijany w wersji graficznej pod adresem https://tax-ledger.com
 ### Jak uruchomić
 
 ##### Windows
